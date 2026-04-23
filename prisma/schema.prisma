@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -20,8 +21,6 @@ model Product {
   images        Json?
   model         String?
   voltage       String?
-
-  // Relacionamento Opcional: Se a subcategoria for apagada, este campo vira NULL
   subCategoryId String?
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
 }
@@ -36,23 +35,18 @@ model Category {
 model SubCategory {
   id         String    @id @default(uuid())
   name       String
-
-  // Relacionamento Opcional: Se a categoria for apagada, este campo vira NULL
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-
   products   Product[]
 }
 
 model Order {
-  id          String   @id @default(uuid())
-  customer    String
-  total       Float
-  status      String   @default("Pendente")
-  payment     String   @default("Não informado")
-  address     String?
-  items       Json
-  createdAt   DateTime @default(now())
-  shippingFee Float?
-  zipCode     String?
+  id        String   @id @default(uuid())
+  customer  String
+  total     Float
+  status    String   @default("Pendente")
+  payment   String   @default("Não informado")
+  address   String?
+  items     Json?
+  createdAt DateTime @default(now())
 }

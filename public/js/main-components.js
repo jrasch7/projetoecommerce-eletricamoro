@@ -231,6 +231,39 @@
         `;
         document.body.insertAdjacentHTML('beforeend', modalsHTML);
     }
+    // Estilos específicos para garantir scroll no painel institucional
+const style = document.createElement('style');
+style.textContent = `
+    .panel-content {
+        max-height: calc(90vh - 100px);
+        overflow-y: auto;
+        padding-right: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    .panel-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    /* Ajuste para desktop: centralização e limite de altura */
+    @media (min-width: 768px) {
+        #institucional-panel {
+            max-width: 720px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+        }
+        #institucional-panel.translate-y-0 {
+            transform: translateX(-50%) translateY(0) !important;
+        }
+    }
+`;
+document.head.appendChild(style);
 
     // ---------- LÓGICA DO CARRINHO ----------
     function loadCart() {

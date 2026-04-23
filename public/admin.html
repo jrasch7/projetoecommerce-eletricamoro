@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Gestão Elétrica Moro · Admin BI</title>
-    <!-- Tailwind + Phosphor Icons + Google Fonts + Chart.js -->
+    <!-- Tailwind + Phosphor Icons + Google Fonts + Chart.js + Cropper.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -172,8 +174,13 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">Foto da categoria <span class="text-slate-400 font-normal">(opcional)</span></label>
                 <input type="file" name="photo" id="categoryPhotoInput" accept="image/*"
                        class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer border border-slate-200 rounded-xl p-1">
-                <div id="categoryPhotoPreview" class="mt-2 hidden">
-                    <img id="categoryPhotoPreviewImg" src="" alt="Preview" class="w-full h-32 object-cover rounded-xl border border-slate-200">
+                <div id="categoryPhotoPreview" class="mt-3 hidden">
+                    <div class="relative group w-40 h-40">
+                        <img id="categoryPhotoPreviewImg" src="" alt="Preview" class="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm transition-opacity group-hover:opacity-90">
+                        <button type="button" id="clearAddCategoryPhotoBtn" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Remover foto">
+                            <i class="ph ph-x text-sm"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end gap-3">
@@ -203,13 +210,20 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">Foto da categoria <span class="text-slate-400 font-normal">(opcional)</span></label>
                 <div id="editCategoryCurrentPhoto" class="mb-2 hidden">
                     <p class="text-xs text-slate-500 mb-1">Foto atual:</p>
-                    <img id="editCategoryCurrentImg" src="" alt="Foto atual" class="w-full h-28 object-cover rounded-xl border border-slate-200">
+                    <div class="relative group w-40 h-40">
+                        <img id="editCategoryCurrentImg" src="" alt="Foto atual" class="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm">
+                    </div>
                 </div>
                 <input type="file" name="photo" id="editCategoryPhotoInput" accept="image/*"
                        class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer border border-slate-200 rounded-xl p-1">
-                <div id="editCategoryPhotoPreview" class="mt-2 hidden">
+                <div id="editCategoryPhotoPreview" class="mt-3 hidden">
                     <p class="text-xs text-slate-500 mb-1">Nova foto:</p>
-                    <img id="editCategoryPhotoPreviewImg" src="" alt="Preview" class="w-full h-28 object-cover rounded-xl border border-slate-200">
+                    <div class="relative group w-40 h-40">
+                        <img id="editCategoryPhotoPreviewImg" src="" alt="Preview" class="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm transition-opacity group-hover:opacity-90">
+                        <button type="button" id="clearEditCategoryPhotoBtn" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Remover foto">
+                            <i class="ph ph-x text-sm"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end gap-3">
@@ -477,6 +491,25 @@
     </main>
 </div>
 
+<!-- ===== MODAL DE CROP DE FOTO (UNIFICADO) ===== -->
+<div id="cropModal" class="fixed inset-0 z-[60] hidden items-center justify-center modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6">
+        <h3 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+            <i class="ph ph-crop text-accent"></i> Ajustar foto
+            <span class="ml-auto text-xs text-slate-400 font-normal">Arraste para reposicionar &middot; Scroll para zoom</span>
+        </h3>
+        <div class="w-full bg-slate-100 rounded-xl overflow-hidden" style="max-height: 400px;">
+            <img id="cropImage" src="" alt="Crop" style="display:block; max-width:100%;">
+        </div>
+        <div class="flex justify-end gap-3 mt-5">
+            <button id="cropCancelBtn" type="button" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl transition font-medium">Cancelar</button>
+            <button id="cropConfirmBtn" type="button" class="px-5 py-2 bg-primary text-white rounded-xl hover:bg-slate-800 transition font-medium shadow-sm flex items-center gap-2">
+                <i class="ph ph-check"></i> Usar esta área
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     (function(){
         const API_BASE = '/api';
@@ -492,6 +525,72 @@
         let ordersData = [];
         let currentSearchTerm = '';
         let myChartInstance = null;
+
+        // ---------- CROPPER GLOBAL ----------
+        let cropperInstance = null;
+        let currentCropCallback = null;
+        let isCropperActive = false;
+
+        const cropModal = document.getElementById('cropModal');
+        const cropImage = document.getElementById('cropImage');
+        const cropCancelBtn = document.getElementById('cropCancelBtn');
+        const cropConfirmBtn = document.getElementById('cropConfirmBtn');
+
+        function openCropper(imageFile, callback) {
+            if (isCropperActive) return;
+            isCropperActive = true;
+            currentCropCallback = callback;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImage.src = e.target.result;
+                cropModal.classList.remove('hidden');
+                cropModal.classList.add('flex');
+                if (cropperInstance) cropperInstance.destroy();
+                cropperInstance = new Cropper(cropImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.9,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: false,
+                    cropBoxResizable: false,
+                    toggleDragModeOnDblclick: false,
+                });
+            };
+            reader.readAsDataURL(imageFile);
+        }
+
+        function closeCropper(confirm = false) {
+            if (!isCropperActive) return;
+            if (confirm && cropperInstance && currentCropCallback) {
+                cropperInstance.getCroppedCanvas({ width: 600, height: 600 }).toBlob((blob) => {
+                    currentCropCallback(blob);
+                    cleanupCropper();
+                }, 'image/jpeg', 0.92);
+            } else {
+                cleanupCropper();
+            }
+        }
+
+        function cleanupCropper() {
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+            cropModal.classList.add('hidden');
+            cropModal.classList.remove('flex');
+            cropImage.src = '';
+            currentCropCallback = null;
+            isCropperActive = false;
+        }
+
+        cropCancelBtn.addEventListener('click', () => closeCropper(false));
+        cropConfirmBtn.addEventListener('click', () => closeCropper(true));
+        cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCropper(false); });
 
         // ---------- TOAST SYSTEM ----------
         function showToast(message, type = 'success') {
@@ -613,29 +712,44 @@
         const categoryNameInput = document.getElementById('newCategoryNameModal');
         const closeCategoryModalBtn = document.getElementById('closeCategoryModalBtn');
         const openAddCategoryBtn = document.getElementById('openAddCategoryModalBtn');
+        const categoryPhotoInput = document.getElementById('categoryPhotoInput');
+        const categoryPhotoPreview = document.getElementById('categoryPhotoPreview');
+        const categoryPhotoPreviewImg = document.getElementById('categoryPhotoPreviewImg');
+        const clearAddCategoryPhotoBtn = document.getElementById('clearAddCategoryPhotoBtn');
+        
+        window._croppedBlobAdd = null;
 
         function openCategoryModal() {
             categoryNameInput.value = '';
-            document.getElementById('categoryPhotoInput').value = '';
-            document.getElementById('categoryPhotoPreview').classList.add('hidden');
+            categoryPhotoInput.value = '';
+            categoryPhotoPreview.classList.add('hidden');
+            window._croppedBlobAdd = null;
             categoryModal.classList.remove('hidden');
             categoryModal.classList.add('flex');
         }
+        
         function closeCategoryModal() {
             categoryModal.classList.add('hidden');
             categoryModal.classList.remove('flex');
         }
 
-        document.getElementById('categoryPhotoInput').addEventListener('change', (e) => {
+        function clearAddCategoryPreview() {
+            window._croppedBlobAdd = null;
+            categoryPhotoPreview.classList.add('hidden');
+            categoryPhotoInput.value = '';
+        }
+
+        clearAddCategoryPhotoBtn.addEventListener('click', clearAddCategoryPreview);
+
+        categoryPhotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const preview = document.getElementById('categoryPhotoPreview');
-                document.getElementById('categoryPhotoPreviewImg').src = ev.target.result;
-                preview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+            openCropper(file, (blob) => {
+                window._croppedBlobAdd = blob;
+                categoryPhotoPreviewImg.src = URL.createObjectURL(blob);
+                categoryPhotoPreview.classList.remove('hidden');
+                categoryPhotoInput.value = '';
+            });
         });
 
         openAddCategoryBtn.addEventListener('click', openCategoryModal);
@@ -653,13 +767,15 @@
             try {
                 const formData = new FormData();
                 formData.append('name', name);
-                const photoFile = document.getElementById('categoryPhotoInput').files[0];
-                if (photoFile) formData.append('photo', photoFile);
+                if (window._croppedBlobAdd) {
+                    formData.append('photo', window._croppedBlobAdd, 'category.jpg');
+                }
                 const res = await fetch(CATEGORIES_URL, { method: 'POST', body: formData });
                 if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || `Erro ${res.status}`); }
                 closeCategoryModal();
                 showToast('Categoria criada com sucesso!', 'success');
                 await loadCategories();
+                clearAddCategoryPreview();
             } catch (error) {
                 showToast('Erro ao criar categoria: ' + error.message, 'error');
             } finally {
@@ -704,7 +820,6 @@
             editProductOnSale.checked = product.on_sale || false;
             editProductFeatured.checked = product.is_featured || false;
 
-            // Popular categorias
             editProductCategory.innerHTML = '<option value="">Selecione a categoria *</option>';
             allCategories.forEach(cat => {
                 const opt = document.createElement('option');
@@ -714,20 +829,27 @@
                 editProductCategory.appendChild(opt);
             });
 
-            // Carregar subcategorias da categoria atual
             loadSubcategoriesForEdit(product.categoryId, product.subCategoryId);
 
-            // Limpar preview de fotos
             editSelectedFiles = [];
             editPreviewContainer.innerHTML = '';
             editPhotosInput.value = '';
 
-            // Exibir fotos atuais (se existirem) como preview estático
             if (product.images && product.images.length) {
-                product.images.forEach((imgUrl, idx) => {
+                product.images.forEach((imgUrl) => {
                     const div = document.createElement('div');
-                    div.className = 'photo-preview-item';
-                    div.innerHTML = `<img src="${escapeHtml(imgUrl)}" alt="Foto ${idx+1}">`;
+                    div.className = 'photo-preview-item group relative';
+                    div.innerHTML = `
+                        <img src="${escapeHtml(imgUrl)}" alt="Foto" class="w-full h-full object-cover transition-opacity group-hover:opacity-90">
+                        <button type="button" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 remove-existing-photo-btn" title="Remover foto">
+                            <i class="ph ph-x text-sm"></i>
+                        </button>
+                    `;
+                    div.querySelector('.remove-existing-photo-btn').addEventListener('click', () => {
+                        div.remove();
+                        // Atualiza o array de imagens existentes? Não precisamos, o backend receberá apenas as novas.
+                        // Mas podemos remover do DOM.
+                    });
                     editPreviewContainer.appendChild(div);
                 });
             }
@@ -763,50 +885,80 @@
             loadSubcategoriesForEdit(editProductCategory.value);
         });
 
-        editPhotosInput.addEventListener('change', (e) => {
+        // Processamento de novas imagens no modal de edição (crop)
+        editPhotosInput.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
-            if (files.length > 4) {
-                showToast('Máximo de 4 fotos', 'error');
+            if (files.length === 0) return;
+            const remainingSlots = 4 - editSelectedFiles.length;
+            if (files.length > remainingSlots) {
+                showToast(`Você pode adicionar no máximo ${remainingSlots} foto(s)`, 'error');
                 editPhotosInput.value = '';
                 return;
             }
-            editSelectedFiles = files;
-            // Limpar preview anterior (exceto as imagens estáticas, vamos limpar tudo e mostrar novas)
-            editPreviewContainer.innerHTML = '';
-            editSelectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'photo-preview-item';
-                    div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" data-index="${index}"><i class="ph ph-x"></i></button>`;
-                    div.querySelector('button').addEventListener('click', () => {
-                        editSelectedFiles.splice(index, 1);
-                        const dt = new DataTransfer();
-                        editSelectedFiles.forEach(f => dt.items.add(f));
-                        editPhotosInput.files = dt.files;
-                        // Re-renderizar preview
-                        editPhotosInput.dispatchEvent(new Event('change'));
+
+            for (const file of files) {
+                await new Promise((resolve) => {
+                    openCropper(file, (blob) => {
+                        editSelectedFiles.push(blob);
+                        resolve();
                     });
-                    editPreviewContainer.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
+                });
+            }
+
+            editPhotosInput.value = '';
+            renderEditPhotoPreviews();
         });
+
+        function renderEditPhotoPreviews() {
+            // Preserva as imagens estáticas (existentes) e adiciona as novas
+            const staticPreviews = Array.from(editPreviewContainer.children).filter(el => 
+                el.classList.contains('photo-preview-item') && !el.querySelector('button:not(.remove-existing-photo-btn)')
+            );
+            
+            // Limpa apenas as prévias de novas imagens, mantendo as estáticas
+            const newPreviews = Array.from(editPreviewContainer.children).filter(el => 
+                !el.querySelector('.remove-existing-photo-btn')
+            );
+            newPreviews.forEach(el => el.remove());
+
+            editSelectedFiles.forEach((blob, index) => {
+                const div = document.createElement('div');
+                div.className = 'photo-preview-item group relative';
+                const url = URL.createObjectURL(blob);
+                div.innerHTML = `
+                    <img src="${url}" alt="Preview" class="w-full h-full object-cover transition-opacity group-hover:opacity-90">
+                    <button type="button" data-index="${index}" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 remove-new-photo-btn" title="Remover foto">
+                        <i class="ph ph-x text-sm"></i>
+                    </button>
+                `;
+                div.querySelector('.remove-new-photo-btn').addEventListener('click', (e) => {
+                    const idx = e.currentTarget.dataset.index;
+                    editSelectedFiles.splice(idx, 1);
+                    renderEditPhotoPreviews();
+                    editPhotosInput.value = ''; // Limpa input para permitir reenvio
+                });
+                editPreviewContainer.appendChild(div);
+            });
+        }
 
         function closeEditModal() {
             editModal.classList.add('hidden');
             editModal.classList.remove('flex');
             currentEditingProduct = null;
+            editSelectedFiles = [];
         }
 
         editForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = editProductId.value;
             const formData = new FormData(editForm);
-            // Se nenhuma foto nova foi selecionada, remova o campo 'photos' para não enviar vazio e sobrescrever
-            if (editSelectedFiles.length === 0) {
-                formData.delete('photos');
-            }
+            
+            // Remove campo photos original e adiciona os blobs
+            formData.delete('photos');
+            editSelectedFiles.forEach((blob, i) => {
+                formData.append('photos', blob, `photo_${i}.jpg`);
+            });
+
             const submitBtn = editForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -985,12 +1137,18 @@
         // ---------- EDITAR CATEGORIA ----------
         const editCategoryModal = document.getElementById('editCategoryModal');
         const editCategoryForm = document.getElementById('editCategoryForm');
+        const editCategoryPhotoInput = document.getElementById('editCategoryPhotoInput');
+        const editCategoryPhotoPreview = document.getElementById('editCategoryPhotoPreview');
+        const editCategoryPhotoPreviewImg = document.getElementById('editCategoryPhotoPreviewImg');
+        const clearEditCategoryPhotoBtn = document.getElementById('clearEditCategoryPhotoBtn');
+        window._croppedBlobEdit = null;
 
         function openEditCategoryModal(cat) {
             document.getElementById('editCategoryId').value = cat.id;
             document.getElementById('editCategoryName').value = cat.name;
-            document.getElementById('editCategoryPhotoInput').value = '';
-            document.getElementById('editCategoryPhotoPreview').classList.add('hidden');
+            editCategoryPhotoInput.value = '';
+            editCategoryPhotoPreview.classList.add('hidden');
+            window._croppedBlobEdit = null;
 
             const currentPhotoBlock = document.getElementById('editCategoryCurrentPhoto');
             const currentImg = document.getElementById('editCategoryCurrentImg');
@@ -1010,19 +1168,27 @@
             editCategoryModal.classList.remove('flex');
         }
 
-        document.getElementById('closeEditCategoryModalBtn').addEventListener('click', closeEditCategoryModal);
-        editCategoryModal.addEventListener('click', (e) => { if (e.target === editCategoryModal) closeEditCategoryModal(); });
+        function clearEditCategoryPreview() {
+            window._croppedBlobEdit = null;
+            editCategoryPhotoPreview.classList.add('hidden');
+            editCategoryPhotoInput.value = '';
+        }
 
-        document.getElementById('editCategoryPhotoInput').addEventListener('change', (e) => {
+        clearEditCategoryPhotoBtn.addEventListener('click', clearEditCategoryPreview);
+
+        editCategoryPhotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                document.getElementById('editCategoryPhotoPreviewImg').src = ev.target.result;
-                document.getElementById('editCategoryPhotoPreview').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
+            openCropper(file, (blob) => {
+                window._croppedBlobEdit = blob;
+                editCategoryPhotoPreviewImg.src = URL.createObjectURL(blob);
+                editCategoryPhotoPreview.classList.remove('hidden');
+                editCategoryPhotoInput.value = '';
+            });
         });
+
+        document.getElementById('closeEditCategoryModalBtn').addEventListener('click', closeEditCategoryModal);
+        editCategoryModal.addEventListener('click', (e) => { if (e.target === editCategoryModal) closeEditCategoryModal(); });
 
         editCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1036,13 +1202,15 @@
             try {
                 const formData = new FormData();
                 formData.append('name', name);
-                const photoFile = document.getElementById('editCategoryPhotoInput').files[0];
-                if (photoFile) formData.append('photo', photoFile);
+                if (window._croppedBlobEdit) {
+                    formData.append('photo', window._croppedBlobEdit, 'category.jpg');
+                }
                 const res = await fetch(`${CATEGORIES_URL}/${id}`, { method: 'PUT', body: formData });
                 if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `Erro ${res.status}`); }
                 closeEditCategoryModal();
                 showToast('Categoria atualizada com sucesso!', 'success');
                 await loadCategories();
+                clearEditCategoryPreview();
             } catch (error) {
                 showToast('Erro ao atualizar categoria: ' + error.message, 'error');
             } finally {
@@ -1083,76 +1251,73 @@
         };
 
         window.openSubcategoryModal = openSubcategoryModal;
-        window.addSubcategoryPrompt = (catId) => openSubcategoryModal(catId);
-        window.deleteCategory = (id) => deleteCategoryHandler(id);
-        window.deleteSubcategory = (id) => deleteSubcategoryHandler(id);
 
-        // ---------- PRODUTOS (REFATORADO COM ACÚMULO DE IMAGENS) ----------
-        // Array global para armazenar arquivos selecionados (acumulativo)
+        // ---------- PRODUTOS (REFATORADO COM CROP SEQUENCIAL) ----------
         let selectedFiles = [];
         const photoInput = document.getElementById('productPhotos');
         const previewContainer = document.getElementById('photoPreviewContainer');
         const MAX_PHOTOS = 5;
 
-        // Função para renderizar previews a partir do array selectedFiles
         function renderPhotoPreview() {
             previewContainer.innerHTML = '';
-            selectedFiles.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'photo-preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview">
-                        <button type="button" data-index="${index}" class="remove-photo-btn">
-                            <i class="ph ph-x"></i>
-                        </button>
-                    `;
-                    // Evento de remoção
-                    div.querySelector('button').addEventListener('click', () => {
-                        selectedFiles.splice(index, 1);
-                        // Atualiza o input file com os arquivos restantes
-                        const dt = new DataTransfer();
-                        selectedFiles.forEach(f => dt.items.add(f));
-                        photoInput.files = dt.files;
-                        renderPhotoPreview();
-                    });
-                    previewContainer.appendChild(div);
-                };
-                reader.readAsDataURL(file);
+            selectedFiles.forEach((blob, index) => {
+                const div = document.createElement('div');
+                div.className = 'photo-preview-item group relative';
+                const url = URL.createObjectURL(blob);
+                div.innerHTML = `
+                    <img src="${url}" alt="Preview" class="w-full h-full object-cover transition-opacity group-hover:opacity-90">
+                    <button type="button" data-index="${index}" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 remove-photo-btn" title="Remover foto">
+                        <i class="ph ph-x text-sm"></i>
+                    </button>
+                `;
+                div.querySelector('.remove-photo-btn').addEventListener('click', (e) => {
+                    const idx = e.currentTarget.dataset.index;
+                    selectedFiles.splice(idx, 1);
+                    renderPhotoPreview();
+                    updatePhotoInputFromSelected();
+                    photoInput.value = ''; // Limpa input para permitir reenvio
+                });
+                previewContainer.appendChild(div);
             });
+            updatePhotoInputFromSelected();
         }
 
-        // Evento de mudança no input de fotos (acumulativo)
-        photoInput.addEventListener('change', (e) => {
-            const newFiles = Array.from(e.target.files);
-            if (newFiles.length === 0) return;
+        function updatePhotoInputFromSelected() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(blob => dt.items.add(new File([blob], 'image.jpg', { type: blob.type })));
+            photoInput.files = dt.files;
+        }
 
-            // Verifica se ultrapassa o limite
-            if (selectedFiles.length + newFiles.length > MAX_PHOTOS) {
-                showToast(`Você pode selecionar no máximo ${MAX_PHOTOS} fotos.`, 'error');
-                photoInput.value = ''; // limpa o input
+        async function processProductImages(files) {
+            const remainingSlots = MAX_PHOTOS - selectedFiles.length;
+            if (files.length > remainingSlots) {
+                showToast(`Você pode adicionar no máximo ${remainingSlots} foto(s)`, 'error');
+                photoInput.value = '';
                 return;
             }
 
-            // Adiciona os novos arquivos ao array global
-            selectedFiles = [...selectedFiles, ...newFiles];
-
-            // Atualiza o input file com todos os arquivos acumulados
-            const dt = new DataTransfer();
-            selectedFiles.forEach(file => dt.items.add(file));
-            photoInput.files = dt.files;
-
-            // Renderiza os previews
+            for (const file of files) {
+                await new Promise((resolve) => {
+                    openCropper(file, (blob) => {
+                        selectedFiles.push(blob);
+                        resolve();
+                    });
+                });
+            }
+            photoInput.value = '';
             renderPhotoPreview();
+        }
+
+        photoInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            processProductImages(files);
         });
 
-        // Submissão do formulário de produto (refatorada para usar o array global)
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             
-            // Validação de quantidade de fotos
             if (selectedFiles.length === 0 || selectedFiles.length > MAX_PHOTOS) {
                 showToast(`Selecione de 1 a ${MAX_PHOTOS} fotos`, 'error');
                 return;
@@ -1164,37 +1329,26 @@
             submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
 
             try {
-                // Cria FormData a partir do formulário
                 const formData = new FormData(form);
-                
-                // Remove qualquer entrada 'photos' existente (do input original)
                 formData.delete('photos');
-                
-                // Adiciona cada arquivo do array global sob a chave 'images' (esperada pelo backend)
-                selectedFiles.forEach(file => {
-                    formData.append('images', file);
+                selectedFiles.forEach((blob, i) => {
+                    formData.append('images', blob, `photo_${i}.jpg`);
                 });
 
-                const res = await fetch(PRODUCTS_URL, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
+                const res = await fetch(PRODUCTS_URL, { method: 'POST', body: formData });
                 if (!res.ok) {
                     const errorText = await res.text();
                     throw new Error(errorText || 'Erro no cadastro');
                 }
-                
                 await res.json();
                 
-                // Limpeza após sucesso
                 form.reset();
                 selectedFiles = [];
                 previewContainer.innerHTML = '';
-                photoInput.value = ''; // limpa o input file
+                photoInput.value = '';
                 
                 await fetchProducts();
-                await loadCategories(); // para atualizar categorias se necessário
+                await loadCategories();
                 showToast('Produto cadastrado com sucesso!', 'success');
             } catch (err) {
                 showToast('Erro: ' + err.message, 'error');
@@ -1204,7 +1358,7 @@
             }
         });
 
-        // Demais funções de produto (fetch, render, toggle, etc.) mantidas
+        // Demais funções de produto
         async function fetchProducts() {
             try {
                 allProducts = await fetchJSON(PRODUCTS_URL);
@@ -1459,6 +1613,9 @@
             loadCategories();
             initTabs();
         });
+
+        window.loadCategories = loadCategories;
+        window.showToast = showToast;
     })();
 </script>
 </body>

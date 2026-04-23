@@ -32,7 +32,7 @@
         }
     </script>
     <style>
-        /* ===== ESTILOS GLOBAIS ===== */
+        /* ===== ESTILOS GLOBAIS (mantidos para a home) ===== */
         @keyframes slideBanner {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
@@ -46,28 +46,6 @@
         .top-bar-container {
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-        }
-        .group\/mega:hover .rotate-icon { transform: rotate(180deg); }
-        .group\/mega { position: static; }
-        .mega-menu-link {
-            display: block;
-            padding: 3px 0;
-            color: #4b5563;
-            transition: all 0.2s ease;
-        }
-        .mega-menu-link:hover {
-            color: #e74c3c;
-            transform: translateX(4px);
-        }
-        .mega-menu-title {
-            font-weight: 800;
-            color: #0a2540;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
-            border-bottom: 2px solid #f4f4f4;
-            padding-bottom: 4px;
         }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -113,158 +91,16 @@
             transform: translateY(-4px);
         }
         .category-card:hover i { color: white; }
-        .group:hover ul::before {
-            content: "";
-            position: absolute;
-            top: -20px;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: transparent;
-        }
-        nav ul { margin-top: 5px !important; }
-        .rotate-icon {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-block;
-        }
-        .group:hover .rotate-icon { transform: rotate(180deg); }
-
-        /* Painel Institucional */
-        #institucional-overlay {
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        #institucional-panel {
-            transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            will-change: transform;
-            max-width: 100%;
-        }
-        @media (min-width: 768px) {
-            #institucional-panel {
-                max-width: 720px;
-                left: 50%;
-                transform: translateX(-50%) translateY(100%);
-            }
-            #institucional-panel.translate-y-0 {
-                transform: translateX(-50%) translateY(0) !important;
-            }
-        }
-        .panel-handle {
-            width: 48px;
-            height: 5px;
-            background-color: #d1d5db;
-            border-radius: 9999px;
-            margin: 0 auto;
-        }
-        .panel-content {
-            max-height: calc(90vh - 100px);
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        /* Modal Mapa */
-        #map-modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        #map-modal .modal-container {
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            transform: scale(0.95);
-        }
-        #map-modal.active .modal-container { transform: scale(1); }
-        .map-iframe { border: 0; width: 100%; height: 100%; min-height: 400px; }
-        @media (max-width: 640px) { .map-iframe { min-height: 300px; } }
-
-        /* Carrinho Drawer */
-        #cart-drawer {
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1), visibility 0.3s;
-        }
-        #cart-overlay {
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .cart-items-container {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
-        }
-        .cart-items-container::-webkit-scrollbar { width: 4px; }
-        .cart-items-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
-
-        /* Modal Global (para mensagens) */
-        .modal-enter { opacity: 0; visibility: hidden; }
-        .modal-enter-active { opacity: 1; visibility: visible; }
-        .modal-content-enter { transform: scale(0.95); transition: transform 0.2s ease; }
-        .modal-enter-active .modal-content-enter { transform: scale(1); }
     </style>
 </head>
 <body class="bg-light-gray font-sans text-gray-900">
 
-<!-- ===== MODAL GLOBAL (mensagens e conta) ===== -->
-<div id="globalModal" class="fixed inset-0 z-[200] flex items-center justify-center p-5 invisible opacity-0 transition-all duration-300" style="pointer-events: none;">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeGlobalModal()"></div>
-    <div id="globalModalContent" class="relative bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-all duration-300 scale-95" style="pointer-events: auto;"></div>
-</div>
+<!-- ===== HEADER INJETADO VIA JS ===== -->
+<div id="global-header"></div>
 
-<!-- ===== TOP BAR ===== -->
-<div class="bg-primary text-white top-bar-height flex items-center overflow-hidden relative border-b border-white/5">
-    <div class="w-full flex items-center h-full top-bar-container">
-        <div class="animate-slide whitespace-nowrap">
-            <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-            <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-            <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-            <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-            <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-            <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-        </div>
-    </div>
-</div>
+<!-- ===== CONTEÚDO PRINCIPAL (HOME) ===== -->
 
-<!-- ===== HEADER ===== -->
-<header class="bg-primary shadow-xl sticky top-0 z-50 py-5">
-    <div class="container mx-auto px-4 flex flex-wrap items-center justify-between gap-6">
-        <a href="/" class="flex items-center shrink-0">
-            <img src="img/logo-moro.webp" alt="Elétrica Moro" class="h-12 w-auto object-contain" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=MORO'">
-        </a>
-        <form class="flex-grow max-w-2xl relative order-3 md:order-none w-full md:w-auto" onsubmit="event.preventDefault(); showMessage('Busca','Funcionalidade em desenvolvimento.');">
-            <input type="search" placeholder="Buscar peças, eletrodomésticos ou serviços..." class="w-full py-3.5 px-6 rounded-full text-sm focus:ring-2 focus:ring-accent outline-none bg-white">
-            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary text-xl"><i class="ph ph-magnifying-glass"></i></button>
-        </form>
-        <nav class="flex items-center gap-4">
-    <!-- Dropdown Minha Conta (hover) -->
-    <div class="relative group">
-        <button class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-            <i class="ph ph-user text-2xl"></i>
-            <span class="hidden lg:inline text-sm font-medium">Minha Conta</span>
-            <i class="ph ph-caret-down text-xs rotate-icon"></i>
-        </button>
-        <ul class="absolute right-0 top-full mt-2 w-48 bg-secondary rounded-xl shadow-2xl py-2 hidden group-hover:block border border-white/5 z-50">
-            <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10" onclick="showMessage('Meus Pedidos','Em breve.')"><i class="ph ph-package mr-2"></i> Meus Pedidos</a></li>
-            <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10" onclick="showMessage('Meus Dados','Em breve.')"><i class="ph ph-gear mr-2"></i> Meus Dados</a></li>
-            <li class="border-t border-white/10 mt-2"><a href="#" class="block px-5 py-3 text-sm text-accent hover:bg-white/10" onclick="showMessage('Logout','Você saiu da conta.')">Sair</a></li>
-        </ul>
-    </div>
-
-    <!-- Carrinho (mantido) -->
-    <button onclick="toggleCart()" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-        <div class="relative">
-            <i class="ph ph-shopping-cart text-2xl"></i>
-            <span id="cartCount" class="absolute -top-2 -right-2 bg-accent text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-        </div>
-        <span class="hidden lg:inline text-sm font-medium">Carrinho</span>
-    </button>
-</nav>
-    </div>
-</header>
-
-<!-- ===== MENU CATEGORIAS (DINÂMICO) ===== -->
-<section class="bg-white border-b border-gray-200 relative">
-    <div class="container mx-auto px-4">
-        <ul id="dynamicMenu" class="flex items-center gap-8 py-4 overflow-x-auto hide-scrollbar whitespace-nowrap text-sm font-medium text-gray-700">
-            <li><a href="/categoria.html" class="flex items-center gap-2 hover:text-primary transition-colors"><i class="ph ph-list"></i> Todas as Categorias</a></li>
-        </ul>
-    </div>
-</section>
-
-<!-- ===== HERO SLIDER ===== -->
+<!-- Hero Slider -->
 <section class="relative overflow-hidden bg-gray-900">
     <div class="relative h-[450px] md:h-[520px] w-full">
         <div id="heroTrack" class="flex h-full transition-transform duration-700 ease-out"></div>
@@ -316,11 +152,11 @@
     <section class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-[260px]">
-                <div class="md:col-span-1 md:row-span-2 relative rounded-2xl overflow-hidden group shadow-xl cursor-pointer" onclick="showMessage('Oficina Premium','Em breve mais informações.')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=800&q=80');"></div><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center p-6 text-white text-center"><h3 class="text-2xl font-bold mb-2">Oficina Premium</h3><p class="text-sm opacity-90">Diagnóstico gratuito e garantia estendida</p><span class="mt-5 bg-white/20 backdrop-blur-sm hover:bg-white hover:text-primary px-5 py-2 rounded-full text-sm font-semibold transition-all">Ver mais →</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="showMessage('Categoria','Geladeiras')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Geladeiras</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="showMessage('Categoria','Máquinas de Lavar')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Máquinas de Lavar</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="showMessage('Categoria','Micro-ondas')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1585515325310-e89a39c7d213?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Micro-ondas</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="showMessage('Categoria','Refrigeração')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Refrigeração</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
+                <div class="md:col-span-1 md:row-span-2 relative rounded-2xl overflow-hidden group shadow-xl cursor-pointer" onclick="AppCore.showMessage('Oficina Premium','Em breve mais informações.')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=800&q=80');"></div><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center p-6 text-white text-center"><h3 class="text-2xl font-bold mb-2">Oficina Premium</h3><p class="text-sm opacity-90">Diagnóstico gratuito e garantia estendida</p><span class="mt-5 bg-white/20 backdrop-blur-sm hover:bg-white hover:text-primary px-5 py-2 rounded-full text-sm font-semibold transition-all">Ver mais →</span></div></div>
+                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Geladeiras')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Geladeiras</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
+                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Máquinas de Lavar')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Máquinas de Lavar</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
+                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Micro-ondas')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1585515325310-e89a39c7d213?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Micro-ondas</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
+                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Refrigeração')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Refrigeração</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
             </div>
         </div>
     </section>
@@ -353,7 +189,7 @@
     </div>
 </section>
 
-<!-- Modais de Chat e Ligação -->
+<!-- Modais específicos da Home (Chat e Ligação) -->
 <div id="chatModal" class="fixed inset-0 z-[100] flex items-center justify-center p-5 invisible opacity-0 transition-all duration-300">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeModal('chatModal')"></div>
     <div class="relative bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform scale-95 transition-all">
@@ -378,328 +214,276 @@
     </div>
 </div>
 
-<!-- ===== RODAPÉ ===== -->
-<footer class="bg-primary text-white pt-16 pb-8">
-    <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            <div class="space-y-6">
-                <img src="img/logo-moro.webp" alt="Elétrica Moro" class="h-12 w-auto object-contain brightness-0 invert" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=MORO'">
-                <p class="text-white/60 text-sm leading-relaxed">Especialistas em peças para eletrodomésticos e assistência técnica autorizada. Qualidade e confiança para o seu lar desde 1990.</p>
-                <div class="flex gap-4">
-                    <a href="https://www.instagram.com/eletricamorooficial/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
-    <i class="ph ph-instagram-logo text-xl"></i>
-</a>
-<a href="https://www.facebook.com/eletricamoro/?locale=pt_BR" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
-    <i class="ph ph-facebook-logo text-xl"></i>
-</a>
-                </div>
-            </div>
-            <div><h4 class="text-lg font-bold mb-6 relative inline-block">Institucional<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                <ul class="space-y-4 text-sm text-white/60">
-                    <li><a href="javascript:void(0)" onclick="openInstitucional('sobre')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Sobre Nós</a></li>
-                    <li><a href="javascript:void(0)" onclick="openInstitucional('entrega')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Política de Entrega</a></li>
-                    <li><a href="javascript:void(0)" onclick="openInstitucional('privacidade')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Privacidade</a></li>
-                    <li><a href="javascript:void(0)" onclick="openInstitucional('termos')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Termos e Condições</a></li>
-                </ul>
-            </div>
-            <div><h4 class="text-lg font-bold mb-6 relative inline-block">Atendimento<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                <ul class="space-y-4 text-sm text-white/60">
-                    <li class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all" onclick="openMapModal()">
-                        <i class="ph ph-map-pin text-xl text-accent"></i>
-                        <span>Rua Santa Sofia 53 - Ideal<br>Novo Hamburgo - RS, 93336-200</span>
-                    </li>
-                    <li class="flex items-center gap-3"><i class="ph ph-phone text-xl text-accent"></i><span>(51) 3581-5940</span></li>
-                </ul>
-            </div>
-            <div><h4 class="text-lg font-bold mb-6 relative inline-block">Segurança<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                <div class="flex flex-wrap gap-3 mb-6"><div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2"><i class="ph ph-shield-check text-2xl text-green-400"></i><span class="text-[10px] leading-tight uppercase font-bold">Site<br>Seguro</span></div><div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2"><i class="ph ph-lock-key text-2xl text-blue-400"></i><span class="text-[10px] leading-tight uppercase font-bold">SSL<br>256-bit</span></div></div>
-                <h4 class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Pagamento</h4>
-                <div class="flex flex-wrap gap-2 opacity-60"><i class="ph ph-credit-card text-2xl"></i><i class="ph ph-barcode text-2xl"></i><i class="ph ph-pix-logo text-2xl"></i></div>
-            </div>
-        </div>
-        <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-[11px]">
-            <p>© <span id="current-year"></span> Elétrica Moro. CNPJ: 07.907.008/0001-85.</p>
-            <div class="flex gap-6"><span>Desenvolvido com ❤️</span></div>
-        </div>
-    </div>
-</footer>
+<!-- ===== FOOTER INJETADO VIA JS ===== -->
+<div id="global-footer"></div>
 
-<!-- ===== PAINEL INSTITUCIONAL ===== -->
-<div id="institucional-overlay" class="fixed inset-0 z-[110] bg-black/50 opacity-0 invisible transition-all duration-300" onclick="closeInstitucional()"></div>
-<div id="institucional-panel" class="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 w-full md:max-w-3xl bg-white rounded-t-[2.5rem] shadow-2xl z-[120] translate-y-full transition-transform duration-500 overflow-hidden">
-    <div class="pt-4 pb-2 flex justify-center"><div class="panel-handle"></div></div>
-    <div class="px-6 pb-2 flex items-center justify-between">
-        <h2 id="panel-title" class="text-2xl font-bold text-primary">Sobre Nós</h2>
-        <button onclick="closeInstitucional()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600"><i class="ph ph-x text-xl"></i></button>
-    </div>
-    <div class="panel-content px-6 pb-8 text-gray-700 leading-relaxed space-y-4 text-sm md:text-base" id="panel-content">Carregando...</div>
-</div>
-
-<!-- ===== MODAL MAPA ===== -->
-<div id="map-modal" class="fixed inset-0 z-[130] flex items-center justify-center p-4 opacity-0 invisible transition-all duration-300 bg-black/60 backdrop-blur-sm" onclick="closeMapModal()">
-    <div class="modal-container bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 class="text-xl font-bold text-primary flex items-center gap-2"><i class="ph ph-map-pin text-accent"></i> Nossa Localização · Elétrica Moro</h3>
-            <button onclick="closeMapModal()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="ph ph-x text-xl"></i></button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-5">
-            <div class="rounded-xl overflow-hidden border border-gray-200 shadow-inner bg-gray-100">
-                <iframe class="map-iframe" src="https://www.google.com/maps?q=Rua+Santa+Sofia+53+Novo+Hamburgo+RS&output=embed&z=16" allowfullscreen loading="lazy"></iframe>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div><p class="text-sm text-gray-500 mb-1">Endereço completo</p><p class="text-gray-800 font-medium"><i class="ph ph-map-pin text-accent mr-1"></i>Rua Santa Sofia, 53 - Ideal, Novo Hamburgo - RS</p><p class="text-xs text-gray-400 mt-1">CEP: 93336-200</p></div>
-                <a href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Sofia+53+Novo+Hamburgo+RS" target="_blank" class="inline-flex items-center justify-center gap-2 bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-secondary"><i class="ph ph-arrow-square-out text-lg"></i>Abrir no Google Maps</a>
-            </div>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-100 flex justify-end"><button onclick="closeMapModal()" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium">Fechar</button></div>
-    </div>
-</div>
-
-<!-- ===== CARRINHO DRAWER ===== -->
-<div id="cart-overlay" class="fixed inset-0 z-[130] bg-black/50 opacity-0 invisible transition-all duration-300" onclick="closeCart()"></div>
-<div id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-[140] transform translate-x-full transition-transform duration-400 flex flex-col">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-        <h3 class="text-xl font-bold text-primary flex items-center gap-2"><i class="ph ph-shopping-cart text-2xl"></i> Meu Carrinho</h3>
-        <button onclick="closeCart()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="ph ph-x text-xl"></i></button>
-    </div>
-    <div id="cart-items-list" class="flex-1 overflow-y-auto cart-items-container p-5 space-y-4"></div>
-    <div class="border-t border-gray-100 p-5 space-y-4">
-        <div class="flex items-center justify-between"><span class="text-gray-600 font-medium">Subtotal</span><span id="cart-subtotal" class="text-2xl font-bold text-primary">R$ 0,00</span></div>
-        <button class="w-full bg-accent hover:bg-accent/90 text-white py-4 rounded-xl font-bold text-lg shadow-lg" onclick="showMessage('Finalizar Pedido','Redirecionando para checkout...')">Finalizar Pedido</button>
-        <button onclick="closeCart()" class="w-full text-gray-500 text-sm hover:text-gray-700">Continuar Comprando</button>
-    </div>
-</div>
-
+<!-- Scripts modulares e de página -->
+<script src="js/main-components.js" defer></script>
 <script>
     (function(){
         "use strict";
-        // ---------- CONFIGURAÇÕES ----------
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        const CART_KEY = 'eletrica_moro_cart';
-        let cartItems = [];
-
-        // ---------- MODAL GLOBAL ----------
-        window.closeGlobalModal = () => {
-            const m = document.getElementById('globalModal');
-            m.classList.add('invisible','opacity-0'); m.style.pointerEvents = 'none';
-        };
-        window.showGlobalModal = (html) => {
-            const m = document.getElementById('globalModal');
-            const content = document.getElementById('globalModalContent');
-            content.innerHTML = html;
-            m.classList.remove('invisible','opacity-0'); m.style.pointerEvents = 'auto';
-        };
-        window.showMessage = (title, msg, type='info') => {
-            showGlobalModal(`<button onclick="closeGlobalModal()" class="absolute top-5 right-5 text-gray-400 hover:text-primary"><i class="ph ph-x text-2xl"></i></button><h3 class="text-xl font-bold text-primary mb-2">${title}</h3><p class="text-gray-600 mb-6">${msg}</p><button onclick="closeGlobalModal()" class="w-full bg-primary text-white py-3 rounded-xl font-semibold">Ok</button>`);
-        };
-        window.openAccountModal = () => {
-            showGlobalModal(`<button onclick="closeGlobalModal()" class="absolute top-5 right-5 text-gray-400 hover:text-primary"><i class="ph ph-x text-2xl"></i></button><h3 class="text-2xl font-bold text-primary mb-4">Minha Conta</h3><div class="space-y-3"><button class="w-full text-left px-4 py-3 bg-gray-50 rounded-xl" onclick="showMessage('Pedidos','Em breve.')"><i class="ph ph-package mr-2"></i>Meus Pedidos</button><button class="w-full text-left px-4 py-3 bg-gray-50 rounded-xl" onclick="showMessage('Dados','Em breve.')"><i class="ph ph-gear mr-2"></i>Meus Dados</button><button class="w-full text-left px-4 py-3 bg-gray-50 rounded-xl text-accent" onclick="closeGlobalModal();showMessage('Logout','Você saiu.')"><i class="ph ph-sign-out mr-2"></i>Sair</button></div>`);
-        };
-
-        // ---------- PAINEL INSTITUCIONAL ----------
-        const institucionalData = {
-    sobre: {
-        titulo: 'Sobre Nós',
-        texto: `A Elétrica Moro é uma empresa que se consolidou como referência em assistência técnica na região. A anos atuando na cidade de Novo Hamburgo, atende toda a região do Vale do Sinos e Grande Porto Alegre.
-
-Com uma equipe qualificada de profissionais procura sempre trazer o que há de melhor para seus clientes. Recentemente ampliou suas dependências para poder ter mais espaço para melhor atender os seus clientes.`
-    },
-    entrega: {
-        titulo: 'Política de Entrega',
-        texto: `Após a confirmação de pagamento pelo sistema ou o envio do comprovante, daremos início ao processamento do seu pedido. Durante esse período, nossa equipe estará dedicada a garantir a qualidade e precisão de cada etapa. Assim que concluído, seu pedido será cuidadosamente embalado e despachado pela transportadora selecionada, garantindo uma entrega segura e eficiente.
-
-O código de rastreamento será enviado diretamente para o e-mail cadastrado, permitindo que você acompanhe o status da sua entrega em tempo real. Estamos comprometidos em fornecer uma experiência de compra tranquila e satisfatória, desde o momento do pedido até a chegada do produto em suas mãos.`
-    },
-    privacidade: {
-        titulo: 'Política de Privacidade',
-        texto: `A proteção da privacidade dos nossos clientes é nossa prioridade. Todas as informações que você nos fornece são utilizadas exclusivamente para aprimorar nossos serviços e personalizar seu atendimento. Garantimos que não vendemos, alugamos ou compartilhamos seus dados com terceiros.
-
-Coleta de Informações: Os dados pessoais fornecidos são fundamentais para entendermos suas necessidades e oferecermos serviços, produtos e informações personalizados. Essas informações são armazenadas em nosso banco de dados para melhorar nosso relacionamento com os clientes e facilitar futuras compras e navegação no site.
-
-Uso das Informações: Seus dados pessoais não são divulgados ou comercializados. São utilizados exclusivamente por nós para conferência de pedidos, facilitação do preenchimento de pedidos, análise de perfis e estatísticas, melhoria das operações do site e envio de conteúdo promocional e informativo, os quais você pode optar por cancelar a qualquer momento.
-
-Registro e Recebimento de Material Promocional: O registro do seu e-mail nos permite enviar informações, promoções e lançamentos, mas apenas se autorizado por você. Você pode optar por não receber mais essas informações a qualquer momento. O registro não estabelece vínculo contratual, sendo apenas para acesso a serviços especiais e tratamento diferenciado.
-
-Segurança: Suas informações são armazenadas em servidores altamente seguros, com criptografia de 128 bits, garantindo sua privacidade e proteção. Não compartilhe sua senha com terceiros para garantir sua segurança.
-
-Modificações: Reservamos o direito de alterar nossa Política de Privacidade, comprometendo-nos a divulgar quaisquer mudanças neste espaço.
-
-Dúvidas e Sugestões: Em caso de dúvidas ou sugestões sobre nossa Política de Privacidade, entre em contato conosco. Estamos aqui para ajudar.`
-    },
-    termos: {
-        titulo: 'Termos e Condições',
-        texto: `Todos os produtos que comercializamos são acompanhados por nossa garantia de qualidade. Em caso de produtos defeituosos, garantimos a troca gratuita, desde que observadas as seguintes condições:
-
-• A troca só será efetuada mediante a apresentação da embalagem original e com os produtos mantendo suas características intactas, tal como quando foram adquiridos.
-• Produtos que apresentarem defeitos decorrentes de mau uso ou aplicação incorreta não serão elegíveis para troca.
-• Você tem até 7 (sete) dias após o recebimento para solicitar a troca, caso detecte algum problema.
-
-Após a confirmação do pagamento, seu pedido será processado e encaminhado para expedição, com previsão de envio pela transportadora em um prazo de 2 a 3 dias úteis.
-
-Estamos à disposição para esclarecer quaisquer dúvidas que possam surgir. Entre em contato conosco se precisar de assistência. Estamos aqui para ajudá-lo.`
-    }
-};
-        const instOverlay = document.getElementById('institucional-overlay');
-        const instPanel = document.getElementById('institucional-panel');
-        window.openInstitucional = (tipo) => {
-            const d = institucionalData[tipo]; if(!d) return;
-            document.getElementById('panel-title').textContent = d.titulo;
-            document.getElementById('panel-content').innerHTML = d.texto.replace(/\n/g,'<br>');
-            instOverlay.classList.remove('invisible','opacity-0'); instOverlay.classList.add('opacity-100');
-            instPanel.classList.remove('translate-y-full'); instPanel.classList.add('translate-y-0');
-            document.body.style.overflow = 'hidden';
-        };
-        window.closeInstitucional = () => {
-            instOverlay.classList.add('opacity-0','invisible'); instOverlay.classList.remove('opacity-100');
-            instPanel.classList.add('translate-y-full'); instPanel.classList.remove('translate-y-0');
-            document.body.style.overflow = '';
-        };
-        document.addEventListener('keydown', e => { if(e.key==='Escape' && instPanel.classList.contains('translate-y-0')) closeInstitucional(); });
-
-        // ---------- MODAL MAPA ----------
-        const mapModal = document.getElementById('map-modal');
-        window.openMapModal = () => { mapModal.classList.remove('opacity-0','invisible'); mapModal.classList.add('active','opacity-100'); document.body.style.overflow='hidden'; };
-        window.closeMapModal = () => { mapModal.classList.add('opacity-0','invisible'); mapModal.classList.remove('active','opacity-100'); document.body.style.overflow=''; };
-
-        // ---------- CARRINHO ----------
-        const cartDrawer = document.getElementById('cart-drawer');
-        const cartOverlay = document.getElementById('cart-overlay');
-        const cartItemsEl = document.getElementById('cart-items-list');
-        const subtotalEl = document.getElementById('cart-subtotal');
-        const cartCounter = document.getElementById('cartCount');
-
-        function loadCart() { try { cartItems = JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch(e){ cartItems = []; } }
-        function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cartItems)); }
-        function calcTotal() { return cartItems.reduce((s,i) => s + (i.price * (i.quantity||1)), 0); }
-        function updateCounter() {
-            const total = cartItems.reduce((s,i) => s + (i.quantity||1), 0);
-            cartCounter.textContent = total;
-            cartCounter.style.display = total > 0 ? 'flex' : 'none';
-        }
-        function renderCart() {
-            if (cartItems.length === 0) {
-                cartItemsEl.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 py-12"><i class="ph ph-shopping-cart text-6xl mb-4 opacity-40"></i><p class="text-lg font-medium">Seu carrinho está vazio</p></div>`;
-                subtotalEl.textContent = 'R$ 0,00'; return;
+        // Aguarda o carregamento do AppCore (main-components.js)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verifica se o AppCore está disponível (carregado)
+            if (!window.AppCore) {
+                console.error('AppCore não carregado. Verifique o main-components.js');
+                return;
             }
-            let html = '';
-            cartItems.forEach(item => {
-                const img = item.image || 'https://placehold.co/100x100?text=Produto';
-                const qty = item.quantity || 1;
-                html += `<div class="flex gap-4 bg-gray-50 p-3 rounded-xl"><div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center p-1"><img src="${img}" alt="${item.name}" class="max-w-full max-h-full object-contain" onerror="this.src='https://placehold.co/100x100'"></div><div class="flex-1"><h4 class="font-semibold text-gray-800 text-sm line-clamp-2">${item.name}</h4><div class="flex items-center justify-between mt-2"><span class="text-primary font-bold">R$ ${(item.price*qty).toFixed(2)}</span><button onclick="removeFromCart('${item.id}')" class="text-gray-400 hover:text-accent"><i class="ph ph-trash text-lg"></i></button></div>${qty>1?`<p class="text-xs text-gray-500 mt-1">Qtd: ${qty}</p>`:''}</div></div>`;
-            });
-            cartItemsEl.innerHTML = html;
-            subtotalEl.textContent = `R$ ${calcTotal().toFixed(2)}`;
-        }
-        window.addToCart = (product) => {
-            if (!product || !product.id) return;
-            const existing = cartItems.find(i => i.id === product.id);
-            if (existing) { existing.quantity = (existing.quantity||1) + 1; }
-            else { cartItems.push({ id: product.id, name: product.name, price: product.price, image: product.image || (product.images?.[0]) || product.image_url || null, quantity: 1 }); }
-            saveCart(); refreshCartUI(); 
-            showMessage('Produto adicionado', `${product.name} foi adicionado ao carrinho.`);
-        };
-        window.removeFromCart = (id) => { cartItems = cartItems.filter(i => i.id !== id); saveCart(); refreshCartUI(); };
-        function refreshCartUI() { renderCart(); updateCounter(); }
-        window.toggleCart = () => { if (cartDrawer.classList.contains('translate-x-full')) { openCart(); } else { closeCart(); } };
-        window.openCart = () => { cartDrawer.classList.remove('translate-x-full'); cartDrawer.classList.add('translate-x-0'); cartOverlay.classList.remove('opacity-0','invisible'); cartOverlay.classList.add('opacity-100'); document.body.style.overflow='hidden'; };
-        window.closeCart = () => { cartDrawer.classList.add('translate-x-full'); cartDrawer.classList.remove('translate-x-0'); cartOverlay.classList.add('opacity-0','invisible'); cartOverlay.classList.remove('opacity-100'); document.body.style.overflow=''; };
-        window.clearCart = () => { cartItems = []; saveCart(); refreshCartUI(); };
 
-        // ---------- API E RENDERIZAÇÃO ----------
-        async function fetchCategories() { try { const r = await fetch('/api/categories'); return r.ok ? r.json() : []; } catch { return []; } }
-        async function fetchProducts() { try { const r = await fetch('/api/products'); return r.ok ? r.json() : []; } catch { return []; } }
+            // ---------- CONFIGURAÇÕES DA HOME ----------
+            
+            // Funções auxiliares para modais específicos da home
+            window.closeModal = function(id) {
+                const modal = document.getElementById(id);
+                modal.classList.add('invisible', 'opacity-0');
+            };
 
-        function renderProductCard(product) {
-            const price = Number(product.price)||0;
-            const parcelas = 3; const valorParcela = price/parcelas;
-            const desconto = product.on_sale ? Math.floor(Math.random()*12+5) : 0;
-            const precoFinal = desconto ? (price*(1-desconto/100)).toFixed(2) : price.toFixed(2);
-            let img = 'img/placeholder.png';
-            if (product.images?.length) img = product.images[0]; else if (product.image_url) img = product.image_url;
-            const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
-            const productJson = JSON.stringify({ id: product.id, name: product.name, price: price, image: img }).replace(/'/g,"&apos;");
-            return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
-                ${desconto?`<div class="absolute top-3 left-3 z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</div>`:''}
-                <div class="p-4 flex items-center justify-center bg-gray-50"><img src="${img}" alt="${product.name}" class="product-img w-full h-auto max-h-40 object-contain" onerror="this.src='img/placeholder.png'"></div>
-                <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
-                    ${specs?`<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>`:''}
-                    <div class="mt-2">${desconto?`<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>`:''}<div class="text-xl font-bold text-primary">R$ ${precoFinal}</div><div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div></div>
-                    <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all" data-product='${productJson}'>Adicionar</button>
-                </div>
-            </div>`;
-        }
-
-        function initCarousel(trackId, prevId, nextId, products, getVisible) {
-            const track = document.getElementById(trackId); if(!track) return;
-            let idx=0, cardW=0, isDrag=false, startX=0, prevTrans=0;
-            function render() {
-                track.innerHTML = products.map(() => `<div class="${trackId==='featuredTrack'?'feature-card':'home-card'}"></div>`).join('');
-                [...track.children].forEach((c,i) => { if(products[i]) c.innerHTML = renderProductCard(products[i]); });
-                setTimeout(()=>updatePos(),30);
+            // Renderização de cards de produto (usa a mesma lógica)
+            function renderProductCard(product) {
+                const price = Number(product.price) || 0;
+                const parcelas = 3;
+                const valorParcela = price / parcelas;
+                const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+                const precoFinal = desconto ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
+                let img = 'img/placeholder.png';
+                if (product.images && product.images.length) img = product.images[0];
+                else if (product.image_url) img = product.image_url;
+                const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
+                
+                // Prepara dados para o botão de adicionar
+                const productData = {
+                    id: product.id,
+                    name: product.name,
+                    price: price,
+                    image: img
+                };
+                const productJson = JSON.stringify(productData).replace(/'/g, "&apos;");
+                
+                return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
+                    ${desconto ? `<div class="absolute top-3 left-3 z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</div>` : ''}
+                    <div class="p-4 flex items-center justify-center bg-gray-50">
+                        <img src="${img}" alt="${product.name}" class="product-img w-full h-auto max-h-40 object-contain" onerror="this.src='img/placeholder.png'">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                        ${specs ? `<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>` : ''}
+                        <div class="mt-2">
+                            ${desconto ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
+                            <div class="text-xl font-bold text-primary">R$ ${precoFinal}</div>
+                            <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
+                        </div>
+                        <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all" data-product='${productJson}'>Adicionar</button>
+                    </div>
+                </div>`;
             }
-            function updatePos() {
-                const first = track.querySelector(`.${trackId==='featuredTrack'?'feature-card':'home-card'}`);
-                if(first) { const gap = parseFloat(getComputedStyle(track).gap)||20; cardW = first.offsetWidth+gap; idx = Math.min(idx, Math.max(0, products.length-getVisible())); track.style.transform = `translateX(-${idx*cardW}px)`; prevTrans = -idx*cardW; }
+
+            // Função para inicializar carrosséis (arraste)
+            function initCarousel(trackId, prevId, nextId, products, getVisible) {
+                const track = document.getElementById(trackId);
+                if (!track) return;
+                let idx = 0, cardW = 0, isDrag = false, startX = 0, prevTrans = 0;
+                
+                function render() {
+                    track.innerHTML = products.map(() => `<div class="${trackId === 'featuredTrack' ? 'feature-card' : 'home-card'}"></div>`).join('');
+                    [...track.children].forEach((c, i) => {
+                        if (products[i]) c.innerHTML = renderProductCard(products[i]);
+                    });
+                    setTimeout(() => updatePos(), 30);
+                }
+                
+                function updatePos() {
+                    const first = track.querySelector(`.${trackId === 'featuredTrack' ? 'feature-card' : 'home-card'}`);
+                    if (first) {
+                        const gap = parseFloat(getComputedStyle(track).gap) || 20;
+                        cardW = first.offsetWidth + gap;
+                        idx = Math.min(idx, Math.max(0, products.length - getVisible()));
+                        track.style.transform = `translateX(-${idx * cardW}px)`;
+                        prevTrans = -idx * cardW;
+                    }
+                }
+                
+                function slide(dir) {
+                    const vis = getVisible();
+                    let newIdx = idx + (dir === 'next' ? vis : -vis);
+                    newIdx = Math.min(Math.max(0, products.length - vis), Math.max(0, newIdx));
+                    if (newIdx !== idx) {
+                        idx = newIdx;
+                        updatePos();
+                    }
+                }
+                
+                function dragStart(e) {
+                    isDrag = true;
+                    startX = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+                    track.style.transition = 'none';
+                }
+                
+                function dragMove(e) {
+                    if (!isDrag) return;
+                    e.preventDefault();
+                    const x = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+                    track.style.transform = `translateX(${prevTrans + (x - startX)}px)`;
+                }
+                
+                function dragEnd() {
+                    if (!isDrag) return;
+                    isDrag = false;
+                    track.style.transition = 'transform 0.4s cubic-bezier(0.2,0.9,0.4,1.1)';
+                    const moved = parseFloat(track.style.transform.replace('translateX(', '')) - prevTrans;
+                    if (Math.abs(moved) > cardW * 0.3) {
+                        moved < 0 ? slide('next') : slide('prev');
+                    } else {
+                        updatePos();
+                    }
+                }
+                
+                track.addEventListener('mousedown', dragStart);
+                window.addEventListener('mousemove', dragMove);
+                window.addEventListener('mouseup', dragEnd);
+                track.addEventListener('touchstart', dragStart, { passive: false });
+                window.addEventListener('touchmove', dragMove, { passive: false });
+                window.addEventListener('touchend', dragEnd);
+                
+                document.getElementById(prevId)?.addEventListener('click', () => slide('prev'));
+                document.getElementById(nextId)?.addEventListener('click', () => slide('next'));
+                window.addEventListener('resize', updatePos);
+                render();
             }
-            function slide(dir) { const vis=getVisible(); let newIdx = idx + (dir==='next'?vis:-vis); newIdx = Math.min(Math.max(0, products.length-vis), Math.max(0,newIdx)); if(newIdx!==idx) { idx=newIdx; updatePos(); } }
-            function dragStart(e) { isDrag=true; startX=e.type.includes('mouse')?e.pageX:e.touches[0].clientX; track.style.transition='none'; }
-            function dragMove(e) { if(!isDrag) return; e.preventDefault(); const x = e.type.includes('mouse')?e.pageX:e.touches[0].clientX; track.style.transform = `translateX(${prevTrans + (x-startX)}px)`; }
-            function dragEnd() { if(!isDrag) return; isDrag=false; track.style.transition='transform 0.4s cubic-bezier(0.2,0.9,0.4,1.1)'; const moved = parseFloat(track.style.transform.replace('translateX(','')) - prevTrans; if(Math.abs(moved)>cardW*0.3) moved<0 ? slide('next'):slide('prev'); else updatePos(); }
-            track.addEventListener('mousedown',dragStart); window.addEventListener('mousemove',dragMove); window.addEventListener('mouseup',dragEnd);
-            track.addEventListener('touchstart',dragStart,{passive:false}); window.addEventListener('touchmove',dragMove,{passive:false}); window.addEventListener('touchend',dragEnd);
-            document.getElementById(prevId)?.addEventListener('click',()=>slide('prev')); document.getElementById(nextId)?.addEventListener('click',()=>slide('next'));
-            window.addEventListener('resize',updatePos); render();
-        }
 
-        async function buildMenuAndGrid() {
-            const cats = await fetchCategories();
-            const menu = document.getElementById('dynamicMenu');
-            const first = menu.firstElementChild; menu.innerHTML = ''; menu.appendChild(first);
-            cats.forEach(c => { const li = document.createElement('li'); li.className = 'group/mega static'; li.innerHTML = `<a href="/categoria.html?categoryId=${c.id}" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">${c.name} ${c.subcategories?.length? '<i class="ph ph-caret-down text-[10px] rotate-icon"></i>':''}</a>`; menu.appendChild(li); });
-            const grid = document.getElementById('categoryGrid');
-            const icons = ['ph-blender','ph-snowflake','ph-wrench','ph-lamp'];
-            grid.innerHTML = cats.slice(0,8).map((c,i) => `<a href="/categoria.html?categoryId=${c.id}" class="group relative overflow-hidden rounded-2xl bg-light-gray p-6 flex flex-col items-center text-center transition-all hover:bg-primary hover:shadow-2xl hover:-translate-y-2"><div class="w-16 h-16 rounded-full bg-white text-primary flex items-center justify-center text-3xl mb-4 shadow-sm group-hover:bg-accent group-hover:text-white"><i class="ph ${icons[i%icons.length]}"></i></div><h3 class="font-bold text-primary group-hover:text-white text-lg">${c.name}</h3></a>`).join('');
-        }
-
-        async function initHero() {
-            const slides = [{ title: "Assistência Técnica Autorizada", subtitle: "Eficiente, confiável e com garantia.", bg: "img/banner-assistencia.png" }, { title: "Peças Originais", subtitle: "Mantenha seus eletros com desempenho máximo.", bg: "https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=1600&q=80" }, { title: "Ofertas em Motores", subtitle: "Até 20% off + frete grátis.", bg: "https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=1600&q=80" }];
-            const track = document.getElementById('heroTrack'); const dots = document.getElementById('heroDots'); let idx=0, interval;
-            track.innerHTML = slides.map(s => `<div class="min-w-full h-full bg-cover bg-center flex items-center" style="background-image: linear-gradient(90deg, rgba(10,37,64,0.85) 0%, rgba(0,0,0,0.4) 100%), url('${s.bg}')"><div class="container mx-auto px-6 md:px-12"><div class="max-w-xl text-white"><h1 class="text-4xl md:text-5xl font-bold mb-4">${s.title}</h1><p class="text-base md:text-lg opacity-90 mb-6">${s.subtitle}</p><a href="#" class="bg-accent hover:scale-105 text-white px-8 py-4 rounded-full font-bold inline-block shadow-lg">Ver mais</a></div></div></div>`).join('');
-            dots.innerHTML = slides.map((_,i)=>`<div class="hero-dot w-2 h-2 rounded-full bg-white/60 mx-1 ${i===0?'active bg-accent w-8':'w-2'}" data-index="${i}"></div>`);
-            const setHero = (i) => { idx = (i+slides.length)%slides.length; track.style.transform = `translateX(-${idx*100}%)`; dots.querySelectorAll('.hero-dot').forEach((d,j)=>{ if(j===idx){ d.classList.add('active','bg-accent','w-8'); d.classList.remove('w-2'); } else { d.classList.remove('active','bg-accent','w-8'); d.classList.add('w-2'); } }); };
-            dots.querySelectorAll('.hero-dot').forEach(d=>d.addEventListener('click',e=>{ setHero(parseInt(e.target.dataset.index)); resetInterval(); }));
-            document.getElementById('heroPrevBtn').addEventListener('click',()=>{ setHero(idx-1); resetInterval(); });
-            document.getElementById('heroNextBtn').addEventListener('click',()=>{ setHero(idx+1); resetInterval(); });
-            function resetInterval() { clearInterval(interval); interval = setInterval(()=>setHero(idx+1), 6000); }
-            resetInterval();
-        }
-
-        (async function init() {
-            loadCart(); refreshCartUI();
-            await buildMenuAndGrid();
-            const prods = await fetchProducts();
-            if (prods.length) {
-                const shuffled = [...prods].sort(()=>Math.random()-0.5);
-                initCarousel('featuredTrack','featuredPrevBtn','featuredNextBtn', shuffled.slice(0,20), ()=>window.innerWidth<640?2:window.innerWidth<1024?3:5);
-                initCarousel('homeTrack','homePrevBtn','homeNextBtn', [...prods].sort(()=>Math.random()-0.5).slice(0,20), ()=>window.innerWidth<640?2:window.innerWidth<1024?3:5);
+            // Função para buscar categorias (com fallback)
+            async function fetchCategories() {
+                try {
+                    const res = await fetch('/api/categories');
+                    if (!res.ok) throw new Error('API offline');
+                    return await res.json();
+                } catch {
+                    console.warn('Usando categorias mock');
+                    return window.AppCore.MOCK_CATEGORIES || [];
+                }
             }
-            initHero();
-            // Event delegation para botões adicionar
-            document.addEventListener('click', e => {
-                const btn = e.target.closest('.add-to-cart-btn');
-                if (btn) {
-                    try {
-                        const prod = JSON.parse(btn.dataset.product.replace(/&apos;/g,"'"));
-                        addToCart(prod);
-                    } catch (err) { console.warn('Erro ao adicionar'); }
+
+            // Função para buscar produtos (com fallback)
+            async function fetchProducts() {
+                try {
+                    const res = await fetch('/api/products');
+                    if (!res.ok) throw new Error('API offline');
+                    return await res.json();
+                } catch {
+                    console.warn('Usando produtos mock');
+                    return []; // Retorna vazio, carrosséis ficarão vazios
+                }
+            }
+
+            // Preencher grid de categorias
+            async function buildCategoryGrid() {
+                const cats = await fetchCategories();
+                const grid = document.getElementById('categoryGrid');
+                const icons = ['ph-blender', 'ph-snowflake', 'ph-wrench', 'ph-lamp'];
+                grid.innerHTML = cats.slice(0, 8).map((c, i) => {
+                    const thumb = c.imageUrl
+                        ? `<div class="w-full h-36 rounded-xl overflow-hidden mb-4"><img src="${c.imageUrl}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.parentElement.outerHTML='<div class=\'w-full h-36 rounded-xl bg-white text-primary flex items-center justify-center text-5xl mb-4 group-hover:bg-accent group-hover:text-white\'><i class=\'ph ${icons[i%icons.length]}\'></i></div>'"></div>`
+                        : `<div class="w-full h-36 rounded-xl bg-white text-primary flex items-center justify-center text-5xl mb-4 group-hover:bg-accent group-hover:text-white"><i class="ph ${icons[i%icons.length]}"></i></div>`;
+                    return `<a href="/categoria.html?categoryId=${c.id}" class="group relative overflow-hidden rounded-2xl bg-light-gray p-4 flex flex-col items-center text-center transition-all hover:bg-primary hover:shadow-2xl hover:-translate-y-2">${thumb}<h3 class="font-bold text-primary group-hover:text-white text-lg">${c.name}</h3></a>`;
+                }).join('');
+            }
+
+            // Hero slider
+            async function initHero() {
+                const slides = [
+                    { title: "Assistência Técnica Autorizada", subtitle: "Eficiente, confiável e com garantia.", bg: "img/banner-assistencia.png" },
+                    { title: "Peças Originais", subtitle: "Mantenha seus eletros com desempenho máximo.", bg: "https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=1600&q=80" },
+                    { title: "Ofertas em Motores", subtitle: "Até 20% off + frete grátis.", bg: "https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=1600&q=80" }
+                ];
+                const track = document.getElementById('heroTrack');
+                const dots = document.getElementById('heroDots');
+                let idx = 0, interval;
+                
+                track.innerHTML = slides.map(s => `
+                    <div class="min-w-full h-full bg-cover bg-center flex items-center" style="background-image: linear-gradient(90deg, rgba(10,37,64,0.85) 0%, rgba(0,0,0,0.4) 100%), url('${s.bg}')">
+                        <div class="container mx-auto px-6 md:px-12">
+                            <div class="max-w-xl text-white">
+                                <h1 class="text-4xl md:text-5xl font-bold mb-4">${s.title}</h1>
+                                <p class="text-base md:text-lg opacity-90 mb-6">${s.subtitle}</p>
+                                <a href="#" class="bg-accent hover:scale-105 text-white px-8 py-4 rounded-full font-bold inline-block shadow-lg">Ver mais</a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                dots.innerHTML = slides.map((_, i) => `
+                    <div class="hero-dot w-2 h-2 rounded-full bg-white/60 mx-1 ${i === 0 ? 'active bg-accent w-8' : 'w-2'}" data-index="${i}"></div>
+                `);
+                
+                const setHero = (i) => {
+                    idx = (i + slides.length) % slides.length;
+                    track.style.transform = `translateX(-${idx * 100}%)`;
+                    dots.querySelectorAll('.hero-dot').forEach((d, j) => {
+                        if (j === idx) {
+                            d.classList.add('active', 'bg-accent', 'w-8');
+                            d.classList.remove('w-2');
+                        } else {
+                            d.classList.remove('active', 'bg-accent', 'w-8');
+                            d.classList.add('w-2');
+                        }
+                    });
+                };
+                
+                dots.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', e => {
+                    setHero(parseInt(e.target.dataset.index));
+                    resetInterval();
+                }));
+                
+                document.getElementById('heroPrevBtn').addEventListener('click', () => { setHero(idx - 1); resetInterval(); });
+                document.getElementById('heroNextBtn').addEventListener('click', () => { setHero(idx + 1); resetInterval(); });
+                
+                function resetInterval() {
+                    clearInterval(interval);
+                    interval = setInterval(() => setHero(idx + 1), 6000);
+                }
+                resetInterval();
+            }
+
+            // Inicialização da home
+            (async function initHome() {
+                // Carregar categorias para o grid
+                await buildCategoryGrid();
+                
+                // Carregar produtos e iniciar carrosséis
+                const prods = await fetchProducts();
+                if (prods.length) {
+                    const shuffled = [...prods].sort(() => Math.random() - 0.5);
+                    initCarousel('featuredTrack', 'featuredPrevBtn', 'featuredNextBtn', 
+                        shuffled.slice(0, 20), 
+                        () => window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5);
+                    
+                    initCarousel('homeTrack', 'homePrevBtn', 'homeNextBtn', 
+                        [...prods].sort(() => Math.random() - 0.5).slice(0, 20), 
+                        () => window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5);
+                }
+                
+                initHero();
+                
+                // Event listeners para modais de atendimento
+                document.getElementById('openChatModalBtn').addEventListener('click', () => {
+                    document.getElementById('chatModal').classList.remove('invisible', 'opacity-0');
+                });
+                document.getElementById('openCallModalBtn').addEventListener('click', () => {
+                    document.getElementById('callModal').classList.remove('invisible', 'opacity-0');
+                });
+            })();
+
+            // Fechar modais com ESC (específicos da home)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    ['chatModal', 'callModal'].forEach(id => {
+                        const modal = document.getElementById(id);
+                        if (modal && !modal.classList.contains('invisible')) {
+                            modal.classList.add('invisible', 'opacity-0');
+                        }
+                    });
                 }
             });
-            // Modais de atendimento
-            document.getElementById('openChatModalBtn').addEventListener('click',()=>document.getElementById('chatModal').classList.remove('invisible','opacity-0'));
-            document.getElementById('openCallModalBtn').addEventListener('click',()=>document.getElementById('callModal').classList.remove('invisible','opacity-0'));
-            window.closeModal = (id) => { const m = document.getElementById(id); m.classList.add('invisible','opacity-0'); };
-        })();
+        });
     })();
 </script>
 </body>
