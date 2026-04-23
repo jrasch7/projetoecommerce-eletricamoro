@@ -1,11 +1,9 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Product {
@@ -22,7 +20,7 @@ model Product {
   images        Json?
   model         String?
   voltage       String?
-  
+
   // Relacionamento Opcional: Se a subcategoria for apagada, este campo vira NULL
   subCategoryId String?
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
@@ -38,11 +36,11 @@ model Category {
 model SubCategory {
   id         String    @id @default(uuid())
   name       String
-  
+
   // Relacionamento Opcional: Se a categoria for apagada, este campo vira NULL
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  
+
   products   Product[]
 }
 

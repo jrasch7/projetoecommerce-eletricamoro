@@ -183,286 +183,118 @@
     </style>
 </head>
 <body class="bg-light-gray font-sans text-gray-900">
-    <!-- ===== TOP BAR (carrossel informativo) ===== -->
-    <div class="bg-primary text-white top-bar-height flex items-center overflow-hidden relative border-b border-white/5">
-        <div class="w-full flex items-center h-full top-bar-container">
-            <div class="animate-slide whitespace-nowrap">
-                <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-                <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-                <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-                
-                <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-                <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-                <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-            </div>
+
+<!-- ===== MODAL GLOBAL (mensagens e conta) ===== -->
+<div id="globalModal" class="fixed inset-0 z-[200] flex items-center justify-center p-5 invisible opacity-0 transition-all duration-300" style="pointer-events: none;">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeGlobalModal()"></div>
+    <div id="globalModalContent" class="relative bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-all duration-300 scale-95" style="pointer-events: auto;"></div>
+</div>
+
+<!-- ===== TOP BAR (carrossel informativo) ===== -->
+<div class="bg-primary text-white top-bar-height flex items-center overflow-hidden relative border-b border-white/5">
+    <div class="w-full flex items-center h-full top-bar-container">
+        <div class="animate-slide whitespace-nowrap">
+            <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
+            <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
+            <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
+            
+            <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
+            <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
+            <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
         </div>
     </div>
+</div>
 
-    <!-- ===== HEADER ===== -->
-    <header class="bg-primary shadow-xl sticky top-0 z-50 py-5">
-        <div class="container mx-auto px-4 flex flex-wrap items-center justify-between gap-6">
-            <a href="/" class="shrink-0">
-                <img src="./logo-moro.png" alt="Elétrica Moro - Peças e Serviços" class="h-14 w-auto" onerror="this.src='https://placehold.co/200x60?text=Elétrica+Moro'">
-            </a>
-            <form class="flex-grow max-w-2xl relative order-3 md:order-none w-full md:w-auto">
-                <input type="search" placeholder="Buscar peças, eletrodomésticos ou serviços..." class="w-full py-3.5 px-6 rounded-full text-sm focus:ring-2 focus:ring-accent outline-none bg-white">
-                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary text-xl">
-                    <i class="ph ph-magnifying-glass"></i>
+<!-- ===== HEADER ===== -->
+<header class="bg-primary shadow-xl sticky top-0 z-50 py-5">
+    <div class="container mx-auto px-4 flex flex-wrap items-center justify-between gap-6">
+        <!-- Logo com caminho corrigido -->
+        <a href="/" class="flex items-center shrink-0">
+            <img src="img/logo-moro.webp" alt="Elétrica Moro - Peças e Serviços" class="h-12 w-auto object-contain" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=El%C3%A9trica+Moro'">
+        </a>
+        <form class="flex-grow max-w-2xl relative order-3 md:order-none w-full md:w-auto" onsubmit="event.preventDefault(); showMessage('Busca','Funcionalidade em desenvolvimento.');">
+            <input type="search" placeholder="Buscar peças, eletrodomésticos ou serviços..." class="w-full py-3.5 px-6 rounded-full text-sm focus:ring-2 focus:ring-accent outline-none bg-white">
+            <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary text-xl">
+                <i class="ph ph-magnifying-glass"></i>
+            </button>
+        </form>
+        <nav class="flex items-center gap-4">
+            <div class="relative group">
+                <button class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
+                    <i class="ph ph-user text-2xl"></i>
+                    <span class="hidden lg:inline text-sm font-medium">Minha Conta</span>
+                    <i class="ph ph-caret-down text-xs rotate-icon"></i>
                 </button>
-            </form>
-            <nav class="flex items-center gap-4">
-                <div class="relative group">
-                    <button class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-                        <i class="ph ph-user text-2xl"></i>
-                        <span class="hidden lg:inline text-sm font-medium">Minha Conta</span>
-                        <i class="ph ph-caret-down text-xs rotate-icon"></i>
-                    </button>
-                    <ul class="absolute right-0 top-full mt-2 w-48 bg-secondary rounded-xl shadow-2xl py-2 hidden group-hover:block border border-white/5">
-                        <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10"><i class="ph ph-package mr-2"></i> Meus Pedidos</a></li>
-                        <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10"><i class="ph ph-gear mr-2"></i> Meus Dados</a></li>
-                        <li class="border-t border-white/10 mt-2"><a href="#" class="block px-5 py-3 text-sm text-accent hover:bg-white/10">Sair</a></li>
-                    </ul>
+                <ul class="absolute right-0 top-full mt-2 w-48 bg-secondary rounded-xl shadow-2xl py-2 hidden group-hover:block border border-white/5">
+                    <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10" onclick="showMessage('Meus Pedidos','Em breve.'); return false;"><i class="ph ph-package mr-2"></i> Meus Pedidos</a></li>
+                    <li><a href="#" class="block px-5 py-3 text-sm text-white hover:bg-white/10" onclick="showMessage('Meus Dados','Em breve.'); return false;"><i class="ph ph-gear mr-2"></i> Meus Dados</a></li>
+                    <li class="border-t border-white/10 mt-2"><a href="#" class="block px-5 py-3 text-sm text-accent hover:bg-white/10" onclick="showMessage('Logout','Você saiu da conta.'); return false;">Sair</a></li>
+                </ul>
+            </div>
+            <button onclick="toggleCart()" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
+                <div class="relative">
+                    <i class="ph ph-shopping-cart text-2xl"></i>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-accent text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
                 </div>
-                <button onclick="toggleCart()" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-                    <div class="relative">
-                        <i class="ph ph-shopping-cart text-2xl"></i>
-                        <span class="absolute -top-2 -right-2 bg-accent text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
-                    </div>
-                    <span class="hidden lg:inline text-sm font-medium">Carrinho</span>
-                </button>
-            </nav>
-        </div>
-    </header>
+                <span class="hidden lg:inline text-sm font-medium">Carrinho</span>
+            </button>
+        </nav>
+    </div>
+</header>
 
-    <!-- ===== MENU CATEGORIAS (dinâmico) ===== -->
-    <section class="bg-white border-b border-gray-200 relative">
+<!-- ===== MENU CATEGORIAS (dinâmico) ===== -->
+<section class="bg-white border-b border-gray-200 relative">
+    <div class="container mx-auto px-4">
+        <ul id="dynamicMenu" class="flex items-center gap-8 py-4 overflow-x-auto hide-scrollbar whitespace-nowrap text-sm font-medium text-gray-700">
+            <li><a href="/categoria.html" class="flex items-center gap-2 hover:text-primary transition-colors"><i class="ph ph-list"></i> Todas as Categorias</a></li>
+            <!-- Os itens do mega menu serão inseridos dinamicamente via JavaScript -->
+        </ul>
+    </div>
+</section>
+
+<!-- ===== CONTEÚDO PRINCIPAL: CATEGORIA (dinâmico) ===== -->
+<main class="pb-16">
+    <!-- Breadcrumb e título -->
+    <section class="bg-white border-b border-gray-200 py-8">
         <div class="container mx-auto px-4">
-            <ul class="flex items-center gap-8 py-4 overflow-x-auto hide-scrollbar whitespace-nowrap text-sm font-medium text-gray-700">
-                <li><a href="/categorias" class="flex items-center gap-2 hover:text-primary transition-colors"><i class="ph ph-list"></i> Todas as Categorias</a></li>
-                
-                <li class="group/mega static">
-                    <a href="#" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
-                        Eletroportáteis <i class="ph ph-caret-down text-[10px] rotate-icon"></i>
-                    </a>
-                    <div class="absolute left-0 top-full w-full bg-white border-t border-gray-100 shadow-2xl opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 z-[60] py-10">
-                        <div class="container mx-auto px-4">
-                            <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
-                                <div>
-                                    <h4 class="mega-menu-title">Cozinha e Preparo</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Batedeira</a>
-                                        <a href="#" class="mega-menu-link">Cafeteira</a>
-                                        <a href="#" class="mega-menu-link">Chaleira Elétrica</a>
-                                        <a href="#" class="mega-menu-link">Cilindro de Massa</a>
-                                        <a href="#" class="mega-menu-link">Espremedor de Frutas</a>
-                                        <a href="#" class="mega-menu-link">Fritadeiras (Óleo/Sem Óleo)</a>
-                                        <a href="#" class="mega-menu-link">Liquidificador / Mixer</a>
-                                        <a href="#" class="mega-menu-link">Multiprocessador</a>
-                                        <a href="#" class="mega-menu-link">Panela Elétrica</a>
-                                        <a href="#" class="mega-menu-link">Sanduicheira / Grill</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Cuidados com a Casa</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Aspirador de Pó</a>
-                                        <a href="#" class="mega-menu-link">Aspirador Vertical</a>
-                                        <a href="#" class="mega-menu-link">Robô Aspirador</a>
-                                        <a href="#" class="mega-menu-link">Extratora</a>
-                                        <a href="#" class="mega-menu-link">Ferro de Passar</a>
-                                        <a href="#" class="mega-menu-link">Passadeira a Vapor</a>
-                                        <a href="#" class="mega-menu-link">Fragmentadora de Papel</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Cuidados Pessoais</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Escova Modeladora</a>
-                                        <a href="#" class="mega-menu-link">Escova Rotativa</a>
-                                        <a href="#" class="mega-menu-link">Escova Secadora</a>
-                                        <a href="#" class="mega-menu-link">Secador de Cabelos</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Outros Eletros</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Centrifuga de Frutas</a>
-                                        <a href="#" class="mega-menu-link">Crepeira / Pipoqueira</a>
-                                        <a href="#" class="mega-menu-link">Panificadora</a>
-                                        <a href="#" class="mega-menu-link">Torradeira / Tostadeira</a>
-                                        <a href="#" class="mega-menu-link">Maquina de Massas</a>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100"></div>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="group/mega static">
-                    <a href="#" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
-                        Refrigeração <i class="ph ph-caret-down text-[10px] rotate-icon"></i>
-                    </a>
-                    <div class="absolute left-0 top-full w-full bg-white border-t border-gray-100 shadow-2xl opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 z-[60] py-10">
-                        <div class="container mx-auto px-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                <div>
-                                    <h4 class="mega-menu-title">Climatização</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Ar-Condicionado / Portátil</a>
-                                        <a href="#" class="mega-menu-link">Climatizador / Umidificador</a>
-                                        <a href="#" class="mega-menu-link">Ventilador / Circulador</a>
-                                        <a href="#" class="mega-menu-link">Desumidificador</a>
-                                        <a href="#" class="mega-menu-link">Aquecedor / Termoventilador</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Bebidas e Conservação</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Adegas</a>
-                                        <a href="#" class="mega-menu-link">Cervejeira / Chopeira</a>
-                                        <a href="#" class="mega-menu-link">Frigobar</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="group/mega static">
-                    <a href="#" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
-                        Ferramentas <i class="ph ph-caret-down text-[10px] rotate-icon"></i>
-                    </a>
-                    <div class="absolute left-0 top-full w-full bg-white border-t border-gray-100 shadow-2xl opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 z-[60] py-10">
-                        <div class="container mx-auto px-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                <div>
-                                    <h4 class="mega-menu-title">Ferramentas Elétricas</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Parafusadeiras</a>
-                                        <a href="#" class="mega-menu-link">Furadeiras de Impacto</a>
-                                        <a href="#" class="mega-menu-link">Marteletes</a>
-                                        <a href="#" class="mega-menu-link">Esmerilhadeiras</a>
-                                        <a href="#" class="mega-menu-link">Lixadeiras Orbitais</a>
-                                        <a href="#" class="mega-menu-link">Serras Tico-Tico / Circulares</a>
-                                        <a href="#" class="mega-menu-link">Plainas Elétricas</a>
-                                        <a href="#" class="mega-menu-link">Sopradores Térmicos</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Manutenção e Limpeza</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Lava Jato (Alta Pressão)</a>
-                                        <a href="#" class="mega-menu-link">Aparador de Grama</a>
-                                        <a href="#" class="mega-menu-link">Roçadeiras</a>
-                                        <a href="#" class="mega-menu-link">Motoesmeril</a>
-                                        <a href="#" class="mega-menu-link">Compressores de Ar</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Acessórios e Consumíveis</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Discos de Corte / Lixa</a>
-                                        <a href="#" class="mega-menu-link">Bits e Ponteiras</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="group/mega static">
-                    <a href="#" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
-                        Utensílios <i class="ph ph-caret-down text-[10px] rotate-icon"></i>
-                    </a>
-                    <div class="absolute left-0 top-full w-full bg-white border-t border-gray-100 shadow-2xl opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 z-[60] py-10">
-                        <div class="container mx-auto px-4">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                                <div>
-                                    <h4 class="mega-menu-title">Cozinha e Organização</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Potes Herméticos</a>
-                                        <a href="#" class="mega-menu-link">Moedores de Café</a>
-                                        <a href="#" class="mega-menu-link">Balanças de Cozinha</a>
-                                        <a href="#" class="mega-menu-link">Escorredores e Suportes</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Iluminação</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Lâmpadas LED</a>
-                                        <a href="#" class="mega-menu-link">Lâmpadas Decorativas / Filamento</a>
-                                        <a href="#" class="mega-menu-link">Spots e Embutidos</a>
-                                        <a href="#" class="mega-menu-link">Painéis de LED</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Jardim e Externo</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Lâmpadas de Jardim</a>
-                                        <a href="#" class="mega-menu-link">Mangueira/Corda</a>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4 class="mega-menu-title">Utilidades Gerais</h4>
-                                    <div class="space-y-1">
-                                        <a href="#" class="mega-menu-link">Filtros e Purificadores</a>
-                                        <a href="#" class="mega-menu-link">Churrasqueira e Acessórios</a>
-                                        <a href="#" class="mega-menu-link">Pilhas e Baterias</a>
-                                        <a href="#" class="mega-menu-link">Extensões e Adaptadores</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+            <nav class="flex text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                    <li><a href="/" class="hover:text-primary transition">Home</a></li>
+                    <li><i class="ph ph-caret-right text-xs"></i></li>
+                    <li><a href="/categoria.html" id="breadcrumb-categories-link" class="hover:text-primary transition">Categorias</a></li>
+                    <li id="breadcrumb-separator" class="hidden"><i class="ph ph-caret-right text-xs"></i></li>
+                    <li id="breadcrumb-category" class="text-primary font-medium truncate hidden">Carregando...</li>
+                </ol>
+            </nav>
+            <h1 id="page-title" class="text-3xl md:text-4xl font-bold text-primary">Carregando...</h1>
+            <div id="category-description" class="text-gray-600 mt-2 max-w-3xl"></div>
         </div>
     </section>
 
-    <!-- ===== CONTEÚDO PRINCIPAL: CATEGORIA (dinâmico) ===== -->
-    <main class="pb-16">
-        <!-- Breadcrumb e título -->
-        <section class="bg-white border-b border-gray-200 py-8">
-            <div class="container mx-auto px-4">
-                <nav class="flex text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2">
-                        <li><a href="/" class="hover:text-primary transition">Home</a></li>
-                        <li><i class="ph ph-caret-right text-xs"></i></li>
-                        <li><a href="/categoria.html" id="breadcrumb-categories-link" class="hover:text-primary transition">Categorias</a></li>
-                        <li id="breadcrumb-separator" class="hidden"><i class="ph ph-caret-right text-xs"></i></li>
-                        <li id="breadcrumb-category" class="text-primary font-medium truncate hidden">Carregando...</li>
-                    </ol>
-                </nav>
-                <h1 id="page-title" class="text-3xl md:text-4xl font-bold text-primary">Carregando...</h1>
-                <div id="category-description" class="text-gray-600 mt-2 max-w-3xl"></div>
-            </div>
-        </section>
+    <!-- Grid de conteúdo (categorias ou produtos) -->
+    <section class="container mx-auto px-4 py-10">
+        <!-- Loading state -->
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
+            <span class="loader"></span>
+            <p class="mt-4 text-gray-500">Carregando conteúdo...</p>
+        </div>
 
-        <!-- Grid de conteúdo (categorias ou produtos) -->
-        <section class="container mx-auto px-4 py-10">
-            <!-- Loading state -->
-            <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
-                <span class="loader"></span>
-                <p class="mt-4 text-gray-500">Carregando conteúdo...</p>
-            </div>
+        <!-- Estado vazio -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <i class="ph ph-smiley-sad text-5xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-700" id="empty-message">Nenhum item encontrado.</h3>
+            <p class="text-gray-500 mt-2">Tente novamente mais tarde ou explore outras opções.</p>
+            <a href="/" class="inline-block mt-6 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-secondary transition">Ver todos os produtos</a>
+        </div>
 
-            <!-- Estado vazio -->
-            <div id="empty-state" class="hidden text-center py-16">
-                <i class="ph ph-smiley-sad text-5xl text-gray-400 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-700" id="empty-message">Nenhum item encontrado.</h3>
-                <p class="text-gray-500 mt-2">Tente novamente mais tarde ou explore outras opções.</p>
-                <a href="/" class="inline-block mt-6 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-secondary transition">Ver todos os produtos</a>
-            </div>
+        <!-- Grid de cards -->
+        <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+            <!-- Os cards serão inseridos via JavaScript -->
+        </div>
+    </section>
+</main>
 
-            <!-- Grid de cards -->
-            <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
-                <!-- Os cards serão inseridos via JavaScript -->
-            </div>
-        </section>
-    </main>
-
-    <!-- ===== CARRINHO DE COMPRAS (SIDE DRAWER) ===== -->
+<!-- ===== CARRINHO DE COMPRAS (SIDE DRAWER) ===== -->
 <style>
     /* Drawer do carrinho */
     #cart-drawer {
@@ -513,7 +345,7 @@
             <span class="text-gray-600 font-medium">Subtotal</span>
             <span id="cart-subtotal" class="text-2xl font-bold text-primary">R$ 0,00</span>
         </div>
-        <button class="w-full bg-accent hover:bg-accent/90 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl">
+        <button class="w-full bg-accent hover:bg-accent/90 text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-xl" onclick="showMessage('Finalizar Pedido','Redirecionando para checkout...')">
             Finalizar Pedido
         </button>
         <button onclick="closeCart()" class="w-full text-gray-500 text-sm hover:text-gray-700 transition">
@@ -522,602 +354,106 @@
     </div>
 </div>
 
-<script>
-    (function() {
-        // ---------- CARRINHO ENGINE ----------
-        const CART_STORAGE_KEY = 'eletrica_moro_cart';
-
-        // Estado do carrinho (array de itens)
-        let cartItems = [];
-
-        // Elementos do DOM
-        const cartDrawer = document.getElementById('cart-drawer');
-        const cartOverlay = document.getElementById('cart-overlay');
-        const cartItemsContainer = document.getElementById('cart-items-list');
-        const cartSubtotalEl = document.getElementById('cart-subtotal');
-        const cartCounterEl = document.querySelector('#cart-counter'); // será criado se não existir
-
-        // Garante que o contador exista no header
-        function ensureCartCounter() {
-            const cartButton = document.querySelector('button[onclick="toggleCart()"]');
-            if (!cartButton) return;
-            
-            let counterSpan = cartButton.querySelector('#cart-counter');
-            if (!counterSpan) {
-                const iconContainer = cartButton.querySelector('.relative');
-                if (iconContainer) {
-                    counterSpan = document.createElement('span');
-                    counterSpan.id = 'cart-counter';
-                    counterSpan.className = 'absolute -top-2 -right-2 bg-accent text-[10px] font-bold px-1.5 py-0.5 rounded-full';
-                    counterSpan.textContent = '0';
-                    iconContainer.appendChild(counterSpan);
-                }
-            }
-            return counterSpan;
-        }
-
-        // Carrega carrinho do localStorage
-        function loadCartFromStorage() {
-            try {
-                const stored = localStorage.getItem(CART_STORAGE_KEY);
-                cartItems = stored ? JSON.parse(stored) : [];
-            } catch (e) {
-                cartItems = [];
-            }
-        }
-
-        // Salva no localStorage
-        function saveCartToStorage() {
-            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-        }
-
-        // Calcula total
-        function calculateTotal() {
-            return cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-        }
-
-        // Atualiza contador no header
-        function updateCartCounter() {
-            const counter = ensureCartCounter();
-            if (counter) {
-                const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-                counter.textContent = totalItems;
-                counter.style.display = totalItems > 0 ? 'flex' : 'none';
-            }
-        }
-
-        // Renderiza os itens no drawer
-        function renderCartItems() {
-            if (!cartItemsContainer) return;
-
-            if (cartItems.length === 0) {
-                cartItemsContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-gray-400 py-12">
-                        <i class="ph ph-shopping-cart text-6xl mb-4 opacity-40"></i>
-                        <p class="text-lg font-medium">Seu carrinho está vazio</p>
-                        <p class="text-sm mt-1">Adicione produtos para continuar</p>
-                    </div>
-                `;
-                cartSubtotalEl.textContent = 'R$ 0,00';
-                return;
-            }
-
-            let html = '';
-            cartItems.forEach(item => {
-                const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
-                const imageUrl = item.image || 'https://placehold.co/100x100?text=Produto';
-                const quantity = item.quantity || 1;
-                const itemTotal = price * quantity;
-
-                html += `
-                    <div class="flex gap-4 bg-gray-50 p-3 rounded-xl">
-                        <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center p-1">
-                            <img src="${imageUrl}" alt="${item.name}" class="max-w-full max-h-full object-contain" onerror="this.src='https://placehold.co/100x100?text=Produto'">
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-800 text-sm line-clamp-2">${item.name}</h4>
-                            <div class="flex items-center justify-between mt-2">
-                                <span class="text-primary font-bold">R$ ${itemTotal.toFixed(2)}</span>
-                                <button onclick="removeFromCart('${item.id}')" class="text-gray-400 hover:text-accent transition-colors">
-                                    <i class="ph ph-trash text-lg"></i>
-                                </button>
-                            </div>
-                            ${quantity > 1 ? `<p class="text-xs text-gray-500 mt-1">Qtd: ${quantity}</p>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            cartItemsContainer.innerHTML = html;
-            const total = calculateTotal();
-            cartSubtotalEl.textContent = `R$ ${total.toFixed(2)}`;
-        }
-
-        // Atualiza toda a UI do carrinho
-        function refreshCartUI() {
-            renderCartItems();
-            updateCartCounter();
-        }
-
-        // Adiciona produto ao carrinho
-        window.addToCart = function(product) {
-            if (!product || !product.id) {
-                console.error('Produto inválido');
-                return;
-            }
-
-            const existingItem = cartItems.find(item => item.id === product.id);
-            if (existingItem) {
-                existingItem.quantity = (existingItem.quantity || 1) + 1;
-            } else {
-                cartItems.push({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image || (product.images && product.images[0]) || product.image_url || null,
-                    quantity: 1
-                });
-            }
-
-            saveCartToStorage();
-            refreshCartUI();
-            
-            // Feedback visual (opcional)
-            // alert(`${product.name} adicionado ao carrinho!`);
-        };
-
-        // Remove produto do carrinho
-        window.removeFromCart = function(productId) {
-            cartItems = cartItems.filter(item => item.id !== productId);
-            saveCartToStorage();
-            refreshCartUI();
-        };
-
-        // Abre o drawer
-        window.openCart = function() {
-            if (!cartDrawer || !cartOverlay) return;
-            cartDrawer.classList.remove('translate-x-full');
-            cartDrawer.classList.add('translate-x-0');
-            cartOverlay.classList.remove('opacity-0', 'invisible');
-            cartOverlay.classList.add('opacity-100');
-            document.body.style.overflow = 'hidden';
-        };
-
-        // Fecha o drawer
-        window.closeCart = function() {
-            if (!cartDrawer || !cartOverlay) return;
-            cartDrawer.classList.add('translate-x-full');
-            cartDrawer.classList.remove('translate-x-0');
-            cartOverlay.classList.add('opacity-0', 'invisible');
-            cartOverlay.classList.remove('opacity-100');
-            document.body.style.overflow = '';
-        };
-
-        // Alterna abrir/fechar
-        window.toggleCart = function() {
-            if (cartDrawer.classList.contains('translate-x-full')) {
-                openCart();
-            } else {
-                closeCart();
-            }
-        };
-
-        // Limpa todo o carrinho (útil para testes)
-        window.clearCart = function() {
-            cartItems = [];
-            saveCartToStorage();
-            refreshCartUI();
-            closeCart();
-        };
-
-        // Inicialização
-        function initCart() {
-            loadCartFromStorage();
-            ensureCartCounter();
-            refreshCartUI();
-
-            // Fecha ao pressionar ESC
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && cartDrawer && !cartDrawer.classList.contains('translate-x-full')) {
-                    closeCart();
-                }
-            });
-        }
-
-        initCart();
-
-        // ---------- INTEGRAÇÃO COM OS CARDS DE PRODUTO ----------
-        // Sobrescreve a função renderProductCard existente para adicionar evento de clique nos botões "Adicionar"
-        // Mas como a função original é definida dentro do escopo do script principal, faremos um monkey patch
-        // ou redefinimos a função globalmente para que os novos cards já venham com o evento correto.
-
-        // Aguarda a definição da função original (se existir) e a substitui
-        const checkInterval = setInterval(() => {
-            if (typeof window.renderProductCard === 'function') {
-                clearInterval(checkInterval);
-                const originalRender = window.renderProductCard;
-                window.renderProductCard = function(product) {
-                    const html = originalRender(product);
-                    // Modifica o HTML para adicionar onclick no botão "Adicionar"
-                    // Como a string HTML já foi gerada, vamos usar um truque: substituir o botão via regex simples
-                    const modifiedHtml = html.replace(
-                        /<button class="mt-4 w-full bg-primary\/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300">Adicionar<\/button>/,
-                        `<button onclick='addToCart(${JSON.stringify(product).replace(/'/g, "&#39;")})' class="mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300">Adicionar</button>`
-                    );
-                    return modifiedHtml;
-                };
-                console.log('Carrinho integrado aos cards de produto.');
-            }
-        }, 100);
-
-        // Também precisamos garantir que a função renderProductCard usada dentro do loadPage seja a modificada.
-        // Se a função original já foi sobrescrita, os futuros cards já usarão a nova versão.
-
-        // Adiciona suporte a clique nos botões "Adicionar" que já existem na página (se houver)
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('button') && e.target.closest('button').textContent.includes('Adicionar')) {
-                // Já tratado pelo onclick inline, mas serve como fallback
-            }
-        });
-
-        // Expõe funções úteis no console (debug)
-        window.cart = {
-            add: addToCart,
-            remove: removeFromCart,
-            clear: clearCart,
-            items: () => cartItems
-        };
-    })();
-</script>
-
-    <!-- ===== FOOTER ===== -->
-    <footer class="bg-primary text-white pt-16 pb-8">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                
-                <div class="space-y-6">
-                    <img src="./logo-moro.png" alt="Elétrica Moro" class="h-12 w-auto brightness-0 invert" onerror="this.src='https://placehold.co/200x60/0a2540/white?text=Elétrica+Moro'">
-                    <p class="text-white/60 text-sm leading-relaxed">
-                        Especialistas em peças para eletrodomésticos e assistência técnica autorizada. Qualidade e confiança para o seu lar desde 1990.
-                    </p>
-                    <div class="flex gap-4">
-                        <a href="https://www.instagram.com/eletricamorooficial/" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
-                            <i class="ph ph-instagram-logo text-xl"></i>
-                        </a>
-                        <a href="https://www.facebook.com/eletricamoro/?locale=pt_BR" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
-                            <i class="ph ph-facebook-logo text-xl"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="text-lg font-bold mb-6 relative inline-block">
-                        Institucional
-                        <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
-                    </h4>
-                    <ul class="space-y-4 text-sm text-white/60">
-                        <li><a href="javascript:void(0)" onclick="openInstitucional('sobre')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Sobre Nós</a></li>
-                        <li><a href="javascript:void(0)" onclick="openInstitucional('entrega')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Política de Entrega</a></li>
-                        <li><a href="javascript:void(0)" onclick="openInstitucional('privacidade')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Privacidade</a></li>
-                        <li><a href="javascript:void(0)" onclick="openInstitucional('termos')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Termos e Condições</a></li>
-                    </ul>
-                </div>
-
-                <div>
-    <h4 class="text-lg font-bold mb-6 relative inline-block">
-        Atendimento
-        <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
-    </h4>
-    <ul class="space-y-4 text-sm text-white/60">
-        <li class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all" onclick="openMapModal()">
-            <i class="ph ph-map-pin text-xl text-accent"></i>
-            <span>Rua Santa Sofia 53 - Ideal<br>Novo Hamburgo - RS, 93336-200</span>
-        </li>
-        <li class="flex items-center gap-3">
-            <i class="ph ph-phone text-xl text-accent"></i>
-            <span>(51) 3581-5940</span>
-        </li>
-    </ul>
-</div>
-
-                <div>
-                    <h4 class="text-lg font-bold mb-6 relative inline-block">
-                        Segurança
-                        <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
-                    </h4>
-                    <div class="flex flex-wrap gap-3 mb-6">
-                        <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-help">
-                            <i class="ph ph-shield-check text-2xl text-green-400"></i>
-                            <span class="text-[10px] leading-tight uppercase font-bold">Site<br>Seguro</span>
-                        </div>
-                        <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-help">
-                            <i class="ph ph-lock-key text-2xl text-blue-400"></i>
-                            <span class="text-[10px] leading-tight uppercase font-bold">SSL<br>256-bit</span>
-                        </div>
-                    </div>
-                    <h4 class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Pagamento</h4>
-                    <div class="flex flex-wrap gap-2 opacity-60">
-                        <i class="ph ph-credit-card text-2xl"></i>
-                        <i class="ph ph-barcode text-2xl"></i>
-                        <i class="ph ph-pix-logo text-2xl"></i>
-                    </div>
+<!-- ===== FOOTER ===== -->
+<footer class="bg-primary text-white pt-16 pb-8">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div class="space-y-6">
+                <!-- Logo no footer também corrigida -->
+                <img src="img/logo-moro.webp" alt="Elétrica Moro" class="h-12 w-auto object-contain brightness-0 invert" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=El%C3%A9trica+Moro'">
+                </p>
+                <div class="flex gap-4">
+                    <a href="https://www.instagram.com/eletricamorooficial/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
+    <i class="ph ph-instagram-logo text-xl"></i>
+</a>
+<a href="https://www.facebook.com/eletricamoro/?locale=pt_BR" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all">
+    <i class="ph ph-facebook-logo text-xl"></i>
+</a>
                 </div>
             </div>
 
-            <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-[11px]">
-                <p>© <span id="current-year"></span> Elétrica Moro. CNPJ: 07.907.008/0001-85. Assistencia tecnica autorizada - Posto de peças.</p>
-                <div class="flex gap-6">
-                    <span>Desenvolvido com ❤️</span>
+            <div>
+                <h4 class="text-lg font-bold mb-6 relative inline-block">
+                    Institucional
+                    <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
+                </h4>
+                <ul class="space-y-4 text-sm text-white/60">
+                    <li><a href="javascript:void(0)" onclick="openInstitucional('sobre')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Sobre Nós</a></li>
+                    <li><a href="javascript:void(0)" onclick="openInstitucional('entrega')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Política de Entrega</a></li>
+                    <li><a href="javascript:void(0)" onclick="openInstitucional('privacidade')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Privacidade</a></li>
+                    <li><a href="javascript:void(0)" onclick="openInstitucional('termos')" class="hover:text-white hover:translate-x-1 flex items-center gap-2 transition-all"><i class="ph ph-caret-right text-[10px]"></i> Termos e Condições</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-bold mb-6 relative inline-block">
+                    Atendimento
+                    <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
+                </h4>
+                <ul class="space-y-4 text-sm text-white/60">
+                    <li class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all" onclick="openMapModal()">
+                        <i class="ph ph-map-pin text-xl text-accent"></i>
+                        <span>Rua Santa Sofia 53 - Ideal<br>Novo Hamburgo - RS, 93336-200</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="ph ph-phone text-xl text-accent"></i>
+                        <span>(51) 3581-5940</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-lg font-bold mb-6 relative inline-block">
+                    Segurança
+                    <span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span>
+                </h4>
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-help">
+                        <i class="ph ph-shield-check text-2xl text-green-400"></i>
+                        <span class="text-[10px] leading-tight uppercase font-bold">Site<br>Seguro</span>
+                    </div>
+                    <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2 grayscale hover:grayscale-0 transition-all cursor-help">
+                        <i class="ph ph-lock-key text-2xl text-blue-400"></i>
+                        <span class="text-[10px] leading-tight uppercase font-bold">SSL<br>256-bit</span>
+                    </div>
+                </div>
+                <h4 class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Pagamento</h4>
+                <div class="flex flex-wrap gap-2 opacity-60">
+                    <i class="ph ph-credit-card text-2xl"></i>
+                    <i class="ph ph-barcode text-2xl"></i>
+                    <i class="ph ph-pix-logo text-2xl"></i>
                 </div>
             </div>
         </div>
-    </footer>
 
-    <!-- ===== PAINEL INSTITUCIONAL DESLIZANTE ===== -->
-    <div id="institucional-overlay" class="fixed inset-0 z-[110] bg-black/50 opacity-0 invisible transition-all duration-300" onclick="closeInstitucional()"></div>
-
-    <div id="institucional-panel" class="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 w-full md:max-w-3xl bg-white rounded-t-[2.5rem] shadow-2xl z-[120] translate-y-full transition-transform duration-500 overflow-hidden">
-        <div class="pt-4 pb-2 flex justify-center">
-            <div class="panel-handle"></div>
-        </div>
-        <div class="px-6 pb-2 flex items-center justify-between">
-            <h2 id="panel-title" class="text-2xl font-bold text-primary">Sobre Nós</h2>
-            <button onclick="closeInstitucional()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">
-                <i class="ph ph-x text-xl"></i>
-            </button>
-        </div>
-        <div class="panel-content px-6 pb-8 text-gray-700 leading-relaxed space-y-4 text-sm md:text-base" id="panel-content">
-            Carregando...
+        <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-[11px]">
+            <p>© <span id="current-year"></span> Elétrica Moro. CNPJ: 07.907.008/0001-85. Assistencia tecnica autorizada - Posto de peças.</p>
+            <div class="flex gap-6">
+                <span>Desenvolvido com ❤️</span>
+            </div>
         </div>
     </div>
+</footer>
 
-    <script>
-        (function() {
-            // Atualiza ano no footer
-            const yearElement = document.getElementById('current-year');
-            if (yearElement) yearElement.textContent = new Date().getFullYear();
+<!-- ===== PAINEL INSTITUCIONAL DESLIZANTE ===== -->
+<div id="institucional-overlay" class="fixed inset-0 z-[110] bg-black/50 opacity-0 invisible transition-all duration-300" onclick="closeInstitucional()"></div>
 
-            // ---------- CONTEÚDO INSTITUCIONAL ----------
-            const institucionalData = {
-                sobre: {
-                    titulo: 'Sobre Nós',
-                    texto: `A Elétrica Moro é uma empresa que se consolidou como referência em assistência técnica na região. A anos atuando na cidade de Novo Hamburgo, atende toda a região do Vale do Sinos e Grande Porto Alegre.
+<div id="institucional-panel" class="fixed bottom-0 left-0 right-0 md:left-1/2 md:-translate-x-1/2 w-full md:max-w-3xl bg-white rounded-t-[2.5rem] shadow-2xl z-[120] translate-y-full transition-transform duration-500 overflow-hidden">
+    <div class="pt-4 pb-2 flex justify-center">
+        <div class="panel-handle"></div>
+    </div>
+    <div class="px-6 pb-2 flex items-center justify-between">
+        <h2 id="panel-title" class="text-2xl font-bold text-primary">Sobre Nós</h2>
+        <button onclick="closeInstitucional()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">
+            <i class="ph ph-x text-xl"></i>
+        </button>
+    </div>
+    <div class="panel-content px-6 pb-8 text-gray-700 leading-relaxed space-y-4 text-sm md:text-base" id="panel-content">
+        Carregando...
+    </div>
+</div>
 
-Com uma equipe qualificada de profissionais procura sempre trazer o que há de melhor para seus clientes. Recentemente ampliou suas dependências para poder ter mais espaço para melhor atender os seus clientes.`
-                },
-                entrega: {
-                    titulo: 'Política de Entrega',
-                    texto: `Após a confirmação de pagamento pelo sistema ou o envio do comprovante, daremos início ao processamento do seu pedido. Durante esse período, nossa equipe estará dedicada a garantir a qualidade e precisão de cada etapa. Assim que concluído, seu pedido será cuidadosamente embalado e despachado pela transportadora selecionada, garantindo uma entrega segura e eficiente.
-
-O código de rastreamento será enviado diretamente para o e-mail cadastrado, permitindo que você acompanhe o status da sua entrega em tempo real. Estamos comprometidos em fornecer uma experiência de compra tranquila e satisfatória, desde o momento do pedido até a chegada do produto em suas mãos.`
-                },
-                privacidade: {
-                    titulo: 'Política de Privacidade',
-                    texto: `A proteção da privacidade dos nossos clientes é nossa prioridade. Todas as informações que você nos fornece são utilizadas exclusivamente para aprimorar nossos serviços e personalizar seu atendimento. Garantimos que não vendemos, alugamos ou compartilhamos seus dados com terceiros.
-
-Coleta de Informações: Os dados pessoais fornecidos são fundamentais para entendermos suas necessidades e oferecermos serviços, produtos e informações personalizados. Essas informações são armazenadas em nosso banco de dados para melhorar nosso relacionamento com os clientes e facilitar futuras compras e navegação no site.
-
-Uso das Informações: Seus dados pessoais não são divulgados ou comercializados. São utilizados exclusivamente por nós para conferência de pedidos, facilitação do preenchimento de pedidos, análise de perfis e estatísticas, melhoria das operações do site e envio de conteúdo promocional e informativo, os quais você pode optar por cancelar a qualquer momento.
-
-Registro e Recebimento de Material Promocional: O registro do seu e-mail nos permite enviar informações, promoções e lançamentos, mas apenas se autorizado por você. Você pode optar por não receber mais essas informações a qualquer momento. O registro não estabelece vínculo contratual, sendo apenas para acesso a serviços especiais e tratamento diferenciado.
-
-Segurança: Suas informações são armazenadas em servidores altamente seguros, com criptografia de 128 bits, garantindo sua privacidade e proteção. Não compartilhe sua senha com terceiros para garantir sua segurança.
-
-Modificações: Reservamos o direito de alterar nossa Política de Privacidade, comprometendo-nos a divulgar quaisquer mudanças neste espaço.
-
-Dúvidas e Sugestões: Em caso de dúvidas ou sugestões sobre nossa Política de Privacidade, entre em contato conosco. Estamos aqui para ajudar.`
-                },
-                termos: {
-                    titulo: 'Termos e Condições',
-                    texto: `Todos os produtos que comercializamos são acompanhados por nossa garantia de qualidade. Em caso de produtos defeituosos, garantimos a troca gratuita, desde que observadas as seguintes condições:
-
-• A troca só será efetuada mediante a apresentação da embalagem original e com os produtos mantendo suas características intactas, tal como quando foram adquiridos.
-• Produtos que apresentarem defeitos decorrentes de mau uso ou aplicação incorreta não serão elegíveis para troca.
-• Você tem até 7 (sete) dias após o recebimento para solicitar a troca, caso detecte algum problema.
-
-Após a confirmação do pagamento, seu pedido será processado e encaminhado para expedição, com previsão de envio pela transportadora em um prazo de 2 a 3 dias úteis.
-
-Estamos à disposição para esclarecer quaisquer dúvidas que possam surgir. Entre em contato conosco se precisar de assistência. Estamos aqui para ajudá-lo.`
-                }
-            };
-
-            // Elementos do painel
-            const overlay = document.getElementById('institucional-overlay');
-            const panel = document.getElementById('institucional-panel');
-            const panelTitle = document.getElementById('panel-title');
-            const panelContent = document.getElementById('panel-content');
-
-            window.openInstitucional = function(tipo) {
-                const dados = institucionalData[tipo];
-                if (!dados) return;
-                panelTitle.textContent = dados.titulo;
-                panelContent.innerHTML = dados.texto.replace(/\n/g, '<br>');
-                overlay.classList.remove('invisible', 'opacity-0');
-                overlay.classList.add('opacity-100');
-                panel.classList.remove('translate-y-full');
-                panel.classList.add('translate-y-0');
-                document.body.style.overflow = 'hidden';
-            };
-
-            window.closeInstitucional = function() {
-                overlay.classList.add('opacity-0', 'invisible');
-                overlay.classList.remove('opacity-100');
-                panel.classList.add('translate-y-full');
-                panel.classList.remove('translate-y-0');
-                document.body.style.overflow = '';
-            };
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && panel.classList.contains('translate-y-0')) {
-                    closeInstitucional();
-                }
-            });
-
-            let startY = 0;
-            panel.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
-            panel.addEventListener('touchmove', (e) => {
-                const delta = e.touches[0].clientY - startY;
-                if (delta > 80) { closeInstitucional(); startY = 0; }
-            }, { passive: true });
-            panel.addEventListener('click', (e) => e.stopPropagation());
-
-            // ---------- LÓGICA DA PÁGINA (CENÁRIO A/B) ----------
-            function getQueryParam(param) {
-                return new URLSearchParams(window.location.search).get(param);
-            }
-
-            function renderCategoryCard(category) {
-                const imageUrl = category.imageUrl || category.image || 'https://placehold.co/400x400?text=Categoria';
-                return `
-                    <a href="/categoria.html?categoryId=${category.id}" class="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 flex flex-col h-full">
-                        <div class="p-4 flex items-center justify-center bg-gray-50">
-                            <img src="${imageUrl}" alt="${category.name}" class="category-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Categoria'">
-                        </div>
-                        <div class="p-4 flex flex-col flex-grow text-center">
-                            <h3 class="text-lg font-bold text-primary group-hover:text-accent transition-colors">${category.name}</h3>
-                            ${category.description ? `<p class="text-sm text-gray-500 mt-1 line-clamp-2">${category.description}</p>` : ''}
-                            <div class="mt-4 text-accent font-medium text-sm flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                Ver produtos <i class="ph ph-arrow-right"></i>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            }
-
-            function renderProductCard(product) {
-                const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
-                const parcelas = 3;
-                const valorParcela = price / parcelas;
-                const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
-                const precoComDesconto = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
-
-                let imageUrl = 'https://placehold.co/400x400?text=Eletrica+Moro';
-                if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-                    imageUrl = product.images[0];
-                } else if (product.image_url) {
-                    imageUrl = product.image_url;
-                }
-
-                const badgeHtml = [];
-                if (product.is_featured) badgeHtml.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
-                if (product.on_sale || desconto > 0) badgeHtml.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
-
-                return `
-                    <div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
-                        ${badgeHtml.join('')}
-                        <div class="p-4 flex items-center justify-center bg-gray-50">
-                            <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Eletrica+Moro'">
-                        </div>
-                        <div class="p-4 flex flex-col flex-grow">
-                            <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
-                            ${product.brand ? `<p class="text-xs text-gray-500 mt-1">${product.brand}</p>` : ''}
-                            <div class="mt-2">
-                                ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
-                                <div class="text-xl font-bold text-primary">R$ ${desconto > 0 ? precoComDesconto : price.toFixed(2)}</div>
-                                <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
-                            </div>
-                            <button class="mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300">Adicionar</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            async function loadPage() {
-                const categoryId = getQueryParam('categoryId') || getQueryParam('subCategoryId');
-                const hasParam = !!categoryId;
-
-                const titleEl = document.getElementById('page-title');
-                const breadcrumbCatEl = document.getElementById('breadcrumb-category');
-                const breadcrumbSep = document.getElementById('breadcrumb-separator');
-                const descEl = document.getElementById('category-description');
-                const gridEl = document.getElementById('content-grid');
-                const loadingEl = document.getElementById('loading-indicator');
-                const emptyEl = document.getElementById('empty-state');
-                const emptyMsg = document.getElementById('empty-message');
-
-                gridEl.innerHTML = '';
-                gridEl.classList.add('hidden');
-                emptyEl.classList.add('hidden');
-                loadingEl.classList.remove('hidden');
-
-                try {
-                    if (!hasParam) {
-                        // CENÁRIO A: LISTAR CATEGORIAS
-                        document.title = 'Nossas Categorias · Elétrica Moro';
-                        titleEl.textContent = 'Nossas Categorias';
-                        descEl.textContent = 'Explore nossas linhas de produtos e encontre o que precisa.';
-                        breadcrumbCatEl.classList.add('hidden');
-                        breadcrumbSep.classList.add('hidden');
-
-                        const res = await fetch('/api/categories');
-                        if (!res.ok) throw new Error('Erro ao carregar categorias');
-                        const categories = await res.json();
-                        loadingEl.classList.add('hidden');
-
-                        if (!categories || categories.length === 0) {
-                            emptyMsg.textContent = 'Nenhuma categoria cadastrada.';
-                            emptyEl.classList.remove('hidden');
-                            return;
-                        }
-                        gridEl.innerHTML = categories.map(c => renderCategoryCard(c)).join('');
-                        gridEl.classList.remove('hidden');
-                    } else {
-                        // CENÁRIO B: LISTAR PRODUTOS DE UMA CATEGORIA
-                        let categoryData = null;
-                        try {
-                            const catRes = await fetch(`/api/categories/${categoryId}`);
-                            if (catRes.ok) categoryData = await catRes.json();
-                        } catch (e) {}
-                        if (!categoryData) {
-                            const allRes = await fetch('/api/categories');
-                            if (allRes.ok) {
-                                const all = await allRes.json();
-                                categoryData = all.find(c => c.id == categoryId);
-                            }
-                        }
-
-                        const catName = categoryData ? categoryData.name : 'Produtos';
-                        document.title = `${catName} · Elétrica Moro`;
-                        titleEl.textContent = catName;
-                        descEl.textContent = categoryData?.description || '';
-                        breadcrumbCatEl.textContent = catName;
-                        breadcrumbCatEl.classList.remove('hidden');
-                        breadcrumbSep.classList.remove('hidden');
-
-                        const prodRes = await fetch(`/api/products?subCategoryId=${categoryId}`);
-                        if (!prodRes.ok) throw new Error('Erro ao carregar produtos');
-                        const products = await prodRes.json();
-                        loadingEl.classList.add('hidden');
-
-                        if (!products || products.length === 0) {
-                            emptyMsg.textContent = 'Ainda não temos produtos cadastrados nesta categoria.';
-                            emptyEl.classList.remove('hidden');
-                            return;
-                        }
-                        gridEl.innerHTML = products.map(p => renderProductCard(p)).join('');
-                        gridEl.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error(error);
-                    loadingEl.classList.add('hidden');
-                    emptyMsg.textContent = 'Ocorreu um erro ao carregar os dados.';
-                    emptyEl.classList.remove('hidden');
-                    titleEl.textContent = 'Erro';
-                }
-            }
-
-            loadPage();
-
-            // Ajuste no link do breadcrumb
-            document.getElementById('breadcrumb-categories-link')?.addEventListener('click', (e) => {
-                if (!getQueryParam('categoryId') && !getQueryParam('subCategoryId')) e.preventDefault();
-            });
-
-            // Previne comportamento padrão de links "#"
-            document.querySelectorAll('a[href="#"]').forEach(l => l.addEventListener('click', e => e.preventDefault()));
-        })();
-    </script>
-    <!-- ===== MODAL DE LOCALIZAÇÃO (GOOGLE MAPS) ===== -->
+<!-- ===== MODAL DE LOCALIZAÇÃO (GOOGLE MAPS) ===== -->
 <style>
     #map-modal {
         transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -1203,36 +539,507 @@ Estamos à disposição para esclarecer quaisquer dúvidas que possam surgir. En
 
 <script>
     (function() {
-        // Elementos do modal de mapa
-        const mapModal = document.getElementById('map-modal');
+        // ---------- CONFIGURAÇÕES INICIAIS ----------
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // ---------- MODAL GLOBAL ----------
+        window.closeGlobalModal = function() {
+            const modal = document.getElementById('globalModal');
+            modal.classList.add('invisible', 'opacity-0');
+            modal.style.pointerEvents = 'none';
+        };
+
+        window.showGlobalModal = function(html) {
+            const modal = document.getElementById('globalModal');
+            const content = document.getElementById('globalModalContent');
+            content.innerHTML = html;
+            modal.classList.remove('invisible', 'opacity-0');
+            modal.style.pointerEvents = 'auto';
+        };
+
+        window.showMessage = function(title, msg, type = 'info') {
+            const html = `
+                <button onclick="closeGlobalModal()" class="absolute top-5 right-5 text-gray-400 hover:text-primary"><i class="ph ph-x text-2xl"></i></button>
+                <h3 class="text-xl font-bold text-primary mb-2">${title}</h3>
+                <p class="text-gray-600 mb-6">${msg}</p>
+                <button onclick="closeGlobalModal()" class="w-full bg-primary text-white py-3 rounded-xl font-semibold">Ok</button>
+            `;
+            showGlobalModal(html);
+        };
+
+        // ---------- PAINEL INSTITUCIONAL ----------
+        const institucionalData = {
+            sobre: {
+                titulo: 'Sobre Nós',
+                texto: `A Elétrica Moro é uma empresa que se consolidou como referência em assistência técnica na região. A anos atuando na cidade de Novo Hamburgo, atende toda a região do Vale do Sinos e Grande Porto Alegre.
+
+Com uma equipe qualificada de profissionais procura sempre trazer o que há de melhor para seus clientes. Recentemente ampliou suas dependências para poder ter mais espaço para melhor atender os seus clientes.`
+            },
+            entrega: {
+                titulo: 'Política de Entrega',
+                texto: `Após a confirmação de pagamento pelo sistema ou o envio do comprovante, daremos início ao processamento do seu pedido. Durante esse período, nossa equipe estará dedicada a garantir a qualidade e precisão de cada etapa. Assim que concluído, seu pedido será cuidadosamente embalado e despachado pela transportadora selecionada, garantindo uma entrega segura e eficiente.
+
+O código de rastreamento será enviado diretamente para o e-mail cadastrado, permitindo que você acompanhe o status da sua entrega em tempo real. Estamos comprometidos em fornecer uma experiência de compra tranquila e satisfatória, desde o momento do pedido até a chegada do produto em suas mãos.`
+            },
+            privacidade: {
+                titulo: 'Política de Privacidade',
+                texto: `A proteção da privacidade dos nossos clientes é nossa prioridade. Todas as informações que você nos fornece são utilizadas exclusivamente para aprimorar nossos serviços e personalizar seu atendimento. Garantimos que não vendemos, alugamos ou compartilhamos seus dados com terceiros.
+
+Coleta de Informações: Os dados pessoais fornecidos são fundamentais para entendermos suas necessidades e oferecermos serviços, produtos e informações personalizados. Essas informações são armazenadas em nosso banco de dados para melhorar nosso relacionamento com os clientes e facilitar futuras compras e navegação no site.
+
+Uso das Informações: Seus dados pessoais não são divulgados ou comercializados. São utilizados exclusivamente por nós para conferência de pedidos, facilitação do preenchimento de pedidos, análise de perfis e estatísticas, melhoria das operações do site e envio de conteúdo promocional e informativo, os quais você pode optar por cancelar a qualquer momento.
+
+Registro e Recebimento de Material Promocional: O registro do seu e-mail nos permite enviar informações, promoções e lançamentos, mas apenas se autorizado por você. Você pode optar por não receber mais essas informações a qualquer momento. O registro não estabelece vínculo contratual, sendo apenas para acesso a serviços especiais e tratamento diferenciado.
+
+Segurança: Suas informações são armazenadas em servidores altamente seguros, com criptografia de 128 bits, garantindo sua privacidade e proteção. Não compartilhe sua senha com terceiros para garantir sua segurança.
+
+Modificações: Reservamos o direito de alterar nossa Política de Privacidade, comprometendo-nos a divulgar quaisquer mudanças neste espaço.
+
+Dúvidas e Sugestões: Em caso de dúvidas ou sugestões sobre nossa Política de Privacidade, entre em contato conosco. Estamos aqui para ajudar.`
+            },
+            termos: {
+                titulo: 'Termos e Condições',
+                texto: `Todos os produtos que comercializamos são acompanhados por nossa garantia de qualidade. Em caso de produtos defeituosos, garantimos a troca gratuita, desde que observadas as seguintes condições:
+
+• A troca só será efetuada mediante a apresentação da embalagem original e com os produtos mantendo suas características intactas, tal como quando foram adquiridos.
+• Produtos que apresentarem defeitos decorrentes de mau uso ou aplicação incorreta não serão elegíveis para troca.
+• Você tem até 7 (sete) dias após o recebimento para solicitar a troca, caso detecte algum problema.
+
+Após a confirmação do pagamento, seu pedido será processado e encaminhado para expedição, com previsão de envio pela transportadora em um prazo de 2 a 3 dias úteis.
+
+Estamos à disposição para esclarecer quaisquer dúvidas que possam surgir. Entre em contato conosco se precisar de assistência. Estamos aqui para ajudá-lo.`
+            }
+        };
+
+        const instOverlay = document.getElementById('institucional-overlay');
+        const instPanel = document.getElementById('institucional-panel');
         
-        // Funções globais para abrir/fechar
+        window.openInstitucional = function(tipo) {
+            const dados = institucionalData[tipo];
+            if (!dados) return;
+            document.getElementById('panel-title').textContent = dados.titulo;
+            document.getElementById('panel-content').innerHTML = dados.texto.replace(/\n/g, '<br>');
+            instOverlay.classList.remove('invisible', 'opacity-0');
+            instOverlay.classList.add('opacity-100');
+            instPanel.classList.remove('translate-y-full');
+            instPanel.classList.add('translate-y-0');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeInstitucional = function() {
+            instOverlay.classList.add('opacity-0', 'invisible');
+            instOverlay.classList.remove('opacity-100');
+            instPanel.classList.add('translate-y-full');
+            instPanel.classList.remove('translate-y-0');
+            document.body.style.overflow = '';
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && instPanel.classList.contains('translate-y-0')) {
+                closeInstitucional();
+            }
+        });
+
+        // Fechar com gesto de arrastar para baixo (touch)
+        let startY = 0;
+        instPanel.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+        instPanel.addEventListener('touchmove', (e) => {
+            const delta = e.touches[0].clientY - startY;
+            if (delta > 80) { closeInstitucional(); startY = 0; }
+        }, { passive: true });
+        instPanel.addEventListener('click', (e) => e.stopPropagation());
+
+        // ---------- MODAL MAPA ----------
+        const mapModal = document.getElementById('map-modal');
         window.openMapModal = function() {
-            if (!mapModal) return;
             mapModal.classList.remove('opacity-0', 'invisible');
             mapModal.classList.add('active', 'opacity-100');
             document.body.style.overflow = 'hidden';
         };
-
         window.closeMapModal = function() {
-            if (!mapModal) return;
             mapModal.classList.add('opacity-0', 'invisible');
             mapModal.classList.remove('active', 'opacity-100');
             document.body.style.overflow = '';
         };
-
-        // Fecha ao pressionar ESC
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && mapModal && mapModal.classList.contains('active')) {
+            if (e.key === 'Escape' && mapModal.classList.contains('active')) {
                 closeMapModal();
             }
         });
 
-        // Opcional: clique no overlay já está configurado com onclick="closeMapModal()"
-        // Mas podemos garantir que o container interno não feche (já feito com stopPropagation)
-    })();
+        // ---------- CARRINHO ENGINE ----------
+        const CART_STORAGE_KEY = 'eletrica_moro_cart';
+        let cartItems = [];
 
-    
+        const cartDrawer = document.getElementById('cart-drawer');
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartItemsContainer = document.getElementById('cart-items-list');
+        const cartSubtotalEl = document.getElementById('cart-subtotal');
+        const cartCounterEl = document.getElementById('cartCount');
+
+        function loadCartFromStorage() {
+            try {
+                const stored = localStorage.getItem(CART_STORAGE_KEY);
+                cartItems = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                cartItems = [];
+            }
+        }
+
+        function saveCartToStorage() {
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+        }
+
+        function calculateTotal() {
+            return cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        }
+
+        function updateCartCounter() {
+            if (cartCounterEl) {
+                const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+                cartCounterEl.textContent = totalItems;
+                cartCounterEl.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
+        }
+
+        function renderCartItems() {
+            if (!cartItemsContainer) return;
+
+            if (cartItems.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 py-12">
+                        <i class="ph ph-shopping-cart text-6xl mb-4 opacity-40"></i>
+                        <p class="text-lg font-medium">Seu carrinho está vazio</p>
+                        <p class="text-sm mt-1">Adicione produtos para continuar</p>
+                    </div>
+                `;
+                cartSubtotalEl.textContent = 'R$ 0,00';
+                return;
+            }
+
+            let html = '';
+            cartItems.forEach(item => {
+                const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+                const imageUrl = item.image || 'https://placehold.co/100x100?text=Produto';
+                const quantity = item.quantity || 1;
+                const itemTotal = price * quantity;
+
+                html += `
+                    <div class="flex gap-4 bg-gray-50 p-3 rounded-xl">
+                        <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center p-1">
+                            <img src="${imageUrl}" alt="${item.name}" class="max-w-full max-h-full object-contain" onerror="this.src='https://placehold.co/100x100?text=Produto'">
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800 text-sm line-clamp-2">${item.name}</h4>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-primary font-bold">R$ ${itemTotal.toFixed(2)}</span>
+                                <button onclick="removeFromCart('${item.id}')" class="text-gray-400 hover:text-accent transition-colors">
+                                    <i class="ph ph-trash text-lg"></i>
+                                </button>
+                            </div>
+                            ${quantity > 1 ? `<p class="text-xs text-gray-500 mt-1">Qtd: ${quantity}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItemsContainer.innerHTML = html;
+            const total = calculateTotal();
+            cartSubtotalEl.textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        function refreshCartUI() {
+            renderCartItems();
+            updateCartCounter();
+        }
+
+        window.addToCart = function(product) {
+            if (!product || !product.id) {
+                console.error('Produto inválido');
+                return;
+            }
+
+            const existingItem = cartItems.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity = (existingItem.quantity || 1) + 1;
+            } else {
+                cartItems.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image || (product.images && product.images[0]) || product.image_url || null,
+                    quantity: 1
+                });
+            }
+
+            saveCartToStorage();
+            refreshCartUI();
+            showMessage('Produto adicionado', `${product.name} foi adicionado ao carrinho.`);
+        };
+
+        window.removeFromCart = function(productId) {
+            cartItems = cartItems.filter(item => item.id !== productId);
+            saveCartToStorage();
+            refreshCartUI();
+        };
+
+        window.openCart = function() {
+            if (!cartDrawer || !cartOverlay) return;
+            cartDrawer.classList.remove('translate-x-full');
+            cartDrawer.classList.add('translate-x-0');
+            cartOverlay.classList.remove('opacity-0', 'invisible');
+            cartOverlay.classList.add('opacity-100');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeCart = function() {
+            if (!cartDrawer || !cartOverlay) return;
+            cartDrawer.classList.add('translate-x-full');
+            cartDrawer.classList.remove('translate-x-0');
+            cartOverlay.classList.add('opacity-0', 'invisible');
+            cartOverlay.classList.remove('opacity-100');
+            document.body.style.overflow = '';
+        };
+
+        window.toggleCart = function() {
+            if (cartDrawer.classList.contains('translate-x-full')) {
+                openCart();
+            } else {
+                closeCart();
+            }
+        };
+
+        window.clearCart = function() {
+            cartItems = [];
+            saveCartToStorage();
+            refreshCartUI();
+            closeCart();
+        };
+
+        // Inicializar carrinho
+        loadCartFromStorage();
+        refreshCartUI();
+
+        // Fechar carrinho com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && cartDrawer && !cartDrawer.classList.contains('translate-x-full')) {
+                closeCart();
+            }
+        });
+
+        // ---------- FUNÇÕES DE RENDERIZAÇÃO (CATEGORIAS E PRODUTOS) ----------
+        function getQueryParam(param) {
+            return new URLSearchParams(window.location.search).get(param);
+        }
+
+        function renderCategoryCard(category) {
+            const imageUrl = category.imageUrl || category.image || 'https://placehold.co/400x400?text=Categoria';
+            return `
+                <a href="/categoria.html?categoryId=${category.id}" class="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 flex flex-col h-full">
+                    <div class="p-4 flex items-center justify-center bg-gray-50">
+                        <img src="${imageUrl}" alt="${category.name}" class="category-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Categoria'">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow text-center">
+                        <h3 class="text-lg font-bold text-primary group-hover:text-accent transition-colors">${category.name}</h3>
+                        ${category.description ? `<p class="text-sm text-gray-500 mt-1 line-clamp-2">${category.description}</p>` : ''}
+                        <div class="mt-4 text-accent font-medium text-sm flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver produtos <i class="ph ph-arrow-right"></i>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+
+        function renderProductCard(product) {
+            const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+            const parcelas = 3;
+            const valorParcela = price / parcelas;
+            const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+            const precoComDesconto = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
+
+            let imageUrl = 'https://placehold.co/400x400?text=Eletrica+Moro';
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                imageUrl = product.images[0];
+            } else if (product.image_url) {
+                imageUrl = product.image_url;
+            }
+
+            const badgeHtml = [];
+            if (product.is_featured) badgeHtml.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
+            if (product.on_sale || desconto > 0) badgeHtml.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+
+            // Preparar dados para o botão (evitando aspas problemáticas)
+            const productData = {
+                id: product.id,
+                name: product.name,
+                price: price,
+                image: imageUrl
+            };
+            const productJson = JSON.stringify(productData).replace(/'/g, "&apos;");
+
+            return `
+                <div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
+                    ${badgeHtml.join('')}
+                    <div class="p-4 flex items-center justify-center bg-gray-50">
+                        <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Eletrica+Moro'">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                        ${product.brand ? `<p class="text-xs text-gray-500 mt-1">${product.brand}</p>` : ''}
+                        <div class="mt-2">
+                            ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
+                            <div class="text-xl font-bold text-primary">R$ ${desconto > 0 ? precoComDesconto : price.toFixed(2)}</div>
+                            <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
+                        </div>
+                        <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300" data-product='${productJson}'>Adicionar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ---------- EVENT DELEGATION PARA ADICIONAR AO CARRINHO ----------
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
+                try {
+                    const productStr = btn.dataset.product.replace(/&apos;/g, "'");
+                    const product = JSON.parse(productStr);
+                    addToCart(product);
+                } catch (err) {
+                    console.warn('Erro ao adicionar produto:', err);
+                }
+            }
+        });
+
+        // ---------- LÓGICA DA PÁGINA (CENÁRIO A/B) ----------
+        async function loadPage() {
+            const categoryId = getQueryParam('categoryId') || getQueryParam('subCategoryId');
+            const hasParam = !!categoryId;
+
+            const titleEl = document.getElementById('page-title');
+            const breadcrumbCatEl = document.getElementById('breadcrumb-category');
+            const breadcrumbSep = document.getElementById('breadcrumb-separator');
+            const descEl = document.getElementById('category-description');
+            const gridEl = document.getElementById('content-grid');
+            const loadingEl = document.getElementById('loading-indicator');
+            const emptyEl = document.getElementById('empty-state');
+            const emptyMsg = document.getElementById('empty-message');
+
+            gridEl.innerHTML = '';
+            gridEl.classList.add('hidden');
+            emptyEl.classList.add('hidden');
+            loadingEl.classList.remove('hidden');
+
+            try {
+                if (!hasParam) {
+                    // CENÁRIO A: LISTAR CATEGORIAS
+                    document.title = 'Nossas Categorias · Elétrica Moro';
+                    titleEl.textContent = 'Nossas Categorias';
+                    descEl.textContent = 'Explore nossas linhas de produtos e encontre o que precisa.';
+                    breadcrumbCatEl.classList.add('hidden');
+                    breadcrumbSep.classList.add('hidden');
+
+                    const res = await fetch('/api/categories');
+                    if (!res.ok) throw new Error('Erro ao carregar categorias');
+                    const categories = await res.json();
+                    loadingEl.classList.add('hidden');
+
+                    if (!categories || categories.length === 0) {
+                        emptyMsg.textContent = 'Nenhuma categoria cadastrada.';
+                        emptyEl.classList.remove('hidden');
+                        return;
+                    }
+                    gridEl.innerHTML = categories.map(c => renderCategoryCard(c)).join('');
+                    gridEl.classList.remove('hidden');
+                } else {
+                    // CENÁRIO B: LISTAR PRODUTOS DE UMA CATEGORIA
+                    let categoryData = null;
+                    try {
+                        const catRes = await fetch(`/api/categories/${categoryId}`);
+                        if (catRes.ok) categoryData = await catRes.json();
+                    } catch (e) {}
+                    if (!categoryData) {
+                        const allRes = await fetch('/api/categories');
+                        if (allRes.ok) {
+                            const all = await allRes.json();
+                            categoryData = all.find(c => c.id == categoryId);
+                        }
+                    }
+
+                    const catName = categoryData ? categoryData.name : 'Produtos';
+                    document.title = `${catName} · Elétrica Moro`;
+                    titleEl.textContent = catName;
+                    descEl.textContent = categoryData?.description || '';
+                    breadcrumbCatEl.textContent = catName;
+                    breadcrumbCatEl.classList.remove('hidden');
+                    breadcrumbSep.classList.remove('hidden');
+
+                    const prodRes = await fetch(`/api/products?subCategoryId=${categoryId}`);
+                    if (!prodRes.ok) throw new Error('Erro ao carregar produtos');
+                    const products = await prodRes.json();
+                    loadingEl.classList.add('hidden');
+
+                    if (!products || products.length === 0) {
+                        emptyMsg.textContent = 'Ainda não temos produtos cadastrados nesta categoria.';
+                        emptyEl.classList.remove('hidden');
+                        return;
+                    }
+                    gridEl.innerHTML = products.map(p => renderProductCard(p)).join('');
+                    gridEl.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error(error);
+                loadingEl.classList.add('hidden');
+                emptyMsg.textContent = 'Ocorreu um erro ao carregar os dados.';
+                emptyEl.classList.remove('hidden');
+                titleEl.textContent = 'Erro';
+            }
+        }
+
+        // ---------- MENU DINÂMICO (MEGA MENU) ----------
+        async function buildMenuAndGrid() {
+            try {
+                const res = await fetch('/api/categories');
+                if (!res.ok) return;
+                const categories = await res.json();
+                const menu = document.getElementById('dynamicMenu');
+                // Manter apenas o primeiro item (Todas as Categorias)
+                const firstItem = menu.firstElementChild;
+                menu.innerHTML = '';
+                menu.appendChild(firstItem);
+                
+                categories.forEach(cat => {
+                    const li = document.createElement('li');
+                    li.className = 'group/mega static';
+                    li.innerHTML = `
+                        <a href="/categoria.html?categoryId=${cat.id}" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
+                            ${cat.name} 
+                            ${cat.subcategories && cat.subcategories.length ? '<i class="ph ph-caret-down text-[10px] rotate-icon"></i>' : ''}
+                        </a>
+                    `;
+                    // Opcional: se quisesse montar o mega menu completo, mas por simplicidade mantemos só o link
+                    menu.appendChild(li);
+                });
+            } catch (e) {
+                console.warn('Menu dinâmico não carregado:', e);
+            }
+        }
+
+        // Inicialização geral
+        (async function init() {
+            await buildMenuAndGrid();
+            loadPage();
+
+            // Previne comportamento padrão de links "#"
+            document.querySelectorAll('a[href="#"]').forEach(l => l.addEventListener('click', e => e.preventDefault()));
+
+            // Ajuste no link do breadcrumb "Categorias"
+            document.getElementById('breadcrumb-categories-link')?.addEventListener('click', (e) => {
+                if (!getQueryParam('categoryId') && !getQueryParam('subCategoryId')) e.preventDefault();
+            });
+        })();
+
+    })();
 </script>
 </body>
 </html>

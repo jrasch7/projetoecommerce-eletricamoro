@@ -1,17 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import pkg from 'pg'; // Importação compatível com ES Modules
+import pg from 'pg';
 import "dotenv/config";
 
-const { Pool } = pkg;
+const { Pool } = pg;
 
-// Configuramos o pool de conexão do Postgres
+// 1. Configuramos o pool de conexão
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-// Instanciamos o Adapter para o Prisma 7
+// 2. Instanciamos o Adapter
 const adapter = new PrismaPg(pool);
 
-// Exportamos uma única instância do Prisma para todo o projeto
+// 3. Instanciamos o Cliente usando o ADAPTER
+// Na v7 com adapter, passamos o objeto 'adapter' diretamente
 export const prisma = new PrismaClient({ adapter });
