@@ -238,45 +238,6 @@
                 modal.classList.add('invisible', 'opacity-0');
             };
 
-            // Renderização de cards de produto (usa a mesma lógica)
-            function renderProductCard(product) {
-                const price = Number(product.price) || 0;
-                const parcelas = 3;
-                const valorParcela = price / parcelas;
-                const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
-                const precoFinal = desconto ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
-                let img = 'img/placeholder.png';
-                if (product.images && product.images.length) img = product.images[0];
-                else if (product.image_url) img = product.image_url;
-                const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
-                
-                // Prepara dados para o botão de adicionar
-                const productData = {
-                    id: product.id,
-                    name: product.name,
-                    price: price,
-                    image: img
-                };
-                const productJson = JSON.stringify(productData).replace(/'/g, "&apos;");
-                
-                return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
-                    ${desconto ? `<div class="absolute top-3 left-3 z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</div>` : ''}
-                    <div class="p-4 flex items-center justify-center bg-gray-50">
-                        <img src="${img}" alt="${product.name}" class="product-img w-full h-auto max-h-40 object-contain" onerror="this.src='img/placeholder.png'">
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
-                        ${specs ? `<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>` : ''}
-                        <div class="mt-2">
-                            ${desconto ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
-                            <div class="text-xl font-bold text-primary">R$ ${precoFinal}</div>
-                            <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
-                        </div>
-                        <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all" data-product='${productJson}'>Adicionar</button>
-                    </div>
-                </div>`;
-            }
-
             // Função para inicializar carrosséis (arraste)
             function initCarousel(trackId, prevId, nextId, products, getVisible) {
                 const track = document.getElementById(trackId);
@@ -286,7 +247,7 @@
                 function render() {
                     track.innerHTML = products.map(() => `<div class="${trackId === 'featuredTrack' ? 'feature-card' : 'home-card'}"></div>`).join('');
                     [...track.children].forEach((c, i) => {
-                        if (products[i]) c.innerHTML = renderProductCard(products[i]);
+                        if (products[i]) c.innerHTML = AppCore.renderProductCard(products[i]);
                     });
                     setTimeout(() => updatePos(), 30);
                 }
@@ -350,33 +311,9 @@
                 render();
             }
 
-            // Função para buscar categorias (com fallback)
-            async function fetchCategories() {
-                try {
-                    const res = await fetch('/api/categories');
-                    if (!res.ok) throw new Error('API offline');
-                    return await res.json();
-                } catch {
-                    console.warn('Usando categorias mock');
-                    return window.AppCore.MOCK_CATEGORIES || [];
-                }
-            }
-
-            // Função para buscar produtos (com fallback)
-            async function fetchProducts() {
-                try {
-                    const res = await fetch('/api/products');
-                    if (!res.ok) throw new Error('API offline');
-                    return await res.json();
-                } catch {
-                    console.warn('Usando produtos mock');
-                    return []; // Retorna vazio, carrosséis ficarão vazios
-                }
-            }
-
             // Preencher grid de categorias
             async function buildCategoryGrid() {
-                const cats = await fetchCategories();
+                const cats = await AppCore.fetchCategories();
                 const grid = document.getElementById('categoryGrid');
                 const icons = ['ph-blender', 'ph-snowflake', 'ph-wrench', 'ph-lamp'];
                 grid.innerHTML = cats.slice(0, 8).map((c, i) => {

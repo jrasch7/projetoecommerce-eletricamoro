@@ -7,27 +7,55 @@
 (function(global) {
     'use strict';
 
-    // ---------- CONSTANTES / MOCK ----------
-    const MOCK_CATEGORIES = [
-        { id: 1, name: 'Ferramentas', subcategories: [] },
-        { id: 2, name: 'Elétrica', subcategories: [] },
-        { id: 3, name: 'Refrigeração', subcategories: [] },
-        { id: 4, name: 'Motores', subcategories: [] }
-    ];
-
+    // ---------- CONSTANTES ----------
     const CART_STORAGE_KEY = 'eletrica_moro_cart';
     let cartItems = [];
 
-    // ---------- API (com fallback) ----------
+    // ---------- API ----------
     async function fetchCategories() {
-        try {
-            const res = await fetch('/api/categories');
-            if (!res.ok) throw new Error('Falha na API');
-            return await res.json();
-        } catch (e) {
-            console.warn('Usando categorias mock (backend offline)');
-            return MOCK_CATEGORIES;
+        const res = await fetch('/api/categories');
+        if (!res.ok) throw new Error('Falha ao carregar categorias');
+        return res.json();
+    }
+
+    // ---------- COMPONENTES COMPARTILHADOS ----------
+    function renderProductCard(product) {
+        const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+        const parcelas = 3;
+        const valorParcela = price / parcelas;
+        const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+        const precoFinal = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
+
+        let imageUrl = '/img/placeholder.png';
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            imageUrl = product.images[0];
+        } else if (product.image_url) {
+            imageUrl = product.image_url;
         }
+
+        const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
+        const badges = [];
+        if (product.is_featured) badges.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
+        if (desconto > 0) badges.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+
+        const productJson = JSON.stringify({ id: product.id, name: product.name, price, image: imageUrl }).replace(/'/g, "&apos;");
+
+        return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
+            ${badges.join('')}
+            <div class="p-4 flex items-center justify-center bg-gray-50">
+                <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='/img/placeholder.png'">
+            </div>
+            <div class="p-4 flex flex-col flex-grow">
+                <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                ${specs ? `<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>` : ''}
+                <div class="mt-2">
+                    ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
+                    <div class="text-xl font-bold text-primary">R$ ${precoFinal}</div>
+                    <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
+                </div>
+                <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all" data-product='${productJson}'>Adicionar</button>
+            </div>
+        </div>`;
     }
 
     // ---------- RENDERIZAÇÃO DO HEADER ----------
@@ -520,9 +548,8 @@ document.head.appendChild(style);
         addToCart,
         removeFromCart,
         closeGlobalModal,
-        // Para acesso nos botões do header/footer
         fetchCategories,
-        MOCK_CATEGORIES
+        renderProductCard,
     };
 
     global.AppCore = AppCore;
