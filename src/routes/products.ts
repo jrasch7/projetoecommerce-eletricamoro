@@ -22,7 +22,10 @@ router.get("/", asyncHandler(async (req, res) => {
   const [data, total] = await prisma.$transaction([
     prisma.product.findMany({
       where,
-      include: { subCategory: true },
+      include: { 
+        subCategory: true,
+        variants: true
+      },
       skip,
       take: limitNum,
       orderBy: { createdAt: "desc" },
@@ -30,7 +33,29 @@ router.get("/", asyncHandler(async (req, res) => {
     prisma.product.count({ where }),
   ]);
 
-  res.json({ data, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
+  // Calculate order count for each product
+  const orders = await prisma.order.findMany({
+    select: { items: true },
+  });
+
+  const productOrderCount = new Map<string, number>();
+  orders.forEach(order => {
+    if (order.items && Array.isArray(order.items)) {
+      order.items.forEach((item: any) => {
+        const productId = item.id;
+        const quantity = item.quantity || 1;
+        productOrderCount.set(productId, (productOrderCount.get(productId) || 0) + quantity);
+      });
+    }
+  });
+
+  // Add order count to each product
+  const productsWithOrderCount = data.map(product => ({
+    ...product,
+    orderCount: productOrderCount.get(product.id) || 0,
+  }));
+
+  res.json({ data: productsWithOrderCount, total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) });
 }));
 
 router.post("/", upload.array("images", 5), asyncHandler(async (req, res) => {
@@ -80,6 +105,51 @@ router.delete("/:id", asyncHandler(async (req, res) => {
   const id = req.params["id"] as string;
   await prisma.product.delete({ where: { id } });
   res.status(204).send();
+}));
+
+router.get("/suggested", asyncHandler(async (req, res) => {
+  const categoryIds = req.query["categoryIds"] as string;
+  
+  if (!categoryIds) {
+    // Return random featured products if no history
+    const products = await prisma.product.findMany({
+      where: { is_featured: true },
+      include: { subCategory: true, variants: true },
+      take: 8,
+      orderBy: { createdAt: "desc" },
+    });
+    // Shuffle for randomness
+    const shuffled = products.sort(() => Math.random() - 0.5);
+    return res.json(shuffled.slice(0, 6));
+  }
+
+  const ids = categoryIds.split(",").filter(Boolean);
+  
+  if (ids.length === 0) {
+    const products = await prisma.product.findMany({
+      where: { is_featured: true },
+      include: { subCategory: true, variants: true },
+      take: 8,
+      orderBy: { createdAt: "desc" },
+    });
+    const shuffled = products.sort(() => Math.random() - 0.5);
+    return res.json(shuffled.slice(0, 6));
+  }
+
+  // Get products from the visited categories
+  const categoryProducts = await prisma.product.findMany({
+    where: {
+      subCategory: {
+        categoryId: { in: ids },
+      },
+    },
+    include: { subCategory: true, variants: true },
+    take: 20,
+  });
+
+  // Shuffle and return up to 6 products
+  const shuffled = categoryProducts.sort(() => Math.random() - 0.5);
+  return res.json(shuffled.slice(0, 6));
 }));
 
 export default router;

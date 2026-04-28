@@ -9,13 +9,64 @@
 
     // ---------- CONSTANTES ----------
     const CART_STORAGE_KEY = 'eletrica_moro_cart';
+    const CATEGORY_HISTORY_KEY = 'eletrica_moro_category_history';
+    const IMAGE_PLACEHOLDER = 'https://placehold.co/300x300/f3f4f6/9ca3af?text=Produto';
     let cartItems = [];
+
+    // Global image fallback: any <img> that fails to load gets the placeholder.
+    // Uses capture phase since `error` events don't bubble.
+    document.addEventListener('error', (e) => {
+        const el = e.target;
+        if (el && el.tagName === 'IMG' && !el.dataset.fallbackApplied) {
+            el.dataset.fallbackApplied = '1';
+            el.src = IMAGE_PLACEHOLDER;
+        }
+    }, true);
 
     // ---------- API ----------
     async function fetchCategories() {
         const res = await fetch('/api/categories');
         if (!res.ok) throw new Error('Falha ao carregar categorias');
         return res.json();
+    }
+
+    async function fetchSuggestedProducts(categoryIds = null) {
+        const url = categoryIds 
+            ? `/api/products/suggested?categoryIds=${categoryIds}`
+            : '/api/products/suggested';
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Falha ao carregar produtos sugeridos');
+        return res.json();
+    }
+
+    // ---------- CATEGORY HISTORY TRACKING ----------
+    function trackCategoryVisit(categoryId) {
+        if (!categoryId) return;
+        
+        try {
+            let history = JSON.parse(localStorage.getItem(CATEGORY_HISTORY_KEY)) || [];
+            
+            // Remove if already exists (to move to front)
+            history = history.filter(id => id !== categoryId);
+            
+            // Add to front
+            history.unshift(categoryId);
+            
+            // Keep only last 3
+            history = history.slice(0, 3);
+            
+            localStorage.setItem(CATEGORY_HISTORY_KEY, JSON.stringify(history));
+        } catch (e) {
+            console.warn('Erro ao rastrear visita à categoria:', e);
+        }
+    }
+
+    function getCategoryHistory() {
+        try {
+            return JSON.parse(localStorage.getItem(CATEGORY_HISTORY_KEY)) || [];
+        } catch {
+            return [];
+        }
     }
 
     // ---------- COMPONENTES COMPARTILHADOS ----------
@@ -26,7 +77,7 @@
         const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
         const precoFinal = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
 
-        let imageUrl = '/img/placeholder.png';
+        let imageUrl = 'https://placehold.co/300x300/f3f4f6/9ca3af?text=Produto';
         if (product.images && Array.isArray(product.images) && product.images.length > 0) {
             imageUrl = product.images[0];
         } else if (product.image_url) {
@@ -35,18 +86,29 @@
 
         const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
         const badges = [];
-        if (product.is_featured) badges.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
-        if (desconto > 0) badges.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+        
+        // Best Seller badge based on actual order count
+        const orderCount = product.orderCount || 0;
+        if (orderCount > 0) {
+            badges.push('<span class="absolute top-3 left-3 z-10 bg-green-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Mais Vendido</span>');
+        } else if (product.is_featured) {
+            badges.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
+        }
+        
+        if (desconto > 0) {
+            const badgePosition = (orderCount > 0 || product.is_featured) ? 'left-20' : 'left-3';
+            badges.push(`<span class="absolute top-3 ${badgePosition} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+        }
 
         const productJson = JSON.stringify({ id: product.id, name: product.name, price, image: imageUrl }).replace(/'/g, "&apos;");
 
         return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
             ${badges.join('')}
-            <div class="p-4 flex items-center justify-center bg-gray-50">
-                <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='/img/placeholder.png'">
-            </div>
+            <a href="/produto.html?id=${product.id}" class="block p-4 flex items-center justify-center bg-gray-50">
+                <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Produto'">
+            </a>
             <div class="p-4 flex flex-col flex-grow">
-                <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]"><a href="/produto.html?id=${product.id}" class="hover:text-primary transition">${product.name}</a></h3>
                 ${specs ? `<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>` : ''}
                 <div class="mt-2">
                     ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
@@ -150,21 +212,44 @@
     }
 
     // ---------- RENDERIZAÇÃO DO FOOTER ----------
-    function renderFooter() {
+    async function renderFooter() {
         const footerPlaceholder = document.getElementById('global-footer');
         if (!footerPlaceholder) return;
 
+        // Fetch store config for dynamic data
+        let config = {};
+        try {
+            const configRes = await fetch('/api/config');
+            const configData = await configRes.json();
+            config = configData.config || {};
+        } catch (err) {
+            console.warn('Failed to load config for footer, using defaults:', err);
+        }
+
         const year = new Date().getFullYear();
+        const logo = config.logo || 'img/logo-moro.webp';
+        const footerText = config.footerText || `© ${year} Elétrica Moro. CNPJ: 07.907.008/0001-85.`;
+        const instagramUrl = config.instagramUrl || 'https://www.instagram.com/eletricamorooficial/';
+        const facebookUrl = config.facebookUrl || 'https://www.facebook.com/eletricamoro/?locale=pt_BR';
+        const whatsappUrl = config.whatsappUrl || '';
+
+        // Format WhatsApp URL if it's just a number
+        let whatsappLink = whatsappUrl;
+        if (whatsappUrl && !whatsappUrl.startsWith('http')) {
+            whatsappLink = `https://wa.me/${whatsappUrl.replace(/\D/g, '')}`;
+        }
+
         footerPlaceholder.innerHTML = `
             <footer class="bg-primary text-white pt-16 pb-8">
                 <div class="container mx-auto px-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                         <div class="space-y-6">
-                            <img src="img/logo-moro.webp" alt="Elétrica Moro" class="h-12 w-auto object-contain brightness-0 invert" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=El%C3%A9trica+Moro'">
+                            <img src="${logo}" alt="Logo" class="h-12 w-auto object-contain brightness-0 invert" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=Logo'">
                             <p class="text-white/60 text-sm leading-relaxed">Especialistas em peças para eletrodomésticos e assistência técnica autorizada. Qualidade e confiança desde 1990.</p>
                             <div class="flex gap-4">
-                                <a href="https://www.instagram.com/eletricamorooficial/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-instagram-logo text-xl"></i></a>
-                                <a href="https://www.facebook.com/eletricamoro/?locale=pt_BR" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-facebook-logo text-xl"></i></a>
+                                ${instagramUrl ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-instagram-logo text-xl"></i></a>` : ''}
+                                ${facebookUrl ? `<a href="${facebookUrl}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-facebook-logo text-xl"></i></a>` : ''}
+                                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-whatsapp-logo text-xl"></i></a>` : ''}
                             </div>
                         </div>
                         <div>
@@ -197,7 +282,7 @@
                         </div>
                     </div>
                     <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-[11px]">
-                        <p>© ${year} Elétrica Moro. CNPJ: 07.907.008/0001-85.</p>
+                        <p>${footerText}</p>
                         <div class="flex gap-6"><span>Desenvolvido com ❤️</span></div>
                     </div>
                 </div>
@@ -525,10 +610,10 @@ document.head.appendChild(style);
     }
 
     // ---------- INICIALIZAÇÃO ----------
-    function init() {
+    async function init() {
         injectGlobalModals();
         renderHeader();
-        renderFooter();
+        await renderFooter();
         loadCart();
         updateCartUI();
         setupGlobalListeners();
@@ -549,6 +634,9 @@ document.head.appendChild(style);
         removeFromCart,
         closeGlobalModal,
         fetchCategories,
+        fetchSuggestedProducts,
+        trackCategoryVisit,
+        getCategoryHistory,
         renderProductCard,
     };
 

@@ -11,12 +11,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    
+    <!-- Theme Configuration -->
+    <script src="js/theme-config.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { primary: '#0a2540', accent: '#e74c3c' },
-                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                    colors: { primary: 'var(--color-primary)', accent: 'var(--color-accent)' },
+                    fontFamily: { sans: 'var(--font-family)' }
                 }
             }
         }
@@ -57,7 +60,7 @@
             border-radius: 50%;
         }
         input:checked + .slider {
-            background-color: #0a2540;
+            background-color: var(--color-primary);
         }
         input:checked + .slider:before {
             transform: translateX(24px);
@@ -66,7 +69,7 @@
         .badge-pending { background-color: #fef9c3; color: #854d0e; }
         .badge-paid { background-color: #dcfce7; color: #166534; }
         .badge-shipped { background-color: #dbeafe; color: #1e40af; }
-        input:focus, select:focus, textarea:focus { outline: none; ring: 2px solid #0a2540; ring-offset: 2px; }
+        input:focus, select:focus, textarea:focus { outline: none; ring: 2px solid var(--color-primary); ring-offset: 2px; }
         .dashboard-card { @apply bg-white rounded-2xl p-5 shadow-md border border-slate-200; }
         
         @media (max-width: 768px) {
@@ -322,6 +325,12 @@
             <button data-tab="orders" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
                 <i class="ph ph-shopping-cart text-base md:text-lg"></i> Pedidos
             </button>
+            <button data-tab="customizable" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
+                <i class="ph ph-paint-brush text-base md:text-lg"></i> Personalizável
+            </button>
+            <button data-tab="payments" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
+                <i class="ph ph-credit-card text-base md:text-lg"></i> Pagamentos
+            </button>
         </div>
 
         <!-- DASHBOARD -->
@@ -481,10 +490,316 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left min-w-[600px]">
                         <thead class="bg-white border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase">
-                            <tr><th class="px-6 py-4">ID</th><th class="px-6 py-4">Cliente</th><th class="px-6 py-4">Total</th><th class="px-6 py-4">Frete</th><th class="px-6 py-4">Status</th><th class="px-6 py-4">Data</th></tr>
+                            <tr><th class="px-6 py-4">ID</th><th class="px-6 py-4">Cliente</th><th class="px-6 py-4">Tipo</th><th class="px-6 py-4">Total</th><th class="px-6 py-4">Frete</th><th class="px-6 py-4">Status</th><th class="px-6 py-4">Data</th></tr>
                         </thead>
-                        <tbody id="ordersTableBody"><tr><td colspan="6" class="text-center py-10 text-slate-400">Carregando...</td></tr></tbody>
+                        <tbody id="ordersTableBody"><tr><td colspan="7" class="text-center py-10 text-slate-400">Carregando...</td></tr></tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERSONALIZÁVEL -->
+        <div id="customizablePanel" class="tab-pane hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sidebar de Personalização -->
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 h-fit">
+                    <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                        <i class="ph ph-paint-brush text-accent"></i> Personalizar Loja
+                    </h2>
+                    <form id="customizationForm" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Nome da Loja</label>
+                            <input type="text" id="storeName" placeholder="Ex: Elétrica Moro" 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Cor Primária</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" id="primaryColor" value="#0a2540" 
+                                       class="w-12 h-12 rounded-lg cursor-pointer border-0">
+                                <input type="text" id="primaryColorText" value="#0a2540" 
+                                       class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Cor Secundária</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" id="secondaryColor" value="#1a365d" 
+                                       class="w-12 h-12 rounded-lg cursor-pointer border-0">
+                                <input type="text" id="secondaryColorText" value="#1a365d" 
+                                       class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Cor de Destaque</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" id="accentColor" value="#e74c3c" 
+                                       class="w-12 h-12 rounded-lg cursor-pointer border-0">
+                                <input type="text" id="accentColorText" value="#e74c3c" 
+                                       class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Logo da Loja</label>
+                            <input type="file" id="logoUpload" accept="image/*" 
+                                   class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer border border-slate-200 rounded-xl p-1">
+                            <div id="logoPreviewContainer" class="mt-3 hidden">
+                                <div class="relative w-32 h-16">
+                                    <img id="logoPreview" src="" alt="Logo preview" class="w-full h-full object-contain rounded-lg border border-slate-200">
+                                    <button type="button" id="clearLogoBtn" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md">
+                                        <i class="ph ph-x text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Favicon Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Favicon (Ícone da Aba)</label>
+                            <input type="file" id="faviconUpload" accept="image/*" 
+                                   class="w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-slate-800 file:cursor-pointer cursor-pointer border border-slate-200 rounded-xl p-1">
+                            <div id="faviconPreviewContainer" class="mt-3 hidden">
+                                <div class="relative w-16 h-16">
+                                    <img id="faviconPreview" src="" alt="Favicon preview" class="w-full h-full object-contain rounded-lg border border-slate-200">
+                                    <button type="button" id="clearFaviconBtn" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md">
+                                        <i class="ph ph-x text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SEO Settings -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-magnifying-glass text-accent"></i> SEO (Google e Redes Sociais)
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Título da Loja (Meta Title)</label>
+                                    <input type="text" id="metaTitle" placeholder="Elétrica Moro - Peças e Assistência Técnica"
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Descrição da Loja (Meta Description)</label>
+                                    <textarea id="metaDescription" rows="3" placeholder="Especialistas em peças para eletrodomésticos e assistência técnica autorizada."
+                                              class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm resize-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Palavras-chave (separadas por vírgula)</label>
+                                    <input type="text" id="metaKeywords" placeholder="peças, eletrodomésticos, assistência técnica, geladeira, máquina de lavar"
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Banner Management Section -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-images text-accent"></i> Carrossel de Banners
+                            </h3>
+                            <div id="bannersContainer" class="space-y-4">
+                                <!-- Banner items will be dynamically added here -->
+                            </div>
+                            <button type="button" id="addBannerBtn" class="mt-3 w-full py-2.5 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 text-sm font-medium">
+                                <i class="ph ph-plus"></i> Adicionar Banner
+                            </button>
+                        </div>
+                        
+                        <!-- Social Media -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-share-network text-accent"></i> Redes Sociais
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Instagram</label>
+                                    <input type="text" id="instagramUrl" placeholder="https://instagram.com/sualoja"
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">WhatsApp (número ou link)</label>
+                                    <input type="text" id="whatsappUrl" placeholder="5551999999999 ou https://wa.me/5551999999999"
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Facebook</label>
+                                    <input type="text" id="facebookUrl" placeholder="https://facebook.com/sualoja"
+                                           class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Store Benefits -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-star text-accent"></i> Benefícios da Loja
+                            </h3>
+                            <div id="benefitsContainer" class="space-y-3">
+                                <!-- Benefit items will be dynamically added here -->
+                            </div>
+                            <button type="button" id="addBenefitBtn" class="mt-3 w-full py-2.5 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-2 text-sm font-medium">
+                                <i class="ph ph-plus"></i> Adicionar Benefício
+                            </button>
+                        </div>
+                        
+                        <!-- Footer Text -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-text-aa text-accent"></i> Rodapé
+                            </h3>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Texto de Copyright</label>
+                                <input type="text" id="footerText" placeholder="© 2026 Elétrica Moro - Todos os direitos reservados"
+                                       class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-slate-200">
+                            <button type="submit" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2">
+                                <i class="ph ph-rocket"></i> Publicar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview em Tempo Real -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="ph ph-eye text-primary text-xl"></i>
+                            <h2 class="font-bold text-primary">Preview em Tempo Real</h2>
+                        </div>
+                        <button id="refreshPreviewBtn" class="text-sm text-primary hover:text-accent transition flex items-center gap-1">
+                            <i class="ph ph-arrows-clockwise"></i> Atualizar
+                        </button>
+                    </div>
+                    <div class="p-4 bg-slate-100">
+                        <div class="relative rounded-xl overflow-hidden shadow-lg bg-white" style="height: 600px;">
+                            <iframe id="previewFrame" src="/" class="w-full h-full border-0" 
+                                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+                            <div id="previewLoading" class="absolute inset-0 bg-white flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="ph ph-spinner animate-spin text-4xl text-primary mb-2"></i>
+                                    <p class="text-slate-500 text-sm">Carregando preview...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGAMENTOS -->
+        <div id="paymentsPanel" class="tab-pane hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6">
+                    <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                        <i class="ph ph-credit-card text-accent"></i> Configurações de Pagamento
+                    </h2>
+                    <form id="paymentConfigForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Provedor de Pagamento Ativo</label>
+                            <select id="paymentProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                <option value="WhatsApp">WhatsApp (Pedido via mensagem)</option>
+                                <option value="PagBank">PagBank (Checkout Transparente)</option>
+                                <option value="MercadoPago">MercadoPago</option>
+                                <option value="Cielo">Cielo</option>
+                            </select>
+                            <p class="text-xs text-slate-500 mt-1">Selecione o provedor que processará os pagamentos da loja</p>
+                        </div>
+
+                        <!-- Dynamic provider fields -->
+                        <div id="providerFields" class="space-y-4">
+                            <!-- WhatsApp fields -->
+                            <div id="whatsappFields" class="provider-fields space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Número do WhatsApp</label>
+                                    <input type="text" id="whatsappNumber" placeholder="Ex: 5551999999999" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+
+                            <!-- PagBank fields -->
+                            <div id="pagbankFields" class="provider-fields space-y-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Token de Integração</label>
+                                    <input type="text" id="pagbankToken" placeholder="Token fornecido pelo PagBank" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Chave Pix (opcional)</label>
+                                    <input type="text" id="pagbankPixKey" placeholder="Chave Pix para pagamentos instantâneos" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+
+                            <!-- MercadoPago fields -->
+                            <div id="mercadopagoFields" class="provider-fields space-y-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Access Token</label>
+                                    <input type="text" id="mpAccessToken" placeholder="Access Token do MercadoPago" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Cielo fields -->
+                            <div id="cieloFields" class="provider-fields space-y-4 hidden">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Merchant ID</label>
+                                    <input type="text" id="cieloMerchantId" placeholder="Merchant ID fornecido pela Cielo" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Merchant Key</label>
+                                    <input type="password" id="cieloMerchantKey" placeholder="Merchant Key fornecido pela Cielo" 
+                                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Webhook URL -->
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">URL de Webhook (opcional)</label>
+                            <input type="text" id="webhookUrl" placeholder="https://seusite.com/api/payments/webhook" 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                            <p class="text-xs text-slate-500 mt-1">URL para receber notificações de confirmação de pagamento</p>
+                        </div>
+
+                        <!-- Card brands display -->
+                        <div class="bg-slate-50 rounded-xl p-4">
+                            <h3 class="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                                <i class="ph ph-credit-card text-accent"></i> Bandeiras Aceitas
+                            </h3>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="visa" class="w-4 h-4 text-accent" checked>
+                                    <span class="text-sm">Visa</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="mastercard" class="w-4 h-4 text-accent" checked>
+                                    <span class="text-sm">Mastercard</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="amex" class="w-4 h-4 text-accent">
+                                    <span class="text-sm">American Express</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="elo" class="w-4 h-4 text-accent">
+                                    <span class="text-sm">Elo</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="hipercard" class="w-4 h-4 text-accent">
+                                    <span class="text-sm">Hipercard</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200">
+                            <button type="submit" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2">
+                                <i class="ph ph-floppy-disk"></i> Salvar Configurações de Pagamento
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -581,16 +896,18 @@
                 cropperInstance.destroy();
                 cropperInstance = null;
             }
-            cropModal.classList.add('hidden');
-            cropModal.classList.remove('flex');
-            cropImage.src = '';
+            if (cropModal) {
+                cropModal.classList.add('hidden');
+                cropModal.classList.remove('flex');
+            }
+            if (cropImage) cropImage.src = '';
             currentCropCallback = null;
             isCropperActive = false;
         }
 
-        cropCancelBtn.addEventListener('click', () => closeCropper(false));
-        cropConfirmBtn.addEventListener('click', () => closeCropper(true));
-        cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCropper(false); });
+        if (cropCancelBtn) cropCancelBtn.addEventListener('click', () => closeCropper(false));
+        if (cropConfirmBtn) cropConfirmBtn.addEventListener('click', () => closeCropper(true));
+        if (cropModal) cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCropper(false); });
 
         // ---------- TOAST SYSTEM ----------
         function showToast(message, type = 'success') {
@@ -637,12 +954,12 @@
             confirmModalCallback = null;
         }
 
-        confirmBtn.addEventListener('click', () => {
+        if (confirmBtn) confirmBtn.addEventListener('click', () => {
             if (confirmModalCallback) confirmModalCallback();
             hideConfirmModal();
         });
-        cancelBtn.addEventListener('click', hideConfirmModal);
-        confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) hideConfirmModal(); });
+        if (cancelBtn) cancelBtn.addEventListener('click', hideConfirmModal);
+        if (confirmModal) confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) hideConfirmModal(); });
 
         // ---------- MODAL PARA SUBCATEGORIA ----------
         const subcategoryModal = document.getElementById('subcategoryModal');
@@ -663,7 +980,7 @@
             subcategoryModal.classList.remove('flex');
         }
 
-        subcategoryForm.addEventListener('submit', async (e) => {
+        if (subcategoryForm) subcategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const categoryId = subcategoryCategoryId.value;
             const name = subcategoryNameInput.value.trim();
@@ -703,8 +1020,8 @@
             }
         });
 
-        closeSubModalBtn.addEventListener('click', closeSubcategoryModal);
-        subcategoryModal.addEventListener('click', (e) => { if (e.target === subcategoryModal) closeSubcategoryModal(); });
+        if (closeSubModalBtn) closeSubModalBtn.addEventListener('click', closeSubcategoryModal);
+        if (subcategoryModal) subcategoryModal.addEventListener('click', (e) => { if (e.target === subcategoryModal) closeSubcategoryModal(); });
 
         // ---------- MODAL PARA CATEGORIA ----------
         const categoryModal = document.getElementById('categoryModal');
@@ -739,9 +1056,9 @@
             categoryPhotoInput.value = '';
         }
 
-        clearAddCategoryPhotoBtn.addEventListener('click', clearAddCategoryPreview);
+        if (clearAddCategoryPhotoBtn) clearAddCategoryPhotoBtn.addEventListener('click', clearAddCategoryPreview);
 
-        categoryPhotoInput.addEventListener('change', (e) => {
+        if (categoryPhotoInput) categoryPhotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             openCropper(file, (blob) => {
@@ -752,11 +1069,11 @@
             });
         });
 
-        openAddCategoryBtn.addEventListener('click', openCategoryModal);
-        closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
-        categoryModal.addEventListener('click', (e) => { if (e.target === categoryModal) closeCategoryModal(); });
+        if (openAddCategoryBtn) openAddCategoryBtn.addEventListener('click', openCategoryModal);
+        if (closeCategoryModalBtn) closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+        if (categoryModal) categoryModal.addEventListener('click', (e) => { if (e.target === categoryModal) closeCategoryModal(); });
 
-        categoryForm.addEventListener('submit', async (e) => {
+        if (categoryForm) categoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = categoryNameInput.value.trim();
             if (!name) return;
@@ -881,12 +1198,12 @@
             }
         }
 
-        editProductCategory.addEventListener('change', () => {
+        if (editProductCategory) editProductCategory.addEventListener('change', () => {
             loadSubcategoriesForEdit(editProductCategory.value);
         });
 
         // Processamento de novas imagens no modal de edição (crop)
-        editPhotosInput.addEventListener('change', async (e) => {
+        if (editPhotosInput) editPhotosInput.addEventListener('change', async (e) => {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
             const remainingSlots = 4 - editSelectedFiles.length;
@@ -948,7 +1265,7 @@
             editSelectedFiles = [];
         }
 
-        editForm.addEventListener('submit', async (e) => {
+        if (editForm) editForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = editProductId.value;
             const formData = new FormData(editForm);
@@ -981,9 +1298,9 @@
             }
         });
 
-        closeEditModalBtn.addEventListener('click', closeEditModal);
-        cancelEditModalBtn.addEventListener('click', closeEditModal);
-        editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
+        if (closeEditModalBtn) closeEditModalBtn.addEventListener('click', closeEditModal);
+        if (cancelEditModalBtn) cancelEditModalBtn.addEventListener('click', closeEditModal);
+        if (editModal) editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
 
         // Helper fetch com fallback
         async function fetchJSON(url, options = {}) {
@@ -1174,9 +1491,9 @@
             editCategoryPhotoInput.value = '';
         }
 
-        clearEditCategoryPhotoBtn.addEventListener('click', clearEditCategoryPreview);
+        if (clearEditCategoryPhotoBtn) clearEditCategoryPhotoBtn.addEventListener('click', clearEditCategoryPreview);
 
-        editCategoryPhotoInput.addEventListener('change', (e) => {
+        if (editCategoryPhotoInput) editCategoryPhotoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             openCropper(file, (blob) => {
@@ -1187,10 +1504,10 @@
             });
         });
 
-        document.getElementById('closeEditCategoryModalBtn').addEventListener('click', closeEditCategoryModal);
-        editCategoryModal.addEventListener('click', (e) => { if (e.target === editCategoryModal) closeEditCategoryModal(); });
+        const closeEditCategoryModalBtn = document.getElementById('closeEditCategoryModalBtn'); if (closeEditCategoryModalBtn) closeEditCategoryModalBtn.addEventListener('click', closeEditCategoryModal);
+        if (editCategoryModal) editCategoryModal.addEventListener('click', (e) => { if (e.target === editCategoryModal) closeEditCategoryModal(); });
 
-        editCategoryForm.addEventListener('submit', async (e) => {
+        if (editCategoryForm) editCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('editCategoryId').value;
             const name = document.getElementById('editCategoryName').value.trim();
@@ -1308,13 +1625,13 @@
             renderPhotoPreview();
         }
 
-        photoInput.addEventListener('change', (e) => {
+        if (photoInput) photoInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             if (files.length === 0) return;
             processProductImages(files);
         });
 
-        document.getElementById('productForm').addEventListener('submit', async (e) => {
+        const productForm = document.getElementById('productForm'); if (productForm) productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             
@@ -1489,12 +1806,19 @@
                     const status = order.status || 'Pendente';
                     let statusClass = status === 'Pendente' ? 'badge-pending' : (status === 'Pago' ? 'badge-paid' : 'badge-shipped');
                     const customerName = order.customer || order.cliente || 'Cliente';
-                    return `<tr><td class="px-6 py-4 font-mono">#${order.id}</td><td class="px-6 py-4">${escapeHtml(customerName)}</td><td class="px-6 py-4">R$ ${Number(order.total).toFixed(2)}</td><td class="px-6 py-4">R$ ${Number(order.shipping||0).toFixed(2)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td><td class="px-6 py-4">${new Date(order.createdAt || order.date).toLocaleDateString('pt-BR')}</td></tr>`;
-                }).join('') : '<tr><td colspan="6" class="text-center py-8">Nenhum pedido</td></tr>';
+                    
+                    // Determine customer type
+                    const isRegistered = !!order.customerId;
+                    const customerType = isRegistered ? 
+                        '<span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800"><i class="ph ph-user"></i> Cadastrado</span>' : 
+                        '<span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600"><i class="ph ph-user-minus"></i> Visitante</span>';
+                    
+                    return `<tr><td class="px-6 py-4 font-mono">#${order.id}</td><td class="px-6 py-4">${escapeHtml(customerName)}</td><td class="px-6 py-4">${customerType}</td><td class="px-6 py-4">R$ ${Number(order.total).toFixed(2)}</td><td class="px-6 py-4">R$ ${Number(order.shipping||0).toFixed(2)}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td><td class="px-6 py-4">${new Date(order.createdAt || order.date).toLocaleDateString('pt-BR')}</td></tr>`;
+                }).join('') : '<tr><td colspan="7" class="text-center py-8">Nenhum pedido</td></tr>';
             } catch(err) {
                 console.error(err);
                 ordersData = [];
-                document.getElementById('ordersTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-8">Erro ao carregar pedidos</td></tr>';
+                document.getElementById('ordersTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-8">Erro ao carregar pedidos</td></tr>';
                 showToast('Erro ao carregar pedidos', 'error');
             }
         }
@@ -1584,29 +1908,646 @@
 
         // Abas
         function initTabs() {
-            const panels = { dashboard: document.getElementById('dashboardPanel'), products: document.getElementById('productsPanel'), categories: document.getElementById('categoriesPanel'), orders: document.getElementById('ordersPanel') };
+            const panels = { 
+                dashboard: document.getElementById('dashboardPanel'), 
+                products: document.getElementById('productsPanel'), 
+                categories: document.getElementById('categoriesPanel'), 
+                orders: document.getElementById('ordersPanel'),
+                customizable: document.getElementById('customizablePanel'),
+                payments: document.getElementById('paymentsPanel')
+            };
+            
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tab = btn.getAttribute('data-tab');
-                    Object.values(panels).forEach(p => p.classList.add('hidden'));
-                    panels[tab].classList.remove('hidden');
+                    
+                    // Hide all panels safely
+                    Object.values(panels).forEach(p => {
+                        if (p) p.classList.add('hidden');
+                    });
+                    
+                    // Show selected panel
+                    if (panels[tab]) {
+                        panels[tab].classList.remove('hidden');
+                    }
+                    
+                    // Update button styles
                     document.querySelectorAll('.tab-btn').forEach(b => {
-                        b.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'border-b-0');
+                        b.classList.remove('bg-white', 'text-primary', 'shadow-sm', 'border', 'border-b-0');
                         b.classList.add('text-slate-500');
                     });
                     btn.classList.add('bg-white', 'text-primary', 'shadow-sm', 'border', 'border-b-0');
                     btn.classList.remove('text-slate-500');
                     
-                    if(tab === 'dashboard') refreshDashboard();
+                    // Load data for specific tabs
+                    if(tab === 'dashboard' && typeof refreshDashboard === 'function') refreshDashboard();
                     if(tab === 'products' && !allProducts.length) fetchProducts();
-                    if(tab === 'categories') loadCategories();
+                    if(tab === 'categories' && typeof loadCategories === 'function') loadCategories();
                     if(tab === 'orders') loadOrders();
+                    if(tab === 'customizable') loadConfig();
+                    if(tab === 'payments') loadPaymentConfig();
                 });
             });
-            document.querySelector('.tab-btn').click();
+            
+            // Click first tab by default
+            const firstTabBtn = document.querySelector('.tab-btn');
+            if (firstTabBtn) {
+                firstTabBtn.click();
+            }
         }
 
         function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
+
+        // ===== CUSTOMIZATION PANEL LOGIC =====
+        const CONFIG_URL = `${API_BASE}/config`;
+        let currentConfig = null;
+        let logoFile = null;
+
+        // Sync color picker with text input
+        function syncColorInputs(pickerId, textId) {
+            const picker = document.getElementById(pickerId);
+            const text = document.getElementById(textId);
+            
+            picker.addEventListener('input', () => {
+                text.value = picker.value;
+                updatePreview();
+            });
+            
+            text.addEventListener('input', () => {
+                if (/^#[0-9A-Fa-f]{6}$/.test(text.value)) {
+                    picker.value = text.value;
+                    updatePreview();
+                }
+            });
+        }
+
+        // Initialize color sync
+        const primaryColorPicker = document.getElementById('primaryColor'); const primaryColorText = document.getElementById('primaryColorText'); if (primaryColorPicker && primaryColorText) syncColorInputs('primaryColor', 'primaryColorText');
+        const secondaryColorPicker = document.getElementById('secondaryColor'); const secondaryColorText = document.getElementById('secondaryColorText'); if (secondaryColorPicker && secondaryColorText) syncColorInputs('secondaryColor', 'secondaryColorText');
+        const accentColorPicker = document.getElementById('accentColor'); const accentColorText = document.getElementById('accentColorText'); if (accentColorPicker && accentColorText) syncColorInputs('accentColor', 'accentColorText');
+        
+        // Update preview when font changes
+        const fontFamily = document.getElementById('fontFamily'); if (fontFamily) fontFamily.addEventListener('change', updatePreview);
+
+        // Logo upload preview
+        const logoUpload = document.getElementById('logoUpload'); if (logoUpload) logoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                logoFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('logoPreview').src = e.target.result;
+                    document.getElementById('logoPreviewContainer').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+                updatePreview();
+            }
+        });
+
+        // Clear logo
+        const clearLogoBtn = document.getElementById('clearLogoBtn'); if (clearLogoBtn) clearLogoBtn.addEventListener('click', () => {
+            logoFile = null;
+            document.getElementById('logoUpload').value = '';
+            document.getElementById('logoPreviewContainer').classList.add('hidden');
+            updatePreview();
+        });
+
+        // Favicon upload preview
+        let faviconFile = null;
+        const faviconUpload = document.getElementById('faviconUpload'); if (faviconUpload) faviconUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                faviconFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('faviconPreview').src = e.target.result;
+                    document.getElementById('faviconPreviewContainer').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+                updatePreview();
+            }
+        });
+
+        // Clear favicon
+        const clearFaviconBtn = document.getElementById('clearFaviconBtn'); if (clearFaviconBtn) clearFaviconBtn.addEventListener('click', () => {
+            faviconFile = null;
+            document.getElementById('faviconUpload').value = '';
+            document.getElementById('faviconPreviewContainer').classList.add('hidden');
+            updatePreview();
+        });
+
+        // Update preview iframe with current settings
+        function updatePreview() {
+            const frame = document.getElementById('previewFrame');
+            const frameDoc = frame.contentDocument || frame.contentWindow.document;
+            
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const accentColor = document.getElementById('accentColor').value;
+            const storeName = document.getElementById('storeName').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            
+            // Inject custom styles into iframe
+            const styleId = 'custom-preview-styles';
+            let styleEl = frameDoc.getElementById(styleId);
+            
+            if (!styleEl) {
+                styleEl = frameDoc.createElement('style');
+                styleEl.id = styleId;
+                frameDoc.head.appendChild(styleEl);
+            }
+            
+            styleEl.textContent = `
+                :root {
+                    --preview-primary: ${primaryColor};
+                    --preview-secondary: ${secondaryColor};
+                    --preview-accent: ${accentColor};
+                    --preview-font: ${fontFamily};
+                }
+                body {
+                    font-family: ${fontFamily}, sans-serif !important;
+                }
+                [style*="--primary-color"], 
+                .bg-primary, 
+                .text-primary {
+                    background-color: ${primaryColor} !important;
+                    color: ${primaryColor} !important;
+                }
+                [style*="#0a2540"] {
+                    background-color: ${primaryColor} !important;
+                }
+                .text-accent, [style*="#e74c3c"] {
+                    color: ${accentColor} !important;
+                }
+                .bg-accent {
+                    background-color: ${accentColor} !important;
+                }
+            `;
+            
+            // Inject Google Fonts link if not present
+            const googleFonts = {
+                'Inter': 'Inter:wght@300;400;500;600;700;800',
+                'Montserrat': 'Montserrat:wght@300;400;500;600;700;800',
+                'Roboto': 'Roboto:wght@300;400;500;700;900',
+                'Open Sans': 'Open+Sans:wght@300;400;500;600;700;800',
+                'Poppins': 'Poppins:wght@300;400;500;600;700;800'
+            };
+            
+            const fontUrl = googleFonts[fontFamily];
+            if (fontUrl) {
+                let fontLink = frameDoc.querySelector(`link[href*="fonts.googleapis.com"]`);
+                if (!fontLink) {
+                    fontLink = frameDoc.createElement('link');
+                    fontLink.rel = 'stylesheet';
+                    frameDoc.head.appendChild(fontLink);
+                }
+                fontLink.href = `https://fonts.googleapis.com/css2?family=${fontUrl}&display=swap`;
+            }
+        }
+
+        // Load existing config
+        async function loadConfig() {
+            try {
+                const res = await fetch(CONFIG_URL);
+                const data = await res.json();
+                currentConfig = data;
+                
+                if (data.config) {
+                    const config = data.config;
+                    document.getElementById('storeName').value = config.storeName || '';
+                    document.getElementById('primaryColor').value = config.primaryColor || '#0a2540';
+                    document.getElementById('primaryColorText').value = config.primaryColor || '#0a2540';
+                    document.getElementById('secondaryColor').value = config.secondaryColor || '#1a365d';
+                    document.getElementById('secondaryColorText').value = config.secondaryColor || '#1a365d';
+                    document.getElementById('accentColor').value = config.accentColor || '#e74c3c';
+                    document.getElementById('accentColorText').value = config.accentColor || '#e74c3c';
+                    document.getElementById('fontFamily').value = config.fontFamily || 'Inter';
+                    
+                    // Load social media
+                    document.getElementById('instagramUrl').value = config.instagramUrl || '';
+                    document.getElementById('whatsappUrl').value = config.whatsappUrl || '';
+                    document.getElementById('facebookUrl').value = config.facebookUrl || '';
+                    
+                    // Load footer text
+                    document.getElementById('footerText').value = config.footerText || '© 2026 Elétrica Moro - Todos os direitos reservados';
+                    
+                    if (config.logo) {
+                        document.getElementById('logoPreview').src = config.logo;
+                        document.getElementById('logoPreviewContainer').classList.remove('hidden');
+                    }
+                    
+                    // Load favicon
+                    if (config.favicon) {
+                        document.getElementById('faviconPreview').src = config.favicon;
+                        document.getElementById('faviconPreviewContainer').classList.remove('hidden');
+                    }
+                    
+                    // Load SEO fields
+                    document.getElementById('metaTitle').value = config.metaTitle || '';
+                    document.getElementById('metaDescription').value = config.metaDescription || '';
+                    document.getElementById('metaKeywords').value = config.metaKeywords || '';
+                    
+                    // Load banners
+                    if (config.banners && Array.isArray(config.banners)) {
+                        banners = config.banners;
+                        renderBanners();
+                    }
+                    
+                    // Load benefits
+                    if (config.benefits && Array.isArray(config.benefits)) {
+                        benefits = config.benefits;
+                        renderBenefits();
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading config:', err);
+            }
+        }
+
+        // Save config
+        const customizationForm = document.getElementById('customizationForm'); if (customizationForm) customizationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                storeName: document.getElementById('storeName').value,
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value,
+                accentColor: document.getElementById('accentColor').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                instagramUrl: document.getElementById('instagramUrl').value,
+                whatsappUrl: document.getElementById('whatsappUrl').value,
+                facebookUrl: document.getElementById('facebookUrl').value,
+                footerText: document.getElementById('footerText').value,
+                metaTitle: document.getElementById('metaTitle').value,
+                metaDescription: document.getElementById('metaDescription').value,
+                metaKeywords: document.getElementById('metaKeywords').value,
+                banners: banners,
+                benefits: benefits,
+            };
+            
+            // Handle logo upload
+            if (logoFile) {
+                const logoFormData = new FormData();
+                logoFormData.append('photo', logoFile);
+                
+                try {
+                    const uploadRes = await fetch(`${PRODUCTS_URL}/upload`, {
+                        method: 'POST',
+                        body: logoFormData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.url) {
+                        formData.logo = uploadData.url;
+                    }
+                } catch (err) {
+                    console.error('Error uploading logo:', err);
+                    showToast('Erro ao fazer upload do logo', 'error');
+                    return;
+                }
+            } else if (currentConfig?.config?.logo) {
+                formData.logo = currentConfig.config.logo;
+            }
+            
+            // Handle favicon upload
+            if (faviconFile) {
+                const faviconFormData = new FormData();
+                faviconFormData.append('photo', faviconFile);
+                
+                try {
+                    const uploadRes = await fetch(`${PRODUCTS_URL}/upload`, {
+                        method: 'POST',
+                        body: faviconFormData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.url) {
+                        formData.favicon = uploadData.url;
+                    }
+                } catch (err) {
+                    console.error('Error uploading favicon:', err);
+                    showToast('Erro ao fazer upload do favicon', 'error');
+                    return;
+                }
+            } else if (currentConfig?.config?.favicon) {
+                formData.favicon = currentConfig.config.favicon;
+            }
+            
+            try {
+                const res = await fetch(CONFIG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (res.ok) {
+                    showToast('Configurações salvas com sucesso!', 'success');
+                    currentConfig = await res.json();
+                } else {
+                    showToast('Erro ao salvar configurações', 'error');
+                }
+            } catch (err) {
+                console.error('Error saving config:', err);
+                showToast('Erro ao salvar configurações', 'error');
+            }
+        });
+
+        // Banner Management
+        let banners = [];
+        const MAX_BANNERS = 3;
+
+        function renderBanners() {
+            const container = document.getElementById('bannersContainer');
+            container.innerHTML = banners.map((banner, index) => `
+                <div class="banner-item bg-slate-50 rounded-xl p-4 border border-slate-200 relative" data-index="${index}">
+                    <button type="button" class="remove-banner-btn absolute top-2 right-2 text-slate-400 hover:text-red-500 transition" onclick="removeBanner(${index})">
+                        <i class="ph ph-trash text-lg"></i>
+                    </button>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Imagem do Banner</label>
+                            <input type="file" accept="image/*" onchange="handleBannerImage(${index}, this)" 
+                                   class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-slate-800 cursor-pointer border border-slate-200 rounded-lg p-1">
+                            ${banner.image ? `<img src="${banner.image}" class="mt-2 h-20 w-full object-cover rounded-lg">` : ''}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Título</label>
+                            <input type="text" value="${banner.title || ''}" onchange="updateBanner(${index}, 'title', this.value)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: Promoção de Verão">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Subtítulo</label>
+                            <input type="text" value="${banner.subtitle || ''}" onchange="updateBanner(${index}, 'subtitle', this.value)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: Até 50% de desconto">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Link do Botão</label>
+                            <input type="text" value="${banner.link || ''}" onchange="updateBanner(${index}, 'link', this.value)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: /categoria.html?categoryId=xxx">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update add button state
+            const addBtn = document.getElementById('addBannerBtn');
+            if (banners.length >= MAX_BANNERS) {
+                addBtn.disabled = true;
+                addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                addBtn.innerHTML = `<i class="ph ph-x"></i> Máximo de ${MAX_BANNERS} banners`;
+            } else {
+                addBtn.disabled = false;
+                addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                addBtn.innerHTML = `<i class="ph ph-plus"></i> Adicionar Banner`;
+            }
+        }
+
+        window.addBanner = function() {
+            if (banners.length < MAX_BANNERS) {
+                banners.push({ image: '', title: '', subtitle: '', link: '' });
+                renderBanners();
+            }
+        };
+
+        window.removeBanner = function(index) {
+            banners.splice(index, 1);
+            renderBanners();
+        };
+
+        window.updateBanner = function(index, field, value) {
+            banners[index][field] = value;
+        };
+
+        window.handleBannerImage = async function(index, input) {
+            const file = input.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('photo', file);
+                
+                try {
+                    const uploadRes = await fetch(`${PRODUCTS_URL}/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.url) {
+                        banners[index].image = uploadData.url;
+                        renderBanners();
+                    }
+                } catch (err) {
+                    console.error('Error uploading banner image:', err);
+                    showToast('Erro ao fazer upload da imagem', 'error');
+                }
+            }
+        };
+
+        const addBannerBtn = document.getElementById('addBannerBtn'); if (addBannerBtn) addBannerBtn.addEventListener('click', window.addBanner);
+
+        // Benefits Management
+        let benefits = [];
+        const MAX_BENEFITS = 3;
+        const availableIcons = ['ph-truck', 'ph-credit-card', 'ph-shield-check', 'ph-headset', 'ph-clock', 'ph-gift', 'ph-tag', 'ph-lightning'];
+
+        function renderBenefits() {
+            const container = document.getElementById('benefitsContainer');
+            container.innerHTML = benefits.map((benefit, index) => `
+                <div class="benefit-item bg-slate-50 rounded-xl p-4 border border-slate-200 relative" data-index="${index}">
+                    <button type="button" class="remove-benefit-btn absolute top-2 right-2 text-slate-400 hover:text-red-500 transition" onclick="removeBenefit(${index})">
+                        <i class="ph ph-trash text-lg"></i>
+                    </button>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Ícone</label>
+                            <select onchange="updateBenefit(${index}, 'icon', this.value)" class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                ${availableIcons.map(icon => `<option value="${icon}" ${benefit.icon === icon ? 'selected' : ''}>${icon}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Título</label>
+                            <input type="text" value="${benefit.title || ''}" onchange="updateBenefit(${index}, 'title', this.value)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: Frete Grátis">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Descrição</label>
+                            <input type="text" value="${benefit.description || ''}" onchange="updateBenefit(${index}, 'description', this.value)"
+                                   class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm" placeholder="Ex: Para compras acima de R$200">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update add button state
+            const addBtn = document.getElementById('addBenefitBtn');
+            if (benefits.length >= MAX_BENEFITS) {
+                addBtn.disabled = true;
+                addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        window.addBenefit = function() {
+            if (benefits.length < MAX_BENEFITS) {
+                benefits.push({ icon: availableIcons[benefits.length % availableIcons.length], title: '', description: '' });
+                renderBenefits();
+            }
+        };
+
+        window.removeBenefit = function(index) {
+            benefits.splice(index, 1);
+            renderBenefits();
+        };
+
+        window.updateBenefit = function(index, field, value) {
+            benefits[index][field] = value;
+        };
+
+        const addBenefitBtn = document.getElementById('addBenefitBtn'); if (addBenefitBtn) addBenefitBtn.addEventListener('click', window.addBenefit);
+
+// Refresh preview button
+const refreshPreviewBtn = document.getElementById('refreshPreviewBtn');
+if (refreshPreviewBtn) {
+    refreshPreviewBtn.addEventListener('click', () => {
+        const frame = document.getElementById('previewFrame');
+        if (frame) frame.src = frame.src;
+    });
+}
+
+// Hide loading when iframe loads
+const previewFrame = document.getElementById('previewFrame');
+if (previewFrame) {
+    previewFrame.addEventListener('load', () => {
+        const previewLoading = document.getElementById('previewLoading');
+        if (previewLoading) previewLoading.classList.add('hidden');
+        updatePreview();
+    });
+}
+
+// ===== PAYMENT CONFIG LOGIC =====
+const PAYMENTS_CONFIG_URL = `${API_BASE}/payments/config`;
+let paymentConfig = null;
+
+// Provider field switching
+const paymentProvider = document.getElementById('paymentProvider');
+if (paymentProvider) {
+    paymentProvider.addEventListener('change', (e) => {
+        const provider = e.target.value;
+        
+        // Hide all provider fields
+        document.querySelectorAll('.provider-fields').forEach(el => {
+            el.classList.add('hidden');
+        });
+        
+        // Show selected provider fields
+        const fieldsMap = {
+            'WhatsApp': 'whatsappFields',
+            'PagBank': 'pagbankFields',
+            'MercadoPago': 'mercadopagoFields',
+            'Cielo': 'cieloFields'
+        };
+        
+        const fieldId = fieldsMap[provider];
+        if (fieldId) {
+            const fieldElement = document.getElementById(fieldId);
+            if (fieldElement) fieldElement.classList.remove('hidden');
+        }
+    });
+}
+
+// Load payment config
+async function loadPaymentConfig() {
+    try {
+        const res = await fetch(PAYMENTS_CONFIG_URL);
+        const data = await res.json();
+        paymentConfig = data;
+        
+        if (data) {
+            const paymentProviderEl = document.getElementById('paymentProvider');
+            if (paymentProviderEl) {
+                paymentProviderEl.value = data.activeProvider || 'WhatsApp';
+                
+                // Trigger change to show correct fields
+                paymentProviderEl.dispatchEvent(new Event('change'));
+            }
+            
+            // Load provider-specific fields
+            if (data.activeProvider === 'WhatsApp' && data.apiKey) {
+                const whatsappNumber = document.getElementById('whatsappNumber');
+                if (whatsappNumber) whatsappNumber.value = data.apiKey;
+            } else if (data.activeProvider === 'PagBank') {
+                const pagbankToken = document.getElementById('pagbankToken');
+                if (pagbankToken && data.apiKey) pagbankToken.value = data.apiKey;
+                const pagbankPixKey = document.getElementById('pagbankPixKey');
+                if (pagbankPixKey && data.pixKey) pagbankPixKey.value = data.pixKey;
+            } else if (data.activeProvider === 'MercadoPago' && data.apiKey) {
+                const mpAccessToken = document.getElementById('mpAccessToken');
+                if (mpAccessToken) mpAccessToken.value = data.apiKey;
+            } else if (data.activeProvider === 'Cielo') {
+                const cieloMerchantId = document.getElementById('cieloMerchantId');
+                if (cieloMerchantId && data.merchantId) cieloMerchantId.value = data.merchantId;
+                const cieloMerchantKey = document.getElementById('cieloMerchantKey');
+                if (cieloMerchantKey && data.apiSecret) cieloMerchantKey.value = data.apiSecret;
+            }
+            
+            const webhookUrl = document.getElementById('webhookUrl');
+            if (webhookUrl && data.webhookUrl) webhookUrl.value = data.webhookUrl;
+        }
+    } catch (err) {
+        console.error('Error loading payment config:', err);
+    }
+}
+
+// Save payment config
+const paymentConfigForm = document.getElementById('paymentConfigForm');
+if (paymentConfigForm) {
+    paymentConfigForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const provider = document.getElementById('paymentProvider')?.value;
+        if (!provider) return;
+        
+        const formData: any = {
+            activeProvider: provider,
+            webhookUrl: document.getElementById('webhookUrl')?.value,
+        };
+        
+        // Collect provider-specific fields
+        if (provider === 'WhatsApp') {
+            formData.apiKey = document.getElementById('whatsappNumber')?.value;
+        } else if (provider === 'PagBank') {
+            formData.apiKey = document.getElementById('pagbankToken')?.value;
+            formData.pixKey = document.getElementById('pagbankPixKey')?.value;
+        } else if (provider === 'MercadoPago') {
+            formData.apiKey = document.getElementById('mpAccessToken')?.value;
+        } else if (provider === 'Cielo') {
+            formData.merchantId = document.getElementById('cieloMerchantId')?.value;
+            formData.apiSecret = document.getElementById('cieloMerchantKey')?.value;
+        }
+        
+        // Collect card brands
+        const cardBrands = [];
+        if (document.getElementById('visa')?.checked) cardBrands.push('visa');
+        if (document.getElementById('mastercard')?.checked) cardBrands.push('mastercard');
+        if (document.getElementById('amex')?.checked) cardBrands.push('amex');
+        if (document.getElementById('elo')?.checked) cardBrands.push('elo');
+        if (document.getElementById('hipercard')?.checked) cardBrands.push('hipercard');
+        formData.cardBrands = cardBrands;
+        
+        try {
+            const res = await fetch(PAYMENTS_CONFIG_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            if (res.ok) {
+                showToast('Configurações de pagamento salvas com sucesso!', 'success');
+                paymentConfig = await res.json();
+            } else {
+                showToast('Erro ao salvar configurações de pagamento', 'error');
+            }
+        } catch (err) {
+            console.error('Error saving payment config:', err);
+            showToast('Erro ao salvar configurações de pagamento', 'error');
+        }
+    });
+}
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchProducts();

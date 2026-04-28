@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Central do Cliente · Elétrica Moro</title>
+    
+    <!-- Tailwind + Phosphor + Inter -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Theme Configuration -->
+    <script src="js/theme-config.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a2540',
+                        secondary: '#1a365d',
+                        accent: '#e74c3c',
+                        'light-gray': '#f4f4f4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Toast animations */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideIn 0.3s ease forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.2s ease forwards;
+        }
+    </style>
+</head>
+<body class="bg-light-gray font-sans text-gray-900 min-h-screen">
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 w-72 md:w-96"></div>
+
+<!-- Header -->
+<header id="clientHeader" class="bg-primary text-white py-4 shadow-md">
+    <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img id="headerLogo" src="img/logo-moro.webp" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold uppercase tracking-wider">Central do Cliente</h1>
+        </div>
+        <a href="/" class="text-sm hover:text-accent transition flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+            <i class="ph ph-storefront"></i> Voltar à Loja
+        </a>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-12">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary mb-3">Acompanhe seus Pedidos</h2>
+            <p class="text-gray-600">Rastreie seu pedido ou acesse sua conta para ver o histórico completo</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Side A: Quick Access (No Login) -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <i class="ph ph-magnifying-glass text-blue-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-primary">Acesso Rápido</h3>
+                        <p class="text-sm text-gray-500">Rastreie sem criar conta</p>
+                    </div>
+                </div>
+
+                <form id="trackOrderForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail ou CPF</label>
+                        <input type="text" id="trackIdentifier" required placeholder="seu@email.com ou 000.000.000-00"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número do Pedido</label>
+                        <input type="text" id="trackOrderNumber" required placeholder="Ex: 123e4567-e89b-12d3-a456-426614174000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="ph ph-magnifying-glass text-xl"></i> Rastrear Pedido
+                    </button>
+                </form>
+
+                <!-- Order Result (Hidden by default) -->
+                <div id="orderResult" class="hidden mt-6 p-6 bg-gray-50 rounded-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-primary">Status do Pedido</h4>
+                        <span id="orderStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">Pendente</span>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Número:</span>
+                            <span id="resultOrderId" class="font-mono">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Cliente:</span>
+                            <span id="resultCustomer">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total:</span>
+                            <span id="resultTotal" class="font-bold text-accent">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Pagamento:</span>
+                            <span id="resultPayment">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Data:</span>
+                            <span id="resultDate">---</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side B: Login/Register -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                        <i class="ph ph-user text-green-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-primary">Minha Conta</h3>
+                        <p class="text-sm text-gray-500">Acesse para ver histórico completo</p>
+                    </div>
+                </div>
+
+                <!-- Tab Buttons -->
+                <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
+                    <button id="loginTabBtn" class="flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all bg-white text-primary shadow-sm">
+                        Login
+                    </button>
+                    <button id="registerTabBtn" class="flex-1 py-2 px-4 rounded-lg font-medium text-sm transition-all text-gray-600 hover:text-primary">
+                        Cadastro
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                        <input type="email" id="loginEmail" required placeholder="seu@email.com"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                        <input type="password" id="loginPassword" required placeholder="••••••••"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="ph ph-sign-in text-xl"></i> Entrar
+                    </button>
+                </form>
+
+                <!-- Register Form (Hidden by default) -->
+                <form id="registerForm" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                        <input type="text" id="registerName" required placeholder="Seu nome completo"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                        <input type="email" id="registerEmail" required placeholder="seu@email.com"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                        <input type="password" id="registerPassword" required placeholder="Mínimo 6 caracteres"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CPF (opcional)</label>
+                        <input type="text" id="registerCpf" placeholder="000.000.000-00"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone (opcional)</label>
+                        <input type="tel" id="registerPhone" placeholder="(00) 00000-0000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-accent hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="ph ph-user-plus text-xl"></i> Criar Conta
+                    </button>
+                </form>
+
+                <!-- Customer Orders (Hidden by default, shown after login) -->
+                <div id="customerOrdersSection" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-bold text-primary">Meus Pedidos</h4>
+                        <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-600 flex items-center gap-1">
+                            <i class="ph ph-sign-out"></i> Sair
+                        </button>
+                    </div>
+                    <div id="customerOrdersList" class="space-y-4">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-primary text-white py-6 mt-12">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-white/70 text-sm">© 2026 Elétrica Moro. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script>
+    (function() {
+        "use strict";
+        
+        const API_BASE = '/api';
+        const AUTH_URL = `${API_BASE}/auth`;
+        const ORDERS_URL = `${API_BASE}/orders`;
+        const CONFIG_URL = `${API_BASE}/config`;
+        
+        let authToken = localStorage.getItem('authToken');
+        let customerData = JSON.parse(localStorage.getItem('customerData') || 'null');
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : 
+                           type === 'error' ? 'bg-red-500' : 
+                           type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            
+            const icon = type === 'success' ? 'ph-check-circle' : 
+                        type === 'error' ? 'ph-x-circle' : 
+                        type === 'warning' ? 'ph-warning' : 'ph-info';
+            
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 toast-enter`;
+            toast.innerHTML = `
+                <i class="ph ${icon} text-xl"></i>
+                <span class="flex-1 text-sm font-medium">${message}</span>
+                <button class="text-white/80 hover:text-white" onclick="this.parentElement.remove()">
+                    <i class="ph ph-x"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 200);
+            }, 5000);
+        }
+        
+        // Load store configuration for visual customization
+        async function loadStoreConfig() {
+            try {
+                const res = await fetch(CONFIG_URL);
+                const data = await res.json();
+                
+                if (data.config) {
+                    const config = data.config;
+                    
+                    if (config.primaryColor) {
+                        document.documentElement.style.setProperty('--primary', config.primaryColor);
+                        tailwind.config.theme.extend.colors.primary = config.primaryColor;
+                    }
+                    if (config.accentColor) {
+                        document.documentElement.style.setProperty('--accent', config.accentColor);
+                        tailwind.config.theme.extend.colors.accent = config.accentColor;
+                    }
+                    
+                    if (config.logo) {
+                        document.getElementById('headerLogo').src = config.logo;
+                    }
+                    
+                    if (config.storeName) {
+                        document.getElementById('headerTitle').textContent = config.storeName;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading store config:', err);
+            }
+        }
+        
+        // Tab switching
+        document.getElementById('loginTabBtn').addEventListener('click', () => {
+            document.getElementById('loginTabBtn').classList.add('bg-white', 'text-primary', 'shadow-sm');
+            document.getElementById('loginTabBtn').classList.remove('text-gray-600');
+            document.getElementById('registerTabBtn').classList.remove('bg-white', 'text-primary', 'shadow-sm');
+            document.getElementById('registerTabBtn').classList.add('text-gray-600');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        });
+        
+        document.getElementById('registerTabBtn').addEventListener('click', () => {
+            document.getElementById('registerTabBtn').classList.add('bg-white', 'text-primary', 'shadow-sm');
+            document.getElementById('registerTabBtn').classList.remove('text-gray-600');
+            document.getElementById('loginTabBtn').classList.remove('bg-white', 'text-primary', 'shadow-sm');
+            document.getElementById('loginTabBtn').classList.add('text-gray-600');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+        });
+        
+        // Track order without login
+        document.getElementById('trackOrderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('trackIdentifier').value;
+            const orderNumber = document.getElementById('trackOrderNumber').value;
+            
+            try {
+                const res = await fetch(`${ORDERS_URL}/track?identifier=${encodeURIComponent(identifier)}&orderNumber=${encodeURIComponent(orderNumber)}`);
+                const data = await res.json();
+                
+                if (res.ok) {
+                    // Show order result
+                    document.getElementById('orderResult').classList.remove('hidden');
+                    document.getElementById('resultOrderId').textContent = data.id.substring(0, 8) + '...';
+                    document.getElementById('resultCustomer').textContent = data.customer;
+                    document.getElementById('resultTotal').textContent = `R$ ${data.total.toFixed(2)}`;
+                    document.getElementById('resultPayment').textContent = data.paymentMethod || data.payment;
+                    document.getElementById('resultDate').textContent = new Date(data.createdAt).toLocaleDateString('pt-BR');
+                    
+                    // Update status badge
+                    const statusBadge = document.getElementById('orderStatusBadge');
+                    statusBadge.textContent = data.status;
+                    
+                    if (data.status === 'Pago') {
+                        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800';
+                    } else if (data.status === 'Cancelado') {
+                        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800';
+                    } else if (data.status === 'Em Análise') {
+                        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800';
+                    } else {
+                        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800';
+                    }
+                    
+                    showToast('Pedido encontrado!', 'success');
+                } else {
+                    showToast(data.error || 'Pedido não encontrado', 'error');
+                    document.getElementById('orderResult').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error('Error tracking order:', err);
+                showToast('Erro ao rastrear pedido', 'error');
+            }
+        });
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const res = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    authToken = data.token;
+                    customerData = data.customer;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('customerData', JSON.stringify(customerData));
+                    
+                    showToast('Login realizado com sucesso!', 'success');
+                    showCustomerOrders();
+                } else {
+                    showToast(data.error || 'Erro ao fazer login', 'error');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                showToast('Erro ao fazer login', 'error');
+            }
+        });
+        
+        // Register
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const cpf = document.getElementById('registerCpf').value;
+            const phone = document.getElementById('registerPhone').value;
+            
+            try {
+                const res = await fetch(`${AUTH_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, cpf, phone })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    authToken = data.token;
+                    customerData = data.customer;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('customerData', JSON.stringify(customerData));
+                    
+                    showToast('Cadastro realizado com sucesso!', 'success');
+                    showCustomerOrders();
+                } else {
+                    showToast(data.error || 'Erro ao criar conta', 'error');
+                }
+            } catch (err) {
+                console.error('Register error:', err);
+                showToast('Erro ao criar conta', 'error');
+            }
+        });
+        
+        // Show customer orders
+        async function showCustomerOrders() {
+            if (!authToken) return;
+            
+            try {
+                const res = await fetch(`${ORDERS_URL}/my-account`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const orders = await res.json();
+                
+                if (res.ok) {
+                    // Hide forms, show orders
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('registerForm').classList.add('hidden');
+                    document.getElementById('customerOrdersSection').classList.remove('hidden');
+                    
+                    const container = document.getElementById('customerOrdersList');
+                    
+                    if (orders.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-8 text-gray-500">
+                                <i class="ph ph-shopping-cart text-4xl mb-2"></i>
+                                <p>Você ainda não tem pedidos</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = orders.map(order => `
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="font-mono text-sm text-gray-600">#${order.id.substring(0, 8)}</span>
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                                        order.status === 'Pago' ? 'bg-green-100 text-green-800' :
+                                        order.status === 'Cancelado' ? 'bg-red-100 text-red-800' :
+                                        order.status === 'Em Análise' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800'
+                                    }">${order.status}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">${new Date(order.createdAt).toLocaleDateString('pt-BR')}</span>
+                                    <span class="font-bold text-accent">R$ ${order.total.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    showToast('Erro ao carregar pedidos', 'error');
+                }
+            } catch (err) {
+                console.error('Error loading orders:', err);
+                showToast('Erro ao carregar pedidos', 'error');
+            }
+        }
+        
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            authToken = null;
+            customerData = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('customerData');
+            
+            document.getElementById('customerOrdersSection').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            showToast('Você saiu da conta', 'info');
+        });
+        
+        // Check if already logged in
+        if (authToken && customerData) {
+            showCustomerOrders();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStoreConfig();
+        });
+    })();
+</script>
+</body>
+</html>

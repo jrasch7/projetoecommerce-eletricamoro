@@ -23,6 +23,9 @@ model Product {
   voltage       String?
   subCategoryId String?
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: SetNull)
+  variants      ProductVariant[]
+  hasVariants   Boolean      @default(false)
+  specifications Json?
 }
 
 model Category {
@@ -40,13 +43,66 @@ model SubCategory {
   products   Product[]
 }
 
+model ProductVariant {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String   // e.g., "20A", "127V", "Vermelho"
+  attribute   String   // e.g., "amperage", "voltage", "color"
+  price       Float?
+  stock       Int      @default(0)
+  sku         String?  @unique
+  images      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Order {
+  id             String   @id @default(uuid())
+  customer       String
+  customerId     String?
+  customerEmail  String?
+  customerCpf    String?
+  total          Float
+  status         String   @default("Pendente")
+  payment        String   @default("Não informado")
+  paymentMethod  String?
+  transactionId  String?
+  address        String?
+  items          Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  customerRef    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+}
+
+model Customer {
   id        String   @id @default(uuid())
-  customer  String
-  total     Float
-  status    String   @default("Pendente")
-  payment   String   @default("Não informado")
+  name      String
+  email     String   @unique
+  password  String
+  cpf       String?  @unique
+  phone     String?
   address   String?
-  items     Json?
+  orders    Order[]
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StoreConfig {
+  id        String   @id @default(uuid())
+  config    Json     @default("{}")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model PaymentConfig {
+  id             String   @id @default(uuid())
+  activeProvider String   @default("WhatsApp")
+  apiKey         String?
+  apiSecret      String?
+  merchantId     String?
+  pixKey         String?
+  webhookUrl     String?
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
 }

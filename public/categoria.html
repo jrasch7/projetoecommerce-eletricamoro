@@ -9,19 +9,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Theme Configuration -->
+    <script src="js/theme-config.js"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0a2540',
-                        secondary: '#1a365d',
-                        accent: '#e74c3c',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        accent: 'var(--color-accent)',
                         'light-gray': '#f4f4f4',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: 'var(--font-family)',
                     },
                     borderRadius: {
                         'xl': '1rem',
@@ -61,7 +64,7 @@
             width: 48px;
             height: 48px;
             border: 4px solid #e2e8f0;
-            border-bottom-color: #0a2540;
+            border-bottom-color: var(--color-primary);
             border-radius: 50%;
             display: inline-block;
             animation: rotation 1s linear infinite;
@@ -103,6 +106,78 @@
             <h3 class="text-xl font-semibold text-gray-700" id="empty-message">Nenhum item encontrado.</h3>
             <p class="text-gray-500 mt-2">Tente novamente mais tarde ou explore outras opções.</p>
             <a href="/" class="inline-block mt-6 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-secondary transition">Ver todos os produtos</a>
+        </div>
+
+        <!-- Filters Section (only shown when viewing products) -->
+        <div id="filters-section" class="hidden mb-8">
+            <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Search Bar -->
+                    <div class="flex-1 relative">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="ph ph-magnifying-glass mr-1"></i> Buscar
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="search-input" placeholder="Digite o nome do produto..." 
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
+                                autocomplete="off">
+                            <!-- Autocomplete Dropdown -->
+                            <div id="search-suggestions" class="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 hidden max-h-80 overflow-y-auto">
+                                <!-- Suggestions will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="lg:w-64">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="ph ph-currency-dollar mr-1"></i> Faixa de Preço
+                        </label>
+                        <div class="flex gap-2">
+                            <div class="flex-1">
+                                <input type="number" id="price-min" placeholder="Min" min="0" step="0.01"
+                                    class="w-full px-3 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm">
+                            </div>
+                            <span class="text-gray-400 self-center">-</span>
+                            <div class="flex-1">
+                                <input type="number" id="price-max" placeholder="Max" min="0" step="0.01"
+                                    class="w-full px-3 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand Filter -->
+                    <div class="lg:w-64">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="ph ph-tag mr-1"></i> Marca
+                        </label>
+                        <select id="brand-filter" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white">
+                            <option value="">Todas as marcas</option>
+                        </select>
+                    </div>
+
+                    <!-- Clear Filters -->
+                    <div class="flex items-end">
+                        <button id="clear-filters" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition flex items-center gap-2">
+                            <i class="ph ph-x"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Attribute Filters -->
+                <div id="dynamic-filters" class="mt-6 pt-6 border-t border-gray-200 hidden">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                        <i class="ph ph-faders"></i> Filtros Específicos
+                    </h3>
+                    <div id="dynamic-filters-container" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Dynamic filters will be added here -->
+                    </div>
+                </div>
+
+                <!-- Results Count -->
+                <div id="results-count" class="mt-4 text-sm text-gray-500"></div>
+            </div>
         </div>
 
         <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden"></div>
@@ -167,11 +242,11 @@
             return `
                 <div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
                     ${badgeHtml.join('')}
-                    <div class="p-4 flex items-center justify-center bg-gray-50">
+                    <a href="/produto.html?id=${product.id}" class="block p-4 flex items-center justify-center bg-gray-50">
                         <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Eletrica+Moro'">
-                    </div>
+                    </a>
                     <div class="p-4 flex flex-col flex-grow">
-                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]"><a href="/produto.html?id=${product.id}" class="hover:text-primary transition">${product.name}</a></h3>
                         ${product.brand ? `<p class="text-xs text-gray-500 mt-1">${product.brand}</p>` : ''}
                         <div class="mt-2">
                             ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
@@ -184,9 +259,13 @@
             `;
         }
 
+        // Store products globally for filtering
+        let allProducts = [];
+
         async function loadPage() {
             const categoryId = getQueryParam('categoryId') || getQueryParam('subCategoryId');
-            const hasParam = !!categoryId;
+            const searchParam = getQueryParam('search');
+            const hasParam = !!categoryId || !!searchParam;
 
             const titleEl = document.getElementById('page-title');
             const breadcrumbCatEl = document.getElementById('breadcrumb-category');
@@ -196,10 +275,13 @@
             const loadingEl = document.getElementById('loading-indicator');
             const emptyEl = document.getElementById('empty-state');
             const emptyMsg = document.getElementById('empty-message');
+            const filtersSection = document.getElementById('filters-section');
+            const searchInput = document.getElementById('search-input');
 
             gridEl.innerHTML = '';
             gridEl.classList.add('hidden');
             emptyEl.classList.add('hidden');
+            filtersSection.classList.add('hidden');
             loadingEl.classList.remove('hidden');
 
             try {
@@ -220,7 +302,47 @@
                     }
                     gridEl.innerHTML = categories.map(c => renderCategoryCard(c)).join('');
                     gridEl.classList.remove('hidden');
+                } else if (searchParam) {
+                    // Search mode - load all products and filter by search term
+                    document.title = `Busca: "${searchParam}" · Elétrica Moro`;
+                    titleEl.textContent = `Resultados para "${searchParam}"`;
+                    descEl.textContent = 'Produtos encontrados em toda a loja';
+                    breadcrumbCatEl.classList.add('hidden');
+                    breadcrumbSep.classList.add('hidden');
+
+                    // Set search input value
+                    searchInput.value = searchParam;
+
+                    // Load all products
+                    const prodRes = await fetch('/api/products');
+                    if (!prodRes.ok) throw new Error('Erro ao carregar produtos');
+                    const products = await prodRes.json();
+                    
+                    // Store products for filtering
+                    allProducts = products;
+                    
+                    loadingEl.classList.add('hidden');
+
+                    if (!products || products.length === 0) {
+                        emptyMsg.textContent = 'Nenhum produto encontrado na loja.';
+                        emptyEl.classList.remove('hidden');
+                        return;
+                    }
+
+                    // Show filters section
+                    filtersSection.classList.remove('hidden');
+                    
+                    // Populate brand filter
+                    populateBrandFilter(products);
+                    
+                    // Apply search filter
+                    applyFilters();
+                    gridEl.classList.remove('hidden');
+                    
+                    // Setup filter event listeners
+                    setupFilterListeners();
                 } else {
+                    // Category mode
                     let categoryData = null;
                     try {
                         const catRes = await fetch(`/api/categories/${categoryId}`);
@@ -239,9 +361,18 @@
                     breadcrumbCatEl.classList.remove('hidden');
                     breadcrumbSep.classList.remove('hidden');
 
+                    // Track category visit for recommendations
+                    if (categoryId && AppCore.trackCategoryVisit) {
+                        AppCore.trackCategoryVisit(categoryId);
+                    }
+
                     const prodRes = await fetch(`/api/products?subCategoryId=${categoryId}`);
                     if (!prodRes.ok) throw new Error('Erro ao carregar produtos');
                     const products = await prodRes.json();
+                    
+                    // Store products for filtering
+                    allProducts = products;
+                    
                     loadingEl.classList.add('hidden');
 
                     if (!products || products.length === 0) {
@@ -249,8 +380,22 @@
                         emptyEl.classList.remove('hidden');
                         return;
                     }
-                    gridEl.innerHTML = products.map(p => renderProductCard(p)).join('');
+
+                    // Show filters section
+                    filtersSection.classList.remove('hidden');
+                    
+                    // Populate brand filter
+                    populateBrandFilter(products);
+                    
+                    // Populate dynamic attribute filters
+                    populateDynamicFilters(products);
+                    
+                    // Render all products initially
+                    renderProducts(products);
                     gridEl.classList.remove('hidden');
+                    
+                    // Setup filter event listeners
+                    setupFilterListeners();
                 }
             } catch (error) {
                 console.error(error);
@@ -259,6 +404,293 @@
                 emptyEl.classList.remove('hidden');
                 titleEl.textContent = 'Erro';
             }
+        }
+
+        function populateBrandFilter(products) {
+            const brandFilter = document.getElementById('brand-filter');
+            const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+            
+            brands.forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandFilter.appendChild(option);
+            });
+        }
+
+        function populateDynamicFilters(products) {
+            const dynamicFiltersSection = document.getElementById('dynamic-filters');
+            const dynamicFiltersContainer = document.getElementById('dynamic-filters-container');
+            
+            // Extract dynamic attributes from product specifications
+            const attributeMap = new Map();
+            
+            products.forEach(product => {
+                if (product.specifications) {
+                    try {
+                        const specData = typeof product.specifications === 'string' 
+                            ? JSON.parse(product.specifications) 
+                            : product.specifications;
+                        
+                        // Collect all specification keys
+                        Object.keys(specData).forEach(key => {
+                            if (!attributeMap.has(key)) {
+                                attributeMap.set(key, new Set());
+                            }
+                            const value = specData[key];
+                            if (value && typeof value === 'string') {
+                                attributeMap.get(key).add(value);
+                            }
+                        });
+                    } catch (e) {
+                        // Ignore parsing errors
+                    }
+                }
+            });
+            
+            // If no dynamic attributes found, hide the section
+            if (attributeMap.size === 0) {
+                dynamicFiltersSection.classList.add('hidden');
+                return;
+            }
+            
+            // Render dynamic filters
+            dynamicFiltersContainer.innerHTML = '';
+            
+            const attributeLabels = {
+                'gauge': 'Bitola',
+                'voltage': 'Tensão',
+                'power': 'Potência',
+                'amperage': 'Amperagem',
+                'wattage': 'Wattagem',
+                'color': 'Cor',
+                'material': 'Material',
+                'length': 'Comprimento',
+                'dimensions': 'Dimensões'
+            };
+            
+            attributeMap.forEach((values, key) => {
+                const label = attributeLabels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                const uniqueValues = Array.from(values).sort();
+                
+                if (uniqueValues.length > 1) { // Only show if there are multiple values
+                    const filterDiv = document.createElement('div');
+                    filterDiv.innerHTML = `
+                        <label class="block text-xs font-medium text-gray-600 mb-1">${label}</label>
+                        <select class="dynamic-filter w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none text-sm bg-white" data-attribute="${key}">
+                            <option value="">Todos</option>
+                            ${uniqueValues.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    `;
+                    dynamicFiltersContainer.appendChild(filterDiv);
+                }
+            });
+            
+            // Show section if we added any filters
+            if (dynamicFiltersContainer.children.length > 0) {
+                dynamicFiltersSection.classList.remove('hidden');
+                
+                // Add event listeners to dynamic filters
+                dynamicFiltersContainer.querySelectorAll('.dynamic-filter').forEach(select => {
+                    select.addEventListener('change', applyFilters);
+                });
+            } else {
+                dynamicFiltersSection.classList.add('hidden');
+            }
+        }
+
+        function setupFilterListeners() {
+            const searchInput = document.getElementById('search-input');
+            const priceMin = document.getElementById('price-min');
+            const priceMax = document.getElementById('price-max');
+            const brandFilter = document.getElementById('brand-filter');
+            const clearFilters = document.getElementById('clear-filters');
+            const suggestionsDropdown = document.getElementById('search-suggestions');
+
+            // Real-time filtering on input
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Show suggestions if search term has at least 2 characters
+                if (searchTerm.length >= 2) {
+                    showSuggestions(searchTerm);
+                } else {
+                    hideSuggestions();
+                }
+                
+                applyFilters();
+            });
+            
+            // Handle Enter key - navigate to categoria.html with search
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    hideSuggestions();
+                    // Navigate to categoria.html with search parameter
+                    const searchTerm = searchInput.value.trim();
+                    if (searchTerm) {
+                        window.location.href = `/categoria.html?search=${encodeURIComponent(searchTerm)}`;
+                    }
+                }
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+
+            priceMin.addEventListener('input', applyFilters);
+            priceMax.addEventListener('input', applyFilters);
+            brandFilter.addEventListener('change', applyFilters);
+
+            // Clear filters
+            clearFilters.addEventListener('click', () => {
+                searchInput.value = '';
+                priceMin.value = '';
+                priceMax.value = '';
+                brandFilter.value = '';
+                hideSuggestions();
+                applyFilters();
+            });
+        }
+
+        function showSuggestions(searchTerm) {
+            const suggestionsDropdown = document.getElementById('search-suggestions');
+            
+            // Filter products matching search term
+            const matches = allProducts.filter(product => {
+                const name = product.name.toLowerCase();
+                const brand = product.brand ? product.brand.toLowerCase() : '';
+                return name.includes(searchTerm) || brand.includes(searchTerm);
+            });
+            
+            // Get top 3 most relevant (simple relevance: starts with search term first)
+            const sorted = matches.sort((a, b) => {
+                const aName = a.name.toLowerCase();
+                const bName = b.name.toLowerCase();
+                const aStarts = aName.startsWith(searchTerm);
+                const bStarts = bName.startsWith(searchTerm);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                return aName.localeCompare(bName);
+            }).slice(0, 3);
+            
+            if (sorted.length === 0) {
+                hideSuggestions();
+                return;
+            }
+            
+            // Render suggestions
+            suggestionsDropdown.innerHTML = sorted.map(product => {
+                const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+                let imageUrl = 'https://placehold.co/60x60?text=Produto';
+                if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                    imageUrl = product.images[0];
+                } else if (product.image_url) {
+                    imageUrl = product.image_url;
+                }
+                
+                return `
+                    <a href="/produto.html?id=${product.id}" class="flex items-center gap-3 p-3 hover:bg-gray-50 transition border-b border-gray-100 last:border-0 suggestion-item">
+                        <img src="${imageUrl}" alt="${product.name}" class="w-14 h-14 object-contain rounded-lg bg-gray-100" onerror="this.src='https://placehold.co/60x60?text=Produto'">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-semibold text-gray-800 truncate">${product.name}</h4>
+                            ${product.brand ? `<p class="text-xs text-gray-500">${product.brand}</p>` : ''}
+                            <p class="text-sm font-bold text-primary">R$ ${price.toFixed(2)}</p>
+                        </div>
+                        <i class="ph ph-arrow-right text-gray-400"></i>
+                    </a>
+                `;
+            }).join('');
+            
+            suggestionsDropdown.classList.remove('hidden');
+        }
+
+        function hideSuggestions() {
+            const suggestionsDropdown = document.getElementById('search-suggestions');
+            suggestionsDropdown.classList.add('hidden');
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const minPrice = parseFloat(document.getElementById('price-min').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('price-max').value) || Infinity;
+            const selectedBrand = document.getElementById('brand-filter').value;
+
+            // Get dynamic filter values
+            const dynamicFilters = {};
+            document.querySelectorAll('.dynamic-filter').forEach(select => {
+                const attribute = select.dataset.attribute;
+                const value = select.value;
+                if (value) {
+                    dynamicFilters[attribute] = value;
+                }
+            });
+
+            const filtered = allProducts.filter(product => {
+                const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+                
+                // Search filter (name and brand)
+                const matchesSearch = !searchTerm || 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    (product.brand && product.brand.toLowerCase().includes(searchTerm));
+
+                // Price range filter
+                const matchesPrice = price >= minPrice && price <= maxPrice;
+
+                // Brand filter
+                const matchesBrand = !selectedBrand || product.brand === selectedBrand;
+
+                // Dynamic attribute filters
+                let matchesDynamicFilters = true;
+                if (product.specifications) {
+                    try {
+                        const specData = typeof product.specifications === 'string' 
+                            ? JSON.parse(product.specifications) 
+                            : product.specifications;
+                        
+                        for (const [attr, value] of Object.entries(dynamicFilters)) {
+                            if (specData[attr] !== value) {
+                                matchesDynamicFilters = false;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        // If parsing fails, product doesn't match dynamic filters
+                        matchesDynamicFilters = Object.keys(dynamicFilters).length === 0;
+                    }
+                } else {
+                    // If no specifications, product only matches if no dynamic filters are selected
+                    matchesDynamicFilters = Object.keys(dynamicFilters).length === 0;
+                }
+
+                return matchesSearch && matchesPrice && matchesBrand && matchesDynamicFilters;
+            });
+
+            renderProducts(filtered);
+        }
+
+        function renderProducts(products) {
+            const gridEl = document.getElementById('content-grid');
+            const resultsCount = document.getElementById('results-count');
+            const emptyEl = document.getElementById('empty-state');
+            const emptyMsg = document.getElementById('empty-message');
+
+            // Update results count
+            resultsCount.textContent = `Mostrando ${products.length} de ${allProducts.length} produtos`;
+
+            if (products.length === 0) {
+                gridEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                emptyMsg.textContent = 'Nenhum produto encontrado com os filtros aplicados.';
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            gridEl.classList.remove('hidden');
+            gridEl.innerHTML = products.map(p => renderProductCard(p)).join('');
         }
 
         // Previne comportamento padrão de links "#"

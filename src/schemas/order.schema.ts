@@ -5,11 +5,15 @@ export const CreateOrderSchema = z.object({
   total: z.coerce.number({ error: "Total é obrigatório" }).nonnegative("Total não pode ser negativo"),
   status: z.string().max(50).default("Pendente"),
   payment: z.string().max(100).default("Não informado"),
+  paymentMethod: z.string().max(100).optional(),
   address: z
     .string()
     .max(500)
     .nullish()
     .transform((v): string | null => v ?? null),
+  customerId: z.string().uuid().optional(),
+  customerEmail: z.string().email().optional(),
+  customerCpf: z.string().optional(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items: z.array(z.any()).default([]),
 });

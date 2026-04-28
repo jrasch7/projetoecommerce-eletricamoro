@@ -6,22 +6,25 @@
     <title>Elétrica Moro · Peças e Serviços</title>
     
     <!-- Tailwind + Phosphor + Inter -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?3.4.1"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Theme Configuration -->
+    <script src="js/theme-config.js"></script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0a2540',
-                        secondary: '#1a365d',
-                        accent: '#e74c3c',
+                        primary: 'var(--color-primary)',
+                        secondary: 'var(--color-secondary)',
+                        accent: 'var(--color-accent)',
                         'light-gray': '#f4f4f4',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: 'var(--font-family)',
                     },
                     borderRadius: {
                         'xl': '1rem',
@@ -81,12 +84,12 @@
             cursor: pointer;
         }
         .hero-dot.active {
-            background-color: #e74c3c !important;
+            background-color: var(--color-accent) !important;
             width: 2rem !important;
         }
         .category-card { transition: all 0.3s ease; }
         .category-card:hover {
-            background-color: #0a2540;
+            background-color: var(--color-primary);
             color: white;
             transform: translateY(-4px);
         }
@@ -111,14 +114,11 @@
 </section>
 
 <main>
-    <!-- Vantagens -->
-    <section class="py-10 bg-[#f9fafb] border-b border-gray-100">
+    <!-- Benefits Bar (Dynamic from StoreConfig) -->
+    <section id="benefitsBar" class="py-10 bg-[#f9fafb] border-b border-gray-100">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-                <div class="flex items-center gap-4 px-4"><div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center text-primary text-2xl"><i class="ph ph-credit-card"></i></div><div><h3 class="font-bold text-primary text-sm uppercase tracking-wider">Até 3x sem juros</h3><p class="text-xs text-gray-500">No cartão de crédito</p></div></div>
-                <div class="flex items-center gap-4 px-4 border-t pt-6 sm:border-t-0 sm:pt-0 lg:border-l lg:border-gray-200"><div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center text-primary text-2xl"><i class="ph ph-truck"></i></div><div><h3 class="font-bold text-primary text-sm uppercase tracking-wider">Entrega ágil</h3><p class="text-xs text-gray-500">Para todo o Brasil</p></div></div>
-                <div class="flex items-center gap-4 px-4 border-t pt-6 lg:border-t-0 lg:pt-0 lg:border-l lg:border-gray-200"><div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center text-primary text-2xl"><i class="ph ph-shield-check"></i></div><div><h3 class="font-bold text-primary text-sm uppercase tracking-wider">Compra Segura</h3><p class="text-xs text-gray-500">Criptografia de ponta</p></div></div>
-                <div class="flex items-center gap-4 px-4 border-t pt-6 lg:border-t-0 lg:pt-0 lg:border-l lg:border-gray-200"><div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center text-primary text-2xl"><i class="ph ph-whatsapp-logo"></i></div><div><h3 class="font-bold text-primary text-sm uppercase tracking-wider">Suporte Técnico</h3><p class="text-xs text-gray-500">Tire suas dúvidas</p></div></div>
+            <div id="benefitsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+                <!-- Benefits will be loaded dynamically -->
             </div>
         </div>
     </section>
@@ -326,14 +326,42 @@
 
             // Hero slider
             async function initHero() {
-                const slides = [
-                    { title: "Assistência Técnica Autorizada", subtitle: "Eficiente, confiável e com garantia.", bg: "img/banner-assistencia.png" },
-                    { title: "Peças Originais", subtitle: "Mantenha seus eletros com desempenho máximo.", bg: "https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=1600&q=80" },
-                    { title: "Ofertas em Motores", subtitle: "Até 20% off + frete grátis.", bg: "https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=1600&q=80" }
-                ];
+                let slides = [];
+                
+                // Try to load banners from store config
+                try {
+                    const configRes = await fetch('/api/config');
+                    const configData = await configRes.json();
+                    if (configData.config && configData.config.banners && configData.config.banners.length > 0) {
+                        slides = configData.config.banners.filter(b => b.image).map(b => ({
+                            title: b.title || '',
+                            subtitle: b.subtitle || '',
+                            bg: b.image,
+                            link: b.link || '#'
+                        }));
+                    }
+                } catch (err) {
+                    console.warn('Failed to load banners from config, using defaults:', err);
+                }
+                
+                // Fallback to default slides if no banners configured
+                if (slides.length === 0) {
+                    slides = [
+                        { title: "Assistência Técnica Autorizada", subtitle: "Eficiente, confiável e com garantia.", bg: "https://placehold.co/1600x600/0a2540/white?text=Assist%C3%AAncia+T%C3%A9cnica", link: "#" },
+                        { title: "Peças Originais", subtitle: "Mantenha seus eletros com desempenho máximo.", bg: "https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=1600&q=80", link: "#" },
+                        { title: "Ofertas em Motores", subtitle: "Até 20% off + frete grátis.", bg: "https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=1600&q=80", link: "#" }
+                    ];
+                }
+                
                 const track = document.getElementById('heroTrack');
                 const dots = document.getElementById('heroDots');
                 let idx = 0, interval;
+                
+                // Get accent color from CSS variable or default
+                const getAccentColor = () => {
+                    const rootStyle = getComputedStyle(document.documentElement);
+                    return rootStyle.getPropertyValue('--color-accent').trim() || '#e74c3c';
+                };
                 
                 track.innerHTML = slides.map(s => `
                     <div class="min-w-full h-full bg-cover bg-center flex items-center" style="background-image: linear-gradient(90deg, rgba(10,37,64,0.85) 0%, rgba(0,0,0,0.4) 100%), url('${s.bg}')">
@@ -341,26 +369,29 @@
                             <div class="max-w-xl text-white">
                                 <h1 class="text-4xl md:text-5xl font-bold mb-4">${s.title}</h1>
                                 <p class="text-base md:text-lg opacity-90 mb-6">${s.subtitle}</p>
-                                <a href="#" class="bg-accent hover:scale-105 text-white px-8 py-4 rounded-full font-bold inline-block shadow-lg">Ver mais</a>
+                                <a href="${s.link}" class="hover:scale-105 text-white px-8 py-4 rounded-full font-bold inline-block shadow-lg transition-transform" style="background-color: ${getAccentColor()}">Ver mais</a>
                             </div>
                         </div>
                     </div>
                 `).join('');
                 
                 dots.innerHTML = slides.map((_, i) => `
-                    <div class="hero-dot w-2 h-2 rounded-full bg-white/60 mx-1 ${i === 0 ? 'active bg-accent w-8' : 'w-2'}" data-index="${i}"></div>
-                `);
+                    <div class="hero-dot w-2 h-2 rounded-full bg-white/60 mx-1 ${i === 0 ? 'active w-8' : 'w-2'}" data-index="${i}" style="${i === 0 ? `background-color: ${getAccentColor()}` : ''}"></div>
+                `).join('');
                 
                 const setHero = (i) => {
                     idx = (i + slides.length) % slides.length;
                     track.style.transform = `translateX(-${idx * 100}%)`;
+                    const accentColor = getAccentColor();
                     dots.querySelectorAll('.hero-dot').forEach((d, j) => {
                         if (j === idx) {
-                            d.classList.add('active', 'bg-accent', 'w-8');
+                            d.classList.add('active', 'w-8');
                             d.classList.remove('w-2');
+                            d.style.backgroundColor = accentColor;
                         } else {
-                            d.classList.remove('active', 'bg-accent', 'w-8');
+                            d.classList.remove('active', 'w-8');
                             d.classList.add('w-2');
+                            d.style.backgroundColor = '';
                         }
                     });
                 };
@@ -378,6 +409,60 @@
                     interval = setInterval(() => setHero(idx + 1), 6000);
                 }
                 resetInterval();
+            }
+
+            // Load benefits from StoreConfig
+            async function loadBenefits() {
+                try {
+                    const configRes = await fetch('/api/config');
+                    const configData = await configRes.json();
+                    const container = document.getElementById('benefitsContainer');
+                    
+                    // Default benefits if none configured
+                    let benefits = [
+                        { icon: 'ph-credit-card', title: 'Até 3x sem juros', description: 'No cartão de crédito' },
+                        { icon: 'ph-truck', title: 'Entrega ágil', description: 'Para todo o Brasil' },
+                        { icon: 'ph-shield-check', title: 'Compra Segura', description: 'Criptografia de ponta' },
+                        { icon: 'ph-headset', title: 'Suporte Técnico', description: 'Tire suas dúvidas' }
+                    ];
+                    
+                    if (configData.config && configData.config.benefits && configData.config.benefits.length > 0) {
+                        benefits = configData.config.benefits;
+                    }
+                    
+                    // Get accent color for icons
+                    const getAccentColor = () => {
+                        const rootStyle = getComputedStyle(document.documentElement);
+                        return rootStyle.getPropertyValue('--color-accent').trim() || '#e74c3c';
+                    };
+                    
+                    container.innerHTML = benefits.map((benefit, index) => `
+                        <div class="flex items-center gap-4 px-4 ${index > 0 ? 'border-t pt-6 sm:border-t-0 sm:pt-0 lg:border-l lg:border-gray-200' : ''}">
+                            <div class="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center text-2xl" style="color: ${getAccentColor()}">
+                                <i class="ph ${benefit.icon || 'ph-star'}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-primary text-sm uppercase tracking-wider">${benefit.title || 'Benefício'}</h3>
+                                <p class="text-xs text-gray-500">${benefit.description || ''}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    console.warn('Failed to load benefits:', err);
+                }
+            }
+
+            // Fetch products from API
+            async function fetchProducts() {
+                try {
+                    const res = await fetch('/api/products');
+                    if (!res.ok) throw new Error('Erro ao carregar produtos');
+                    const data = await res.json();
+                    return data.data || [];
+                } catch (err) {
+                    console.error('Erro ao buscar produtos:', err);
+                    return [];
+                }
             }
 
             // Inicialização da home
@@ -399,12 +484,15 @@
                 }
                 
                 initHero();
+                loadBenefits();
                 
                 // Event listeners para modais de atendimento
-                document.getElementById('openChatModalBtn').addEventListener('click', () => {
+                const openChatModalBtn = document.getElementById('openChatModalBtn');
+                const openCallModalBtn = document.getElementById('openCallModalBtn');
+                if (openChatModalBtn) openChatModalBtn.addEventListener('click', () => {
                     document.getElementById('chatModal').classList.remove('invisible', 'opacity-0');
                 });
-                document.getElementById('openCallModalBtn').addEventListener('click', () => {
+                if (openCallModalBtn) openCallModalBtn.addEventListener('click', () => {
                     document.getElementById('callModal').classList.remove('invisible', 'opacity-0');
                 });
             })();

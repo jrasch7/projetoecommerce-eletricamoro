@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Carregando · Elétrica Moro">
+    
+    <!-- Tailwind + Phosphor + Inter -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a2540',
+                        secondary: '#1a365d',
+                        accent: '#e74c3c',
+                        'light-gray': '#f4f4f4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos compartilhados */
+        @keyframes slideBanner {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-slide {
+            display: inline-block;
+            white-space: nowrap;
+            animation: slideBanner 40s linear infinite;
+        }
+        .top-bar-height { height: 32px; }
+        .top-bar-container {
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        button, a, .clickable { transition: all 0.3s ease; }
+        .product-img {
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            background: #f9fafb;
+            transition: transform 0.3s ease;
+        }
+        .group:hover .product-img { transform: scale(1.03); }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-bottom-color: #0a2540;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-light-gray font-sans text-gray-900">
+
+<!-- ===== HEADER GLOBAL ===== -->
+<header id="global-header"></header>
+
+<!-- ===== CONTEÚDO PRINCIPAL: PRODUTO ===== -->
+<main class="pb-16">
+    <section class="bg-white border-b border-gray-200 py-8">
+        <div class="container mx-auto px-4">
+            <nav class="flex text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                    <li><a href="/" class="hover:text-primary transition">Home</a></li>
+                    <li><i class="ph ph-caret-right text-xs"></i></li>
+                    <li><a href="/categoria.html" class="hover:text-primary transition">Categorias</a></li>
+                    <li><i class="ph ph-caret-right text-xs"></i></li>
+                    <li id="breadcrumb-category" class="hover:text-primary transition hidden">Categoria</li>
+                    <li id="breadcrumb-separator" class="hidden"><i class="ph ph-caret-right text-xs"></i></li>
+                    <li id="breadcrumb-product" class="text-primary font-medium truncate">Carregando...</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="container mx-auto px-4 py-10">
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
+            <span class="loader"></span>
+            <p class="mt-4 text-gray-500">Carregando produto...</p>
+        </div>
+
+        <div id="error-state" class="hidden text-center py-16">
+            <i class="ph ph-warning-circle text-5xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-700">Produto não encontrado</h3>
+            <p class="text-gray-500 mt-2">O produto que você procura não existe ou foi removido.</p>
+            <a href="/" class="inline-block mt-6 bg-primary text-white px-6 py-3 rounded-full font-medium hover:bg-secondary transition">Voltar para a Home</a>
+        </div>
+
+        <div id="product-content" class="hidden">
+            <!-- Product Details -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+                <!-- Images -->
+                <div class="space-y-4">
+                    <div class="bg-white rounded-2xl p-8 border border-gray-100">
+                        <img id="main-image" src="" alt="" class="w-full h-auto max-h-[500px] object-contain mx-auto">
+                    </div>
+                    <div id="thumbnail-gallery" class="flex gap-3 overflow-x-auto hide-scrollbar"></div>
+                </div>
+
+                <!-- Info -->
+                <div class="space-y-6">
+                    <div>
+                        <h1 id="product-name" class="text-3xl md:text-4xl font-bold text-primary"></h1>
+                        <p id="product-brand" class="text-gray-500 mt-2"></p>
+                    </div>
+
+                    <div class="flex items-baseline gap-4">
+                        <span id="old-price" class="text-gray-400 text-xl line-through hidden"></span>
+                        <div id="product-price" class="text-4xl font-bold text-primary"></div>
+                    </div>
+
+                    <div id="discount-badge" class="hidden inline-block bg-accent text-white text-sm font-bold px-3 py-1 rounded-full"></div>
+
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-semibold text-primary">Parcelamento:</span>
+                            <span id="installment-info"></span>
+                        </div>
+                    </div>
+
+                    <p id="product-description" class="text-gray-600 leading-relaxed"></p>
+
+                    <div id="product-specs" class="grid grid-cols-2 gap-4 text-sm"></div>
+
+                    <!-- Variant Selection -->
+                    <div id="variant-section" class="hidden">
+                        <div id="variant-selectors" class="space-y-4">
+                            <!-- Variant selectors will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <span class="text-gray-600">Estoque:</span>
+                        <span id="stock-status" class="font-semibold"></span>
+                    </div>
+
+                    <!-- Shipping Calculator -->
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h3 class="font-semibold text-primary mb-3 flex items-center gap-2">
+                            <i class="ph ph-truck text-accent"></i> Calcular Frete e Prazo
+                        </h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="cep-input" placeholder="Digite seu CEP (apenas números)" maxlength="8"
+                                class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none text-sm">
+                            <button id="calculate-shipping-btn" class="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-secondary transition flex items-center gap-2">
+                                <i class="ph ph-calculator"></i> Calcular
+                            </button>
+                        </div>
+                        <div id="shipping-result" class="mt-3 hidden">
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">PAC:</span>
+                                    <span id="shipping-pac" class="font-medium">-</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">SEDEX:</span>
+                                    <span id="shipping-sedex" class="font-medium">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="add-to-cart-btn" class="w-full bg-primary hover:bg-secondary text-white py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2">
+                        <i class="ph ph-shopping-cart text-xl"></i>
+                        Adicionar ao Carrinho
+                    </button>
+
+                    <!-- WhatsApp Specialist Button -->
+                    <a id="whatsapp-specialist-btn" href="#" target="_blank" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                        <i class="ph ph-whatsapp-logo text-xl"></i>
+                        Dúvida técnica? Fale com um especialista
+                    </a>
+
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <i class="ph ph-shield-check text-green-500 text-xl"></i>
+                        <span>Garantia de 30 dias</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Specifications Table -->
+            <section class="border-t border-gray-200 pt-12 mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6">Especificações Técnicas</h2>
+                <div id="specs-table" class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                    <!-- Specs will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Compre Junto (Bundle) Widget -->
+            <section class="border-t border-gray-200 pt-12 mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold text-primary mb-6 flex items-center gap-2">
+                    <i class="ph ph-package text-accent"></i> Compre Junto
+                </h2>
+                <p class="text-gray-500 mb-6">Aproveite e leve produtos complementares com desconto!</p>
+                
+                <div id="bundle-loading" class="flex flex-col items-center justify-center py-8 hidden">
+                    <span class="loader"></span>
+                    <p class="mt-4 text-gray-500">Carregando sugestões...</p>
+                </div>
+
+                <div id="bundle-content" class="hidden">
+                    <div class="bg-white rounded-2xl border border-gray-200 p-6">
+                        <div class="flex flex-col md:flex-row items-center gap-6">
+                            <!-- Main Product -->
+                            <div class="flex-1 text-center">
+                                <div class="bg-gray-50 rounded-xl p-4 mb-3">
+                                    <img id="bundle-main-image" src="" alt="" class="w-full h-32 object-contain">
+                                </div>
+                                <h3 id="bundle-main-name" class="font-semibold text-sm text-gray-800 line-clamp-2"></h3>
+                                <p id="bundle-main-price" class="font-bold text-primary mt-1"></p>
+                            </div>
+
+                            <!-- Plus Icon -->
+                            <div class="text-accent text-3xl">
+                                <i class="ph ph-plus"></i>
+                            </div>
+
+                            <!-- Complementary Product -->
+                            <div class="flex-1 text-center">
+                                <div class="bg-gray-50 rounded-xl p-4 mb-3">
+                                    <img id="bundle-complement-image" src="" alt="" class="w-full h-32 object-contain">
+                                </div>
+                                <h3 id="bundle-complement-name" class="font-semibold text-sm text-gray-800 line-clamp-2"></h3>
+                                <p id="bundle-complement-price" class="font-bold text-primary mt-1"></p>
+                                <label class="flex items-center justify-center gap-2 mt-2 cursor-pointer">
+                                    <input type="checkbox" id="bundle-checkbox" class="w-5 h-5 text-accent rounded">
+                                    <span class="text-sm text-gray-600">Adicionar ao kit</span>
+                                </label>
+                            </div>
+
+                            <!-- Total and Add Button -->
+                            <div class="flex-1 text-center">
+                                <div class="bg-primary/5 rounded-xl p-4 mb-4">
+                                    <p class="text-sm text-gray-600">Total do Kit</p>
+                                    <p id="bundle-total" class="text-2xl font-bold text-primary"></p>
+                                    <p id="bundle-savings" class="text-sm text-green-600 font-medium mt-1"></p>
+                                </div>
+                                <button id="add-bundle-btn" class="w-full bg-accent hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                                    <i class="ph ph-shopping-cart"></i> Adicionar Kit ao Carrinho
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bundle-empty" class="hidden text-center py-8">
+                    <p class="text-gray-500">Nenhum produto complementar disponível no momento.</p>
+                </div>
+            </section>
+
+            <!-- Recommended Products Section -->
+            <section class="border-t border-gray-200 pt-12">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-primary">Recomendados para você</h2>
+                        <div class="w-20 h-1.5 bg-accent rounded-full mt-2"></div>
+                        <p class="text-gray-500 mt-2 text-sm">Baseado no seu histórico de navegação</p>
+                    </div>
+                </div>
+
+                <div id="suggested-loading" class="flex flex-col items-center justify-center py-12 hidden">
+                    <span class="loader"></span>
+                    <p class="mt-4 text-gray-500">Carregando recomendações...</p>
+                </div>
+
+                <div id="suggested-empty" class="hidden text-center py-12">
+                    <i class="ph ph-smiley text-5xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500">Navegue pelas categorias para ver recomendações personalizadas.</p>
+                </div>
+
+                <div id="suggested-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden"></div>
+            </section>
+        </div>
+    </section>
+</main>
+
+<!-- ===== FOOTER GLOBAL ===== -->
+<footer id="global-footer"></footer>
+
+<!-- Scripts -->
+<script src="js/main-components.js"></script>
+<script>
+    (function() {
+        function getQueryParam(param) {
+            return new URLSearchParams(window.location.search).get(param);
+        }
+
+        function renderProductCard(product) {
+            const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+            const parcelas = 3;
+            const valorParcela = price / parcelas;
+            const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+            const precoComDesconto = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
+
+            let imageUrl = 'https://placehold.co/400x400?text=Eletrica+Moro';
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                imageUrl = product.images[0];
+            } else if (product.image_url) {
+                imageUrl = product.image_url;
+            }
+
+            const badgeHtml = [];
+            if (product.is_featured) badgeHtml.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
+            if (product.on_sale || desconto > 0) badgeHtml.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+
+            const productData = {
+                id: product.id,
+                name: product.name,
+                price: price,
+                image: imageUrl
+            };
+            const productJson = JSON.stringify(productData).replace(/'/g, "&apos;");
+
+            return `
+                <div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
+                    ${badgeHtml.join('')}
+                    <div class="p-4 flex items-center justify-center bg-gray-50">
+                        <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Eletrica+Moro'">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">${product.name}</h3>
+                        ${product.brand ? `<p class="text-xs text-gray-500 mt-1">${product.brand}</p>` : ''}
+                        <div class="mt-2">
+                            ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
+                            <div class="text-xl font-bold text-primary">R$ ${desconto > 0 ? precoComDesconto : price.toFixed(2)}</div>
+                            <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
+                        </div>
+                        <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300" data-product='${productJson}'>Adicionar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadProduct() {
+            const productId = getQueryParam('id');
+            
+            const loadingEl = document.getElementById('loading-indicator');
+            const errorEl = document.getElementById('error-state');
+            const contentEl = document.getElementById('product-content');
+
+            if (!productId) {
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // Fetch product
+                const prodRes = await fetch(`/api/products`);
+                if (!prodRes.ok) throw new Error('Erro ao carregar produto');
+                const allProducts = await prodRes.json();
+                const product = allProducts.find(p => p.id === productId);
+
+                if (!product) {
+                    loadingEl.classList.add('hidden');
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                // Store product globally for variant handling
+                window.currentProduct = product;
+                window.selectedVariant = null;
+
+                // Render product details
+                const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+                const parcelas = 3;
+                const valorParcela = price / parcelas;
+                const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+                const precoComDesconto = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
+
+                document.title = `${product.name} · Elétrica Moro`;
+                document.getElementById('breadcrumb-product').textContent = product.name;
+
+                // Main image
+                let mainImageUrl = 'https://placehold.co/600x600?text=Produto';
+                if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                    mainImageUrl = product.images[0];
+                } else if (product.image_url) {
+                    mainImageUrl = product.image_url;
+                }
+                document.getElementById('main-image').src = mainImageUrl;
+                document.getElementById('main-image').alt = product.name;
+
+                // Thumbnail gallery
+                const galleryEl = document.getElementById('thumbnail-gallery');
+                if (product.images && Array.isArray(product.images) && product.images.length > 1) {
+                    galleryEl.innerHTML = product.images.map((img, i) => `
+                        <div class="flex-shrink-0 w-20 h-20 bg-white rounded-lg border-2 ${i === 0 ? 'border-primary' : 'border-gray-200'} cursor-pointer overflow-hidden" onclick="document.getElementById('main-image').src='${img}'">
+                            <img src="${img}" alt="${product.name}" class="w-full h-full object-contain">
+                        </div>
+                    `).join('');
+                } else {
+                    galleryEl.classList.add('hidden');
+                }
+
+                // Product info
+                document.getElementById('product-name').textContent = product.name;
+                document.getElementById('product-brand').textContent = product.brand || '';
+                document.getElementById('product-price').textContent = `R$ ${desconto > 0 ? precoComDesconto : price.toFixed(2)}`;
+                
+                if (desconto > 0) {
+                    document.getElementById('old-price').textContent = `R$ ${price.toFixed(2)}`;
+                    document.getElementById('old-price').classList.remove('hidden');
+                    document.getElementById('discount-badge').textContent = `-${desconto}%`;
+                    document.getElementById('discount-badge').classList.remove('hidden');
+                }
+
+                document.getElementById('installment-info').textContent = `ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} sem juros`;
+                document.getElementById('product-description').textContent = product.description || 'Sem descrição disponível.';
+
+                // Specs (old simple display - will be replaced by table)
+                const specsEl = document.getElementById('product-specs');
+                const specs = [];
+                if (product.brand) specs.push(`<div><span class="text-gray-500">Marca:</span> <span class="font-medium">${product.brand}</span></div>`);
+                if (product.model) specs.push(`<div><span class="text-gray-500">Modelo:</span> <span class="font-medium">${product.model}</span></div>`);
+                if (product.voltage) specs.push(`<div><span class="text-gray-500">Voltagem:</span> <span class="font-medium">${product.voltage}</span></div>`);
+                specsEl.innerHTML = specs.join('');
+
+                // Technical Specifications Table
+                renderSpecsTable(product);
+
+                // Setup variant selection if product has variants
+                if (product.hasVariants && product.variants && product.variants.length > 0) {
+                    setupVariantSelectors(product);
+                }
+
+                // Shipping Calculator
+                setupShippingCalculator();
+
+                // WhatsApp Specialist Button
+                setupWhatsAppButton(product);
+
+                // Stock
+                updateStockDisplay(product);
+
+                // Add to cart button
+                document.getElementById('add-to-cart-btn').onclick = handleAddToCart;
+
+                // Track category visit if product has category
+                if (product.subCategory && product.subCategory.categoryId && AppCore.trackCategoryVisit) {
+                    AppCore.trackCategoryVisit(product.subCategory.categoryId);
+                    
+                    // Update breadcrumb
+                    const breadcrumbCat = document.getElementById('breadcrumb-category');
+                    breadcrumbCat.textContent = product.subCategory.category?.name || 'Categoria';
+                    breadcrumbCat.href = `/categoria.html?categoryId=${product.subCategory.categoryId}`;
+                    breadcrumbCat.classList.remove('hidden');
+                    document.getElementById('breadcrumb-separator').classList.remove('hidden');
+                }
+
+                loadingEl.classList.add('hidden');
+                contentEl.classList.remove('hidden');
+
+                // Load suggested products
+                await loadSuggestedProducts();
+
+                // Load bundle widget
+                await loadBundleWidget(product);
+
+            } catch (error) {
+                console.error(error);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function setupVariantSelectors(product) {
+            const variantSection = document.getElementById('variant-section');
+            const variantSelectors = document.getElementById('variant-selectors');
+            
+            // Group variants by attribute
+            const attributeMap = new Map();
+            product.variants.forEach(variant => {
+                if (!attributeMap.has(variant.attribute)) {
+                    attributeMap.set(variant.attribute, []);
+                }
+                attributeMap.get(variant.attribute).push(variant);
+            });
+
+            // Attribute labels in Portuguese
+            const attributeLabels = {
+                'amperage': 'Amperagem',
+                'voltage': 'Tensão',
+                'color': 'Cor',
+                'size': 'Tamanho',
+                'gauge': 'Bitola',
+                'power': 'Potência'
+            };
+
+            // Render selectors
+            variantSelectors.innerHTML = '';
+            window.selectedVariants = new Map();
+
+            attributeMap.forEach((variants, attribute) => {
+                const label = attributeLabels[attribute] || attribute.charAt(0).toUpperCase() + attribute.slice(1);
+                
+                const selectorDiv = document.createElement('div');
+                selectorDiv.innerHTML = `
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">${label}</label>
+                    <div class="flex flex-wrap gap-2">
+                        ${variants.map(variant => `
+                            <button type="button" 
+                                class="variant-btn px-4 py-2 rounded-lg border-2 border-gray-300 hover:border-primary transition text-sm font-medium ${variant.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                data-attribute="${attribute}"
+                                data-variant-id="${variant.id}"
+                                data-variant-name="${variant.name}"
+                                data-stock="${variant.stock}"
+                                data-price="${variant.price || ''}"
+                                ${variant.stock === 0 ? 'disabled' : ''}>
+                                ${variant.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                variantSelectors.appendChild(selectorDiv);
+            });
+
+            // Add event listeners
+            variantSelectors.querySelectorAll('.variant-btn').forEach(btn => {
+                btn.addEventListener('click', () => selectVariant(btn));
+            });
+
+            variantSection.classList.remove('hidden');
+        }
+
+        function selectVariant(btn) {
+            const attribute = btn.dataset.attribute;
+            const variantId = btn.dataset.variantId;
+            const variantName = btn.dataset.variantName;
+            const stock = parseInt(btn.dataset.stock);
+            const variantPrice = btn.dataset.price;
+
+            // Update selected state
+            document.querySelectorAll(`.variant-btn[data-attribute="${attribute}"]`).forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                b.classList.add('border-gray-300');
+            });
+            btn.classList.remove('border-gray-300');
+            btn.classList.add('border-primary', 'bg-primary', 'text-white');
+
+            // Store selection
+            window.selectedVariants.set(attribute, {
+                id: variantId,
+                name: variantName,
+                stock: stock,
+                price: variantPrice ? parseFloat(variantPrice) : null
+            });
+
+            // Update product display based on variant
+            updateProductForVariant();
+        }
+
+        function updateProductForVariant() {
+            const product = window.currentProduct;
+            if (!product) return;
+
+            // Calculate effective price and stock from selected variants
+            let effectivePrice = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+            let effectiveStock = product.stock;
+            let variantInfo = [];
+
+            window.selectedVariants.forEach((variant, attribute) => {
+                variantInfo.push(`${attribute}: ${variant.name}`);
+                if (variant.price) {
+                    effectivePrice = variant.price;
+                }
+                if (variant.stock !== null && variant.stock !== undefined) {
+                    effectiveStock = variant.stock;
+                }
+            });
+
+            // Update price display
+            const parcelas = 3;
+            const valorParcela = effectivePrice / parcelas;
+            const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
+            const precoComDesconto = desconto > 0 ? (effectivePrice * (1 - desconto / 100)).toFixed(2) : effectivePrice.toFixed(2);
+
+            document.getElementById('product-price').textContent = `R$ ${precoComDesconto}`;
+            document.getElementById('installment-info').textContent = `ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} sem juros`;
+
+            if (desconto > 0) {
+                document.getElementById('old-price').textContent = `R$ ${effectivePrice.toFixed(2)}`;
+                document.getElementById('old-price').classList.remove('hidden');
+                document.getElementById('discount-badge').textContent = `-${desconto}%`;
+                document.getElementById('discount-badge').classList.remove('hidden');
+            }
+
+            // Update stock display
+            updateStockDisplay({ ...product, stock: effectiveStock });
+        }
+
+        function updateStockDisplay(product) {
+            const stockEl = document.getElementById('stock-status');
+            const addBtn = document.getElementById('add-to-cart-btn');
+            const stock = product.stock || 0;
+
+            if (stock > 0) {
+                stockEl.textContent = `${stock} unidades disponíveis`;
+                stockEl.className = 'font-semibold text-green-600';
+                addBtn.disabled = false;
+                addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                stockEl.textContent = 'Produto indisponível';
+                stockEl.className = 'font-semibold text-red-600';
+                addBtn.disabled = true;
+                addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function handleAddToCart() {
+            const product = window.currentProduct;
+            if (!product) return;
+
+            // Check if product has variants and if all required variants are selected
+            if (product.hasVariants && product.variants && product.variants.length > 0) {
+                const uniqueAttributes = [...new Set(product.variants.map(v => v.attribute))];
+                if (window.selectedVariants.size < uniqueAttributes.length) {
+                    alert('Por favor, selecione todas as variantes antes de adicionar ao carrinho.');
+                    return;
+                }
+            }
+
+            // Build product data with variant info
+            let productName = product.name;
+            let productPrice = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+            let productStock = product.stock;
+            let variantInfo = [];
+
+            if (window.selectedVariants && window.selectedVariants.size > 0) {
+                window.selectedVariants.forEach((variant, attribute) => {
+                    variantInfo.push(`${attribute}: ${variant.name}`);
+                    if (variant.price) {
+                        productPrice = variant.price;
+                    }
+                    if (variant.stock !== null && variant.stock !== undefined) {
+                        productStock = variant.stock;
+                    }
+                });
+            }
+
+            if (variantInfo.length > 0) {
+                productName = `${product.name} - ${variantInfo.join(', ')}`;
+            }
+
+            // Check stock
+            if (productStock <= 0) {
+                alert('Esta variante está indisponível.');
+                return;
+            }
+
+            // Get main image
+            let mainImageUrl = 'https://placehold.co/600x600?text=Produto';
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                mainImageUrl = product.images[0];
+            } else if (product.image_url) {
+                mainImageUrl = product.image_url;
+            }
+
+            const productData = {
+                id: product.id,
+                name: productName,
+                price: productPrice,
+                image: mainImageUrl,
+                variantInfo: variantInfo.length > 0 ? variantInfo : null,
+                variantIds: window.selectedVariants ? Array.from(window.selectedVariants.values()).map(v => v.id) : null
+            };
+
+            if (AppCore.addToCart) {
+                AppCore.addToCart(productData);
+            }
+        }
+
+        function renderSpecsTable(product) {
+            const specsTable = document.getElementById('specs-table');
+            const specs = [];
+            
+            // Basic specs
+            if (product.brand) specs.push({ label: 'Marca', value: product.brand });
+            if (product.model) specs.push({ label: 'Modelo', value: product.model });
+            if (product.voltage) specs.push({ label: 'Tensão', value: product.voltage });
+            
+            // Try to extract from specifications JSON if available
+            if (product.specifications) {
+                try {
+                    const specData = typeof product.specifications === 'string' 
+                        ? JSON.parse(product.specifications) 
+                        : product.specifications;
+                    
+                    if (specData.power) specs.push({ label: 'Potência', value: specData.power });
+                    if (specData.amperage) specs.push({ label: 'Amperagem', value: specData.amperage });
+                    if (specData.wattage) specs.push({ label: 'Wattagem', value: specData.wattage });
+                    if (specData.dimensions) specs.push({ label: 'Dimensões', value: specData.dimensions });
+                    if (specData.weight) specs.push({ label: 'Peso', value: specData.weight });
+                    if (specData.material) specs.push({ label: 'Material', value: specData.material });
+                    if (specData.color) specs.push({ label: 'Cor', value: specData.color });
+                    if (specData.gauge) specs.push({ label: 'Bitola', value: specData.gauge });
+                    if (specData.length) specs.push({ label: 'Comprimento', value: specData.length });
+                } catch (e) {
+                    console.error('Error parsing specifications:', e);
+                }
+            }
+            
+            if (specs.length === 0) {
+                specsTable.innerHTML = '<p class="p-6 text-gray-500 text-center">Nenhuma especificação técnica disponível.</p>';
+                return;
+            }
+            
+            specsTable.innerHTML = `
+                <table class="w-full">
+                    <tbody>
+                        ${specs.map(spec => `
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="px-6 py-4 bg-gray-50 font-medium text-gray-700 w-1/3">${spec.label}</td>
+                                <td class="px-6 py-4 text-gray-900">${spec.value}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function setupShippingCalculator() {
+            const cepInput = document.getElementById('cep-input');
+            const calculateBtn = document.getElementById('calculate-shipping-btn');
+            const shippingResult = document.getElementById('shipping-result');
+            const shippingPac = document.getElementById('shipping-pac');
+            const shippingSedex = document.getElementById('shipping-sedex');
+
+            // Allow only numbers
+            cepInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+
+            calculateBtn.addEventListener('click', async () => {
+                const cep = cepInput.value.trim();
+                if (cep.length !== 8) {
+                    alert('Por favor, digite um CEP válido com 8 dígitos.');
+                    return;
+                }
+
+                calculateBtn.disabled = true;
+                calculateBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Calculando...';
+
+                try {
+                    // Call Correios API (simulated for now - would need backend proxy)
+                    // Using a free API for demonstration
+                    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                    const addressData = await response.json();
+                    
+                    if (addressData.erro) {
+                        throw new Error('CEP não encontrado');
+                    }
+
+                    // Simulate shipping calculation (in production, use real Correios API via backend)
+                    // This is a mock calculation
+                    const pacPrice = (Math.random() * 20 + 15).toFixed(2);
+                    const pacDays = Math.floor(Math.random() * 5 + 5);
+                    const sedexPrice = (Math.random() * 30 + 25).toFixed(2);
+                    const sedexDays = Math.floor(Math.random() * 3 + 2);
+
+                    shippingPac.textContent = `R$ ${pacPrice} (${pacDays} dias úteis)`;
+                    shippingSedex.textContent = `R$ ${sedexPrice} (${sedexDays} dias úteis)`;
+                    shippingResult.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error('Shipping calculation error:', error);
+                    alert('Erro ao calcular frete. Verifique o CEP e tente novamente.');
+                } finally {
+                    calculateBtn.disabled = false;
+                    calculateBtn.innerHTML = '<i class="ph ph-calculator"></i> Calcular';
+                }
+            });
+        }
+
+        function setupWhatsAppButton(product) {
+            const whatsappBtn = document.getElementById('whatsapp-specialist-btn');
+            
+            // Get WhatsApp number from config or use default
+            const whatsappNumber = '5551999999999'; // Would come from config in production
+            
+            const message = encodeURIComponent(
+                `Olá! Tenho uma dúvida técnica sobre o produto: ${product.name}\n\nLink: ${window.location.href}`
+            );
+            
+            whatsappBtn.href = `https://wa.me/${whatsappNumber}?text=${message}`;
+        }
+
+        async function loadBundleWidget(product) {
+            const bundleLoading = document.getElementById('bundle-loading');
+            const bundleContent = document.getElementById('bundle-content');
+            const bundleEmpty = document.getElementById('bundle-empty');
+
+            bundleLoading.classList.remove('hidden');
+            bundleContent.classList.add('hidden');
+            bundleEmpty.classList.add('hidden');
+
+            try {
+                // Fetch products from same category
+                const categoryId = product.subCategory?.categoryId;
+                if (!categoryId) {
+                    bundleLoading.classList.add('hidden');
+                    bundleEmpty.classList.remove('hidden');
+                    return;
+                }
+
+                const prodRes = await fetch('/api/products');
+                const allProducts = await prodRes.json();
+                
+                // Find complementary products (same category, different product)
+                const complementary = allProducts.filter(p => 
+                    p.id !== product.id && 
+                    p.subCategory?.categoryId === categoryId
+                );
+
+                if (complementary.length === 0) {
+                    bundleLoading.classList.add('hidden');
+                    bundleEmpty.classList.remove('hidden');
+                    return;
+                }
+
+                // Pick a random complementary product
+                const complement = complementary[Math.floor(Math.random() * complementary.length)];
+                const complementPrice = typeof complement.price === 'number' ? complement.price : parseFloat(complement.price) || 0;
+                const bundleDiscount = 0.1; // 10% discount on bundle
+                const totalPrice = price + complementPrice;
+                const discountedTotal = totalPrice * (1 - bundleDiscount);
+                const savings = totalPrice - discountedTotal;
+
+                // Render bundle
+                let mainImageUrl = 'https://placehold.co/200x200?text=Produto';
+                if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                    mainImageUrl = product.images[0];
+                } else if (product.image_url) {
+                    mainImageUrl = product.image_url;
+                }
+
+                let complementImageUrl = 'https://placehold.co/200x200?text=Produto';
+                if (complement.images && Array.isArray(complement.images) && complement.images.length > 0) {
+                    complementImageUrl = complement.images[0];
+                } else if (complement.image_url) {
+                    complementImageUrl = complement.image_url;
+                }
+
+                document.getElementById('bundle-main-image').src = mainImageUrl;
+                document.getElementById('bundle-main-name').textContent = product.name;
+                document.getElementById('bundle-main-price').textContent = `R$ ${price.toFixed(2)}`;
+
+                document.getElementById('bundle-complement-image').src = complementImageUrl;
+                document.getElementById('bundle-complement-name').textContent = complement.name;
+                document.getElementById('bundle-complement-price').textContent = `R$ ${complementPrice.toFixed(2)}`;
+
+                document.getElementById('bundle-total').textContent = `R$ ${discountedTotal.toFixed(2)}`;
+                document.getElementById('bundle-savings').textContent = `Economize R$ ${savings.toFixed(2)}`;
+
+                bundleLoading.classList.add('hidden');
+                bundleContent.classList.remove('hidden');
+
+                // Setup bundle checkbox and button
+                const bundleCheckbox = document.getElementById('bundle-checkbox');
+                const addBundleBtn = document.getElementById('add-bundle-btn');
+
+                addBundleBtn.addEventListener('click', () => {
+                    // Add main product
+                    if (AppCore.addToCart) {
+                        AppCore.addToCart({
+                            id: product.id,
+                            name: product.name,
+                            price: price,
+                            image: mainImageUrl
+                        });
+                    }
+
+                    // Add complement if checked
+                    if (bundleCheckbox.checked && AppCore.addToCart) {
+                        AppCore.addToCart({
+                            id: complement.id,
+                            name: complement.name,
+                            price: complementPrice,
+                            image: complementImageUrl
+                        });
+                    }
+
+                    alert(bundleCheckbox.checked 
+                        ? 'Kit adicionado ao carrinho!' 
+                        : 'Produto adicionado ao carrinho!');
+                });
+
+            } catch (error) {
+                console.error('Error loading bundle widget:', error);
+                bundleLoading.classList.add('hidden');
+                bundleEmpty.classList.remove('hidden');
+            }
+        }
+
+        async function loadSuggestedProducts() {
+            const suggestedLoading = document.getElementById('suggested-loading');
+            const suggestedEmpty = document.getElementById('suggested-empty');
+            const suggestedGrid = document.getElementById('suggested-grid');
+
+            suggestedLoading.classList.remove('hidden');
+            suggestedEmpty.classList.add('hidden');
+            suggestedGrid.classList.add('hidden');
+
+            try {
+                const categoryHistory = AppCore.getCategoryHistory ? AppCore.getCategoryHistory() : [];
+                const categoryIds = categoryHistory.length > 0 ? categoryHistory.join(',') : null;
+                
+                const suggested = await AppCore.fetchSuggestedProducts(categoryIds);
+                
+                suggestedLoading.classList.add('hidden');
+
+                if (!suggested || suggested.length === 0) {
+                    suggestedEmpty.classList.remove('hidden');
+                    return;
+                }
+
+                suggestedGrid.innerHTML = suggested.map(p => renderProductCard(p)).join('');
+                suggestedGrid.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erro ao carregar produtos sugeridos:', error);
+                suggestedLoading.classList.add('hidden');
+                suggestedEmpty.classList.remove('hidden');
+            }
+        }
+
+        // Previne comportamento padrão de links "#"
+        document.querySelectorAll('a[href="#"]').forEach(l => l.addEventListener('click', e => e.preventDefault()));
+
+        loadProduct();
+    })();
+</script>
+</body>
+</html>

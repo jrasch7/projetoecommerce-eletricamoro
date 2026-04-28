@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Checkout · Finalizar Compra</title>
+    
+    <!-- Tailwind + Phosphor + Inter -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0a2540',
+                        secondary: '#1a365d',
+                        accent: '#e74c3c',
+                        'light-gray': '#f4f4f4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        button, a { transition: all 0.3s ease; }
+        
+        /* Trust Bar Animations */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .trust-icon { animation: pulse-soft 2s ease-in-out infinite; }
+        
+        /* Loading spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin { animation: spin 1s linear infinite; }
+        
+        /* Toast animations */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .toast-enter {
+            animation: slideIn 0.3s ease forwards;
+        }
+        .toast-exit {
+            animation: fadeOut 0.2s ease forwards;
+        }
+    </style>
+</head>
+<body class="bg-light-gray font-sans text-gray-900 min-h-screen">
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 w-72 md:w-96"></div>
+
+<!-- Header -->
+<header id="checkoutHeader" class="bg-primary text-white py-4 shadow-md sticky top-0 z-20">
+    <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img id="headerLogo" src="img/logo-moro.webp" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
+            <h1 id="headerTitle" class="text-lg md:text-xl font-bold uppercase tracking-wider">Finalizar Compra</h1>
+        </div>
+        <a href="/" class="text-sm hover:text-accent transition flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+            <i class="ph ph-arrow-left"></i> Continuar Comprando
+        </a>
+    </div>
+</header>
+
+<!-- Trust Bar -->
+<div id="trustBar" class="bg-white border-b border-gray-200 py-3">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm">
+            <div class="flex items-center gap-2 text-gray-600">
+                <i class="ph ph-lock-key trust-icon text-green-600 text-xl"></i>
+                <span class="font-medium">Compra Segura</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+                <i class="ph ph-shield-check trust-icon text-blue-600 text-xl"></i>
+                <span class="font-medium">SSL Certificado</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+                <i class="ph ph-check-circle trust-icon text-emerald-600 text-xl"></i>
+                <span class="font-medium">Dados Protegidos</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-600">
+                <i class="ph ph-credit-card trust-icon text-accent text-xl"></i>
+                <span class="font-medium">Pagamento Verificado</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card Brands Bar -->
+<div id="cardBrandsBar" class="bg-gray-50 border-b border-gray-200 py-2">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <span class="text-xs text-gray-500 font-medium">Aceitamos:</span>
+            <div id="cardBrandsContainer" class="flex items-center gap-3">
+                <!-- Card brands will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Order Summary -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                    <i class="ph ph-shopping-cart text-accent"></i> Resumo do Pedido
+                </h2>
+                <div id="orderItems" class="space-y-4">
+                    <!-- Order items will be dynamically loaded -->
+                </div>
+                <div class="border-t border-gray-200 mt-6 pt-4">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span>Total:</span>
+                        <span id="orderTotal" class="text-accent">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
+                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                    <i class="ph ph-user text-accent"></i> Seus Dados
+                </h2>
+                <form id="customerForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                        <input type="text" id="customerName" required placeholder="Seu nome completo"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                        <input type="email" id="customerEmail" required placeholder="seu@email.com"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone/WhatsApp *</label>
+                        <input type="tel" id="customerPhone" required placeholder="(00) 00000-0000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço de Entrega *</label>
+                        <textarea id="customerAddress" required rows="3" placeholder="Rua, número, bairro, cidade, UF"
+                                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 sticky top-24">
+                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
+                    <i class="ph ph-credit-card text-accent"></i> Pagamento
+                </h2>
+                
+                <div id="paymentLoading" class="text-center py-8">
+                    <i class="ph ph-spinner animate-spin text-4xl text-primary mb-2"></i>
+                    <p class="text-gray-500 text-sm">Carregando opções de pagamento...</p>
+                </div>
+
+                <div id="paymentContent" class="hidden space-y-4">
+                    <!-- Payment provider info -->
+                    <div id="paymentProviderInfo" class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+                        <p>Pagamento processado via: <strong id="providerName">Carregando...</strong></p>
+                    </div>
+
+                    <!-- WhatsApp Payment -->
+                    <div id="whatsappPayment" class="hidden space-y-4">
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="ph ph-whatsapp-logo text-green-600 text-2xl"></i>
+                                <div>
+                                    <h3 class="font-bold text-green-800">Pagamento via WhatsApp</h3>
+                                    <p class="text-xs text-green-600">Você será redirecionado para finalizar o pedido</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="whatsappPayBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                            <i class="ph ph-whatsapp-logo text-xl"></i> Finalizar no WhatsApp
+                        </button>
+                    </div>
+
+                    <!-- PagBank Transparent Checkout -->
+                    <div id="pagbankPayment" class="hidden space-y-4">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="ph ph-bank text-blue-600 text-2xl"></i>
+                                <div>
+                                    <h3 class="font-bold text-blue-800">PagBank Checkout Transparente</h3>
+                                    <p class="text-xs text-blue-600">Pague sem sair do site</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="pagbankCheckoutContainer">
+                            <!-- PagBank checkout will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- MercadoPago Payment -->
+                    <div id="mercadopagoPayment" class="hidden space-y-4">
+                        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="ph ph-handshake text-sky-600 text-2xl"></i>
+                                <div>
+                                    <h3 class="font-bold text-sky-800">MercadoPago</h3>
+                                    <p class="text-xs text-sky-600">Diversas opções de pagamento</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="mercadopagoCheckoutContainer">
+                            <!-- MercadoPago checkout will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Cielo Payment -->
+                    <div id="cieloPayment" class="hidden space-y-4">
+                        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <i class="ph ph-credit-card text-orange-600 text-2xl"></i>
+                                <div>
+                                    <h3 class="font-bold text-orange-800">Cielo</h3>
+                                    <p class="text-xs text-orange-600">Pagamento com cartão</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="cieloCheckoutContainer">
+                            <!-- Cielo checkout will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-primary text-white py-6 mt-12">
+    <div class="container mx-auto px-4 text-center">
+        <p class="text-white/70 text-sm">© 2026 Elétrica Moro. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script>
+    (function() {
+        "use strict";
+        
+        const API_BASE = '/api';
+        const PAYMENTS_CONFIG_URL = `${API_BASE}/payments/config`;
+        const CONFIG_URL = `${API_BASE}/config`;
+        
+        let paymentConfig = null;
+        let storeConfig = null;
+        let cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : 
+                           type === 'error' ? 'bg-red-500' : 
+                           type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+            
+            const icon = type === 'success' ? 'ph-check-circle' : 
+                        type === 'error' ? 'ph-x-circle' : 
+                        type === 'warning' ? 'ph-warning' : 'ph-info';
+            
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 toast-enter`;
+            toast.innerHTML = `
+                <i class="ph ${icon} text-xl"></i>
+                <span class="flex-1 text-sm font-medium">${message}</span>
+                <button class="text-white/80 hover:text-white" onclick="this.parentElement.remove()">
+                    <i class="ph ph-x"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 200);
+            }, 5000);
+        }
+        
+        // Card brand icons mapping
+        const cardBrandIcons = {
+            visa: '<div class="w-10 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">VISA</div>',
+            mastercard: '<div class="w-10 h-6 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">MC</div>',
+            amex: '<div class="w-10 h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">AMEX</div>',
+            elo: '<div class="w-10 h-6 bg-yellow-500 rounded flex items-center justify-center text-black text-xs font-bold">ELO</div>',
+            hipercard: '<div class="w-10 h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">HIPER</div>'
+        };
+        
+        // Load store configuration for visual customization
+        async function loadStoreConfig() {
+            try {
+                const res = await fetch(CONFIG_URL);
+                const data = await res.json();
+                storeConfig = data;
+                
+                if (data.config) {
+                    const config = data.config;
+                    
+                    // Apply colors
+                    if (config.primaryColor) {
+                        document.documentElement.style.setProperty('--primary', config.primaryColor);
+                        tailwind.config.theme.extend.colors.primary = config.primaryColor;
+                    }
+                    if (config.accentColor) {
+                        document.documentElement.style.setProperty('--accent', config.accentColor);
+                        tailwind.config.theme.extend.colors.accent = config.accentColor;
+                    }
+                    
+                    // Update logo
+                    if (config.logo) {
+                        document.getElementById('headerLogo').src = config.logo;
+                    }
+                    
+                    // Update store name
+                    if (config.storeName) {
+                        document.getElementById('headerTitle').textContent = config.storeName;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading store config:', err);
+            }
+        }
+        
+        // Load payment configuration
+        async function loadPaymentConfig() {
+            try {
+                const res = await fetch(PAYMENTS_CONFIG_URL);
+                const data = await res.json();
+                paymentConfig = data;
+                
+                // Update provider name
+                document.getElementById('providerName').textContent = data.activeProvider || 'WhatsApp';
+                
+                // Show appropriate payment method
+                showPaymentMethod(data.activeProvider);
+                
+                // Load card brands
+                if (data.cardBrands && Array.isArray(data.cardBrands)) {
+                    renderCardBrands(data.cardBrands);
+                }
+                
+                document.getElementById('paymentLoading').classList.add('hidden');
+                document.getElementById('paymentContent').classList.remove('hidden');
+            } catch (err) {
+                console.error('Error loading payment config:', err);
+                document.getElementById('paymentLoading').innerHTML = `
+                    <p class="text-red-500 text-sm">Erro ao carregar configurações de pagamento</p>
+                `;
+            }
+        }
+        
+        // Show appropriate payment method based on provider
+        function showPaymentMethod(provider) {
+            // Hide all payment methods
+            document.getElementById('whatsappPayment').classList.add('hidden');
+            document.getElementById('pagbankPayment').classList.add('hidden');
+            document.getElementById('mercadopagoPayment').classList.add('hidden');
+            document.getElementById('cieloPayment').classList.add('hidden');
+            
+            // Show selected payment method
+            switch(provider) {
+                case 'WhatsApp':
+                    document.getElementById('whatsappPayment').classList.remove('hidden');
+                    break;
+                case 'PagBank':
+                    document.getElementById('pagbankPayment').classList.remove('hidden');
+                    initPagBankCheckout();
+                    break;
+                case 'MercadoPago':
+                    document.getElementById('mercadopagoPayment').classList.remove('hidden');
+                    initMercadoPagoCheckout();
+                    break;
+                case 'Cielo':
+                    document.getElementById('cieloPayment').classList.remove('hidden');
+                    initCieloCheckout();
+                    break;
+                default:
+                    document.getElementById('whatsappPayment').classList.remove('hidden');
+            }
+        }
+        
+        // Render card brands
+        function renderCardBrands(brands) {
+            const container = document.getElementById('cardBrandsContainer');
+            container.innerHTML = brands.map(brand => cardBrandIcons[brand] || '').join('');
+        }
+        
+        // Initialize PagBank Transparent Checkout
+        function initPagBankCheckout() {
+            const container = document.getElementById('pagbankCheckoutContainer');
+            container.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número do Cartão</label>
+                        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Validade</label>
+                            <input type="text" id="cardExpiry" placeholder="MM/AA"
+                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                            <input type="text" id="cardCvv" placeholder="123"
+                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome no Cartão</label>
+                        <input type="text" id="cardName" placeholder="Nome como está no cartão"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <button id="pagbankPayBtn" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all shadow-md">
+                        Pagar Agora
+                    </button>
+                </div>
+            `;
+            
+            // Add payment handler
+            document.getElementById('pagbankPayBtn').addEventListener('click', processPagBankPayment);
+        }
+        
+        // Initialize MercadoPago Checkout
+        function initMercadoPagoCheckout() {
+            const container = document.getElementById('mercadopagoCheckoutContainer');
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <p class="text-sm text-gray-600 mb-3">Checkout MercadoPago será carregado aqui</p>
+                    <button id="mpPayBtn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-xl transition-all shadow-md">
+                        Continuar com MercadoPago
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('mpPayBtn').addEventListener('click', processMercadoPagoPayment);
+        }
+        
+        // Initialize Cielo Checkout
+        function initCieloCheckout() {
+            const container = document.getElementById('cieloCheckoutContainer');
+            container.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Número do Cartão</label>
+                        <input type="text" id="cieloCardNumber" placeholder="0000 0000 0000 0000"
+                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Validade</label>
+                            <input type="text" id="cieloCardExpiry" placeholder="MM/AA"
+                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                            <input type="text" id="cieloCardCvv" placeholder="123"
+                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                        </div>
+                    </div>
+                    <button id="cieloPayBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-md">
+                        Pagar com Cielo
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('cieloPayBtn').addEventListener('click', processCieloPayment);
+        }
+        
+        // Process WhatsApp payment
+        document.getElementById('whatsappPayBtn').addEventListener('click', processWhatsAppPayment);
+        
+        async function processWhatsAppPayment() {
+            const customerData = getCustomerData();
+            if (!validateCustomerData(customerData)) return;
+            
+            const orderData = {
+                customer: customerData.name,
+                email: customerData.email,
+                phone: customerData.phone,
+                address: customerData.address,
+                items: cartItems,
+                total: calculateTotal()
+            };
+            
+            // Format WhatsApp message
+            const message = formatWhatsAppMessage(orderData);
+            const whatsappNumber = paymentConfig.apiKey || '5551999999999';
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            
+            window.open(whatsappUrl, '_blank');
+            
+            // Save order to backend
+            await saveOrder(orderData, 'WhatsApp');
+        }
+        
+        async function processPagBankPayment() {
+            const customerData = getCustomerData();
+            if (!validateCustomerData(customerData)) return;
+            
+            // Disable button and show loading
+            const payBtn = document.getElementById('pagbankPayBtn');
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Processando...';
+            
+            const orderData = {
+                orderId: null, // Will be set after order creation
+                customerName: customerData.name,
+                customerEmail: customerData.email,
+                customerPhone: customerData.phone,
+                customerTaxId: null,
+                cardNumber: document.getElementById('cardNumber').value.replace(/\s/g, ''),
+                cardExpiry: document.getElementById('cardExpiry').value,
+                cardCvv: document.getElementById('cardCvv').value,
+                cardName: document.getElementById('cardName').value,
+                total: calculateTotal(),
+                items: cartItems
+            };
+            
+            try {
+                // First, create the order
+                const orderRes = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer: customerData.name,
+                        total: orderData.total,
+                        payment: 'PagBank',
+                        paymentMethod: 'Cartão de Crédito - PagBank',
+                        address: customerData.address,
+                        items: cartItems
+                    })
+                });
+                
+                if (!orderRes.ok) {
+                    throw new Error('Erro ao criar pedido');
+                }
+                
+                const order = await orderRes.json();
+                orderData.orderId = order.id;
+                
+                // Process payment through backend
+                const paymentRes = await fetch(`${API_BASE}/payments/process`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const paymentResult = await paymentRes.json();
+                
+                if (paymentResult.status === 'approved') {
+                    // Save order details for success page
+                    localStorage.setItem('lastOrderId', order.id);
+                    localStorage.setItem('lastOrderTotal', orderData.total.toString());
+                    localStorage.setItem('lastPaymentMethod', 'Cartão de Crédito - PagBank');
+                    localStorage.setItem('lastTransactionId', paymentResult.transactionId);
+                    
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    
+                    // Redirect to success page
+                    window.location.href = `/sucesso.html?orderId=${order.id}&total=${orderData.total}&paymentMethod=Cartão de Crédito - PagBank&transactionId=${paymentResult.transactionId}`;
+                } else {
+                    showToast('Pagamento recusado. Tente outro cartão.', 'error');
+                    // Re-enable button
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = 'Pagar Agora';
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showToast('Erro ao processar pagamento. Tente novamente.', 'error');
+                // Re-enable button
+                payBtn.disabled = false;
+                payBtn.innerHTML = 'Pagar Agora';
+            }
+        }
+        
+        async function processMercadoPagoPayment() {
+            const customerData = getCustomerData();
+            if (!validateCustomerData(customerData)) return;
+            
+            // TODO: Implement MercadoPago preference creation
+            alert('MercadoPago integration - checkout would open here');
+        }
+        
+        async function processCieloPayment() {
+            const customerData = getCustomerData();
+            if (!validateCustomerData(customerData)) return;
+            
+            // TODO: Implement Cielo payment processing
+            alert('Cielo integration - payment processing would happen here');
+        }
+        
+        function formatWhatsAppMessage(orderData) {
+            const items = orderData.items.map(item => 
+                `${item.name} - R$ ${item.price.toFixed(2)} x ${item.quantity}`
+            ).join('\n');
+            
+            return `🛒 *NOVO PEDIDO*
+
+*Cliente:* ${orderData.customer}
+*E-mail:* ${orderData.email}
+*Telefone:* ${orderData.phone}
+
+*Endereço:*
+${orderData.address}
+
+*Itens:*
+${items}
+
+*Total:* R$ ${orderData.total.toFixed(2)}`;
+        }
+        
+        function getCustomerData() {
+            return {
+                name: document.getElementById('customerName').value,
+                email: document.getElementById('customerEmail').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value
+            };
+        }
+        
+        function validateCustomerData(data) {
+            if (!data.name || !data.email || !data.phone || !data.address) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return false;
+            }
+            return true;
+        }
+        
+        function calculateTotal() {
+            return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+        
+        async function saveOrder(orderData, paymentMethod) {
+            try {
+                const res = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer: orderData.customer,
+                        total: orderData.total,
+                        payment: paymentMethod,
+                        address: orderData.address,
+                        items: orderData.items
+                    })
+                });
+                
+                if (res.ok) {
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                }
+            } catch (err) {
+                console.error('Error saving order:', err);
+            }
+        }
+        
+        // Render order items
+        function renderOrderItems() {
+            const container = document.getElementById('orderItems');
+            
+            if (cartItems.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="ph ph-shopping-cart text-4xl mb-2"></i>
+                        <p>Seu carrinho está vazio</p>
+                        <a href="/" class="text-primary hover:underline mt-2 inline-block">Voltar às compras</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = cartItems.map(item => `
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                        <i class="ph ph-package text-2xl text-gray-400"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-medium text-gray-800">${item.name}</h3>
+                        <p class="text-sm text-gray-500">Quantidade: ${item.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-primary">R$ ${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('orderTotal').textContent = `R$ ${calculateTotal().toFixed(2)}`;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStoreConfig();
+            loadPaymentConfig();
+            renderOrderItems();
+        });
+    })();
+</script>
+</body>
+</html>
