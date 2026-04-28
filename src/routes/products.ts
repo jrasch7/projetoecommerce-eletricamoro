@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { upload } from "../middleware/upload.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
+import { uploadFile, deleteFileByUrl } from "../lib/storage.js";
 import { CreateProductSchema, UpdateProductSchema } from "../schemas/product.schema.js";
 
 const router = Router();
@@ -61,6 +62,7 @@ router.get("/", asyncHandler(async (req, res) => {
 router.post("/", upload.array("images", 5), asyncHandler(async (req, res) => {
   const parsed = CreateProductSchema.parse(req.body);
   const files = (req.files as Express.Multer.File[]) ?? [];
+  const imageUrls = await Promise.all(files.map((f) => uploadFile(f)));
   const product = await prisma.product.create({
     data: {
       name: parsed.name,
@@ -73,7 +75,7 @@ router.post("/", upload.array("images", 5), asyncHandler(async (req, res) => {
       brand: parsed.brand,
       model: parsed.model,
       voltage: parsed.voltage,
-      images: files.map((f) => `/uploads/${f.filename}`),
+      images: imageUrls,
     },
   });
   res.status(201).json(product);
@@ -95,15 +97,29 @@ router.put("/:id", upload.array("images", 5), asyncHandler(async (req, res) => {
   if (parsed.brand !== undefined) data.brand = parsed.brand;
   if (parsed.model !== undefined) data.model = parsed.model;
   if (parsed.voltage !== undefined) data.voltage = parsed.voltage;
-  if (files.length > 0) data.images = files.map((f) => `/uploads/${f.filename}`);
+
+  let previousImages: string[] = [];
+  if (files.length > 0) {
+    const previous = await prisma.product.findUnique({ where: { id }, select: { images: true } });
+    if (previous?.images && Array.isArray(previous.images)) {
+      previousImages = previous.images.filter((u): u is string => typeof u === "string");
+    }
+    data.images = await Promise.all(files.map((f) => uploadFile(f)));
+  }
 
   const product = await prisma.product.update({ where: { id }, data });
+  await Promise.all(previousImages.map((u) => deleteFileByUrl(u)));
   res.json(product);
 }));
 
 router.delete("/:id", asyncHandler(async (req, res) => {
   const id = req.params["id"] as string;
+  const previous = await prisma.product.findUnique({ where: { id }, select: { images: true } });
   await prisma.product.delete({ where: { id } });
+  if (previous?.images && Array.isArray(previous.images)) {
+    const urls = previous.images.filter((u): u is string => typeof u === "string");
+    await Promise.all(urls.map((u) => deleteFileByUrl(u)));
+  }
   res.status(204).send();
 }));
 
