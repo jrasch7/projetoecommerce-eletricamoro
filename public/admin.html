@@ -2502,7 +2502,7 @@ if (paymentConfigForm) {
         const provider = document.getElementById('paymentProvider')?.value;
         if (!provider) return;
         
-        const formData: any = {
+        const formData = {
             activeProvider: provider,
             webhookUrl: document.getElementById('webhookUrl')?.value,
         };
