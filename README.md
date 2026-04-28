@@ -295,11 +295,54 @@ npx tsx scripts/migrate-uploads.ts   # migra imagens locais → Supabase Storage
 
 ## 🚦 Roadmap
 
-### Próximos
-- [ ] **Cupons & descontos** (modelo `Coupon` + UI admin + apply no checkout)
-- [ ] **Carrinho persistido + recuperação de venda** (sync com DB + email de carrinho abandonado)
-- [ ] **Newsletter & ofertas** (lista + dispatcher de email)
-- [ ] **Wishlist/Interesses** (botão coração nos produtos + UI em minha-conta)
+### 📍 Onde paramos (última sessão: 2026-04-28)
+
+**Concluído na Phase A:**
+- ✅ Auth unificada via Supabase Auth (cliente + admin no mesmo sistema, distinção via `user_metadata.is_admin`)
+- ✅ Eliminado JWT custom + bcrypt + `Customer.password` (deps removidas)
+- ✅ Storage migrado para Supabase (`uploadFile`/`deleteFileByUrl` em `src/lib/storage.ts`)
+- ✅ Modal de login/cadastro/forgot na loja (`main-components.js`)
+- ✅ `/login.html`, `/set-password.html`, `/minha-conta.html` — universais
+- ✅ Aba "Equipe" no admin com convite por email + revogar acesso
+- ✅ Redesign visual com identidade SulCore + footer em todas as telas admin
+- ✅ Anti-FOUC: SSR de tema em todas as páginas + cache localStorage
+
+**Próxima sessão começa por aqui — Phase B-a: Cupons & Descontos**
+
+Plano detalhado:
+1. **Schema** — adicionar modelo `Coupon` no `prisma/schema.prisma`:
+   ```prisma
+   model Coupon {
+     id           String   @id @default(uuid())
+     code         String   @unique               // "BLACK10", "FRETE10"
+     type         String                         // "PERCENT" | "FIXED"
+     value        Float                          // 10 = 10% ou R$ 10
+     minOrder     Float?                         // pedido mínimo
+     maxUses      Int?                           // limite total
+     usedCount    Int      @default(0)
+     expiresAt    DateTime?
+     active       Boolean  @default(true)
+     createdAt    DateTime @default(now())
+     updatedAt    DateTime @updatedAt
+   }
+   ```
+2. **Backend** — `src/routes/coupons.ts`:
+   - `GET /` `[admin]` — lista paginada
+   - `POST /` `[admin]` — cria
+   - `PUT /:id` `[admin]` — edita
+   - `DELETE /:id` `[admin]`
+   - `POST /validate` `[público]` — `{ code, total }` → retorna desconto se válido
+   - `POST /apply` `[público]` — aplicado no checkout, incrementa `usedCount` atômico
+3. **UI admin** — nova aba "Cupons" no `admin.html`: tabela de cupons + form de criação + toggle ativo/inativo
+4. **UI checkout** — campo "Código de desconto" no `checkout.html` que chama `/api/coupons/validate` e atualiza o total
+
+### Phase B (sequência confirmada com o usuário)
+- [ ] **B-a: Cupons & descontos** ← próximo
+- [ ] **B-b: Carrinho persistido + recuperação de venda** (sync com DB + email de carrinho abandonado)
+- [ ] **B-c: Newsletter & ofertas** (lista + dispatcher de email)
+
+### Outras pendências
+- [ ] **Wishlist/Interesses** (botão coração nos produtos + UI em minha-conta — placeholder já existe)
 
 ### Médio prazo
 - [ ] **Busca de produtos** (`?q=termo` com Prisma `contains` + índice)
