@@ -670,26 +670,31 @@ document.head.appendChild(style);
         }
         const admin = isAdminUser(user);
         const initial = (user.email || '?')[0].toUpperCase();
+        const displayName = user.user_metadata?.name || user.email?.split('@')[0] || 'Conta';
+        // Dropdown usa cores fixas (não-temáticas) pra garantir contraste
+        // independente da identidade visual configurada pela loja.
         const adminLink = admin
-            ? `<li class="border-t border-white/10 mt-2 pt-2"><a href="/admin.html" class="block px-5 py-3 text-sm text-amber-300 hover:bg-white/10"><i class="ph-bold ph-shield-check mr-2"></i> Painel administrativo</a></li>`
+            ? `<li class="border-t border-slate-100 mt-1 pt-1"><a href="/admin.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-amber-700 hover:bg-amber-50 transition"><i class="ph-bold ph-shield-check text-base"></i> Painel administrativo</a></li>`
             : '';
         widget.innerHTML = `
             <button id="accountBtn" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
                 <span class="w-8 h-8 rounded-full bg-accent text-white text-sm font-bold flex items-center justify-center">${initial}</span>
-                <span class="hidden lg:inline text-sm font-medium truncate max-w-[140px]">${user.email}</span>
+                <span class="hidden lg:inline text-sm font-medium truncate max-w-[140px]">${displayName}</span>
                 <i class="ph ph-caret-down text-xs"></i>
             </button>
-            <ul id="accountMenu" class="absolute right-0 top-full mt-2 w-60 bg-secondary rounded-xl shadow-2xl py-2 hidden border border-white/5 z-50">
-                <li class="px-5 py-2 border-b border-white/10 mb-1">
-                    <p class="text-xs text-white/50">Logado como</p>
-                    <p class="text-sm text-white truncate">${user.email}</p>
-                </li>
-                <li><a href="/minha-conta.html?tab=pedidos" class="block px-5 py-3 text-sm text-white hover:bg-white/10"><i class="ph ph-package mr-2"></i> Meus pedidos</a></li>
-                <li><a href="/minha-conta.html?tab=interesses" class="block px-5 py-3 text-sm text-white hover:bg-white/10"><i class="ph ph-heart mr-2"></i> Meus interesses</a></li>
-                <li><a href="/minha-conta.html?tab=perfil" class="block px-5 py-3 text-sm text-white hover:bg-white/10"><i class="ph ph-user mr-2"></i> Meus dados</a></li>
-                ${adminLink}
-                <li class="border-t border-white/10 mt-2"><a href="#" id="logoutBtn" class="block px-5 py-3 text-sm text-accent hover:bg-white/10"><i class="ph ph-sign-out mr-2"></i> Sair</a></li>
-            </ul>
+            <div id="accountMenu" class="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 hidden border border-slate-200 z-50 overflow-hidden">
+                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+                    <p class="text-xs text-slate-500 font-medium">Logado como</p>
+                    <p class="text-sm text-slate-800 truncate font-semibold">${user.email}</p>
+                </div>
+                <ul class="py-1">
+                    <li><a href="/minha-conta.html?tab=pedidos" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition"><i class="ph ph-package text-base text-slate-400"></i> Meus pedidos</a></li>
+                    <li><a href="/minha-conta.html?tab=interesses" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition"><i class="ph ph-heart text-base text-slate-400"></i> Meus interesses</a></li>
+                    <li><a href="/minha-conta.html?tab=perfil" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition"><i class="ph ph-user text-base text-slate-400"></i> Meus dados</a></li>
+                    ${adminLink}
+                    <li class="border-t border-slate-100 mt-1 pt-1"><a href="#" id="logoutBtn" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition"><i class="ph ph-sign-out text-base"></i> Sair</a></li>
+                </ul>
+            </div>
         `;
         const btn = document.getElementById('accountBtn');
         const menu = document.getElementById('accountMenu');

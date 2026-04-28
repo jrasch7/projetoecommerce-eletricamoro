@@ -134,25 +134,48 @@
         window.dispatchEvent(new CustomEvent('themeLoaded', { detail: config }));
     }
 
-    // Fetch and apply theme configuration from API
-    async function loadThemeConfig() {
+    // Estratégia anti-flash:
+    // 1. Lê config injetado pelo SSR (<script id="ssr-config">) — sincrono, zero flash
+    // 2. Fallback: cache localStorage da última config — também sincrono
+    // 3. Background: revalida via /api/config e atualiza se mudou
+    function readSsrConfig() {
+        const tag = document.getElementById('ssr-config');
+        if (!tag) return null;
         try {
-            const response = await fetch('/api/config');
-            if (!response.ok) {
-                console.warn('Failed to fetch theme config, using defaults');
-                applyTheme(defaultConfig);
-                return;
-            }
-            
-            const data = await response.json();
-            const config = data.config || defaultConfig;
-            applyTheme(config);
-        } catch (error) {
-            console.warn('Error loading theme config:', error);
-            applyTheme(defaultConfig);
-        }
+            const parsed = JSON.parse(tag.textContent || '{}');
+            return Object.keys(parsed).length ? parsed : null;
+        } catch (e) { return null; }
+    }
+    function readCacheConfig() {
+        try { return JSON.parse(localStorage.getItem('eletrica_moro_theme') || 'null'); }
+        catch (e) { return null; }
+    }
+    function saveCacheConfig(cfg) {
+        try { localStorage.setItem('eletrica_moro_theme', JSON.stringify(cfg)); }
+        catch (e) {}
     }
 
-    // Load theme config immediately
-    loadThemeConfig();
+    // Aplica IMEDIATAMENTE a melhor fonte disponível (SSR > cache > defaults)
+    const initial = readSsrConfig() || readCacheConfig() || defaultConfig;
+    applyTheme(initial);
+
+    // Em background, revalida com a API e atualiza se houver divergência
+    async function revalidate() {
+        try {
+            const response = await fetch('/api/config');
+            if (!response.ok) return;
+            const data = await response.json();
+            const config = data.config || defaultConfig;
+            saveCacheConfig(config);
+            // Só re-aplica se mudou (evita re-flash desnecessário)
+            if (JSON.stringify(config) !== JSON.stringify(initial)) {
+                applyTheme(config);
+            }
+        } catch (error) {
+            // silencioso — cache/SSR já cobriu
+        }
+    }
+    // Pequeno delay pra não competir com renderização inicial
+    if (document.readyState === 'complete') revalidate();
+    else window.addEventListener('load', revalidate, { once: true });
 })();

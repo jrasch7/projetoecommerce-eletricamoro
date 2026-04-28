@@ -36,47 +36,52 @@ app.use("/api/", limiter);
 
 const publicPath = path.join(path.resolve(), "public");
 
-// Middleware to inject CSS variables into HTML files
-app.get(/\.html$/, async (req, res, next) => {
+// Renderiza HTML com tema injetado server-side (zero flash). Inclui também
+// o config completo como JSON em <script id="ssr-config"> pra theme-config.js
+// pular o fetch async e aplicar sincronicamente.
+async function renderWithSsrTheme(filePath: string): Promise<string | null> {
+  if (!fs.existsSync(filePath)) return null;
+
+  let config: Record<string, unknown> | null = null;
   try {
-    const filePath = path.join(publicPath, req.path);
-    
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return next();
+    const storeConfig = await prisma.storeConfig.findFirst();
+    if (storeConfig && storeConfig.config) {
+      config = storeConfig.config as Record<string, unknown>;
     }
+  } catch (err) {
+    console.warn("Failed to fetch store config for HTML injection:", err);
+  }
 
-    // Fetch store config
-    let config = null;
-    try {
-      const storeConfig = await prisma.storeConfig.findFirst();
-      if (storeConfig && storeConfig.config) {
-        config = storeConfig.config;
-      }
-    } catch (err) {
-      console.warn('Failed to fetch store config for HTML injection:', err);
+  let html = fs.readFileSync(filePath, "utf-8");
+  const themeConfig = (config ?? {}) as Record<string, string>;
+  const primaryColor = themeConfig["primaryColor"] || "#0a2540";
+  const secondaryColor = themeConfig["secondaryColor"] || "#1a365d";
+  const accentColor = themeConfig["accentColor"] || "#e74c3c";
+  const fontFamily = themeConfig["fontFamily"] || "Inter";
+
+  // CSS vars + serialização do config completo como JSON (pra theme-config.js).
+  // O <style> e o <script id="ssr-config"> precisam vir ANTES do tailwind CDN
+  // pra colors do config tailwind avaliarem var(--color-*) já preenchidas.
+  const injected = `<style>:root{--color-primary:${primaryColor};--color-secondary:${secondaryColor};--color-accent:${accentColor};--font-family:'${fontFamily}',sans-serif;}body{font-family:var(--font-family);}</style>` +
+    `<script id="ssr-config" type="application/json">${JSON.stringify(config ?? {}).replace(/</g, "\\u003c")}</script>`;
+
+  return html.replace("<head>", `<head>${injected}`);
+}
+
+// Intercepta tanto `/`, `/foo` (sem extensão) quanto `*.html` pra servir com SSR.
+app.get(/^\/(?!api\/|uploads\/|js\/|img\/|favicon\.).*?(\.html)?$/, async (req, res, next) => {
+  try {
+    let pathPart = req.path === "/" ? "/index.html" : req.path;
+    if (!pathPart.endsWith(".html")) {
+      // se path é /foo, tenta /foo.html
+      pathPart = `${pathPart}.html`;
     }
-
-    // Read HTML file
-    let html = fs.readFileSync(filePath, 'utf-8');
-
-    // Inject CSS variables if config exists
-    if (config) {
-      const themeConfig = config as any;
-      const primaryColor = themeConfig.primaryColor || '#0a2540';
-      const secondaryColor = themeConfig.secondaryColor || '#1a365d';
-      const accentColor = themeConfig.accentColor || '#e74c3c';
-      const fontFamily = themeConfig.fontFamily || 'Inter';
-      
-      const injectedStyle = `<style>:root{--color-primary:${primaryColor};--color-secondary:${secondaryColor};--color-accent:${accentColor};--font-family:'${fontFamily}',sans-serif;}</style>`;
-      
-      // Replace <head> with <head> + injected style
-      html = html.replace('<head>', `<head>${injectedStyle}`);
-    }
-
+    const filePath = path.join(publicPath, pathPart);
+    const html = await renderWithSsrTheme(filePath);
+    if (!html) return next();
     res.send(html);
   } catch (err) {
-    console.error('Error injecting CSS variables:', err);
+    console.error("Error injecting CSS variables:", err);
     next();
   }
 });
