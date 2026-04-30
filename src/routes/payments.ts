@@ -15,6 +15,16 @@ const PaymentConfigSchema = z.object({
   pixKey: z.string().optional(),
   webhookUrl: z.string().optional(),
   cardBrands: z.array(z.string()).optional(),
+  enabledMethods: z.array(z.enum(["CARD", "PIX", "BOLETO", "WHATSAPP"])).optional(),
+  methodProviders: z
+    .object({
+      CARD: z.enum(["PagBank", "MercadoPago", "Cielo"]).optional(),
+      PIX: z.enum(["PagBank", "MercadoPago", "WhatsApp"]).optional(),
+      BOLETO: z.enum(["PagBank", "MercadoPago", "WhatsApp"]).optional(),
+      WHATSAPP: z.enum(["WhatsApp"]).optional(),
+    })
+    .partial()
+    .optional(),
 });
 
 router.get("/config", asyncHandler(async (_req, res) => {
@@ -24,6 +34,9 @@ router.get("/config", asyncHandler(async (_req, res) => {
     config = await prisma.paymentConfig.create({
       data: {
         activeProvider: "WhatsApp",
+        enabledMethods: ["WHATSAPP"],
+        methodProviders: { WHATSAPP: "WhatsApp" },
+        cardBrands: ["visa", "mastercard"],
       },
     });
   }
@@ -46,6 +59,9 @@ router.post("/config", requireAdmin, asyncHandler(async (req, res) => {
   if (parsed.merchantId !== undefined) updateData.merchantId = parsed.merchantId;
   if (parsed.pixKey !== undefined) updateData.pixKey = parsed.pixKey;
   if (parsed.webhookUrl !== undefined) updateData.webhookUrl = parsed.webhookUrl;
+  if (parsed.cardBrands !== undefined) updateData.cardBrands = parsed.cardBrands;
+  if (parsed.enabledMethods !== undefined) updateData.enabledMethods = parsed.enabledMethods;
+  if (parsed.methodProviders !== undefined) updateData.methodProviders = parsed.methodProviders;
   
   if (config) {
     config = await prisma.paymentConfig.update({
@@ -61,6 +77,9 @@ router.post("/config", requireAdmin, asyncHandler(async (req, res) => {
         merchantId: parsed.merchantId ?? null,
         pixKey: parsed.pixKey ?? null,
         webhookUrl: parsed.webhookUrl ?? null,
+        cardBrands: parsed.cardBrands ?? ["visa", "mastercard"],
+        enabledMethods: parsed.enabledMethods ?? ["WHATSAPP"],
+        methodProviders: parsed.methodProviders ?? { WHATSAPP: "WhatsApp" },
       },
     });
   }

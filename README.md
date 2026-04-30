@@ -13,7 +13,7 @@ Sistema desenvolvido por **[SulCore](https://sulcore.com)**.
 | Runtime | Node.js (ESM, `"type": "module"`) |
 | Linguagem | TypeScript 5.9 estrito (`exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`) |
 | Framework | Express 4 |
-| ORM | Prisma 7 com adaptador `@prisma/adapter-pg` |
+| ORM | Prisma 6.19 com adaptador `@prisma/adapter-pg` |
 | Banco | PostgreSQL (Supabase) |
 | **Autenticação** | **Supabase Auth** (login email+senha, recuperação, convites por email) |
 | **Storage** | **Supabase Storage** (bucket público `uploads`, persistente em produção) |
@@ -270,6 +270,13 @@ GET    /api/payments/config                       → provedor ativo (sem secret
 POST   /api/payments/config          [admin]      → atualiza
 POST   /api/payments/process                      → processa pagamento
 POST   /api/payments/webhook                      → callback do provedor
+
+# Cupons
+GET    /api/coupons                   [admin]      → lista paginada
+POST   /api/coupons                   [admin]      → cria
+PUT    /api/coupons/:id               [admin]      → edita
+DELETE /api/coupons/:id               [admin]      → remove
+POST   /api/coupons/validate                       → valida cupom no checkout
 ```
 
 Rate limit: **100 req / 15min** por IP em `/api/*`.
@@ -295,7 +302,7 @@ npx tsx scripts/migrate-uploads.ts   # migra imagens locais → Supabase Storage
 
 ## 🚦 Roadmap
 
-### 📍 Onde paramos (última sessão: 2026-04-28)
+### 📍 Onde paramos (última sessão: 2026-04-30)
 
 **Concluído na Phase A:**
 - ✅ Auth unificada via Supabase Auth (cliente + admin no mesmo sistema, distinção via `user_metadata.is_admin`)
@@ -307,37 +314,28 @@ npx tsx scripts/migrate-uploads.ts   # migra imagens locais → Supabase Storage
 - ✅ Redesign visual com identidade SulCore + footer em todas as telas admin
 - ✅ Anti-FOUC: SSR de tema em todas as páginas + cache localStorage
 
-**Próxima sessão começa por aqui — Phase B-a: Cupons & Descontos**
+**Concluído na Phase B-a: Cupons & descontos**
 
-Plano detalhado:
-1. **Schema** — adicionar modelo `Coupon` no `prisma/schema.prisma`:
-   ```prisma
-   model Coupon {
-     id           String   @id @default(uuid())
-     code         String   @unique               // "BLACK10", "FRETE10"
-     type         String                         // "PERCENT" | "FIXED"
-     value        Float                          // 10 = 10% ou R$ 10
-     minOrder     Float?                         // pedido mínimo
-     maxUses      Int?                           // limite total
-     usedCount    Int      @default(0)
-     expiresAt    DateTime?
-     active       Boolean  @default(true)
-     createdAt    DateTime @default(now())
-     updatedAt    DateTime @updatedAt
-   }
-   ```
-2. **Backend** — `src/routes/coupons.ts`:
-   - `GET /` `[admin]` — lista paginada
-   - `POST /` `[admin]` — cria
-   - `PUT /:id` `[admin]` — edita
-   - `DELETE /:id` `[admin]`
-   - `POST /validate` `[público]` — `{ code, total }` → retorna desconto se válido
-   - `POST /apply` `[público]` — aplicado no checkout, incrementa `usedCount` atômico
-3. **UI admin** — nova aba "Cupons" no `admin.html`: tabela de cupons + form de criação + toggle ativo/inativo
-4. **UI checkout** — campo "Código de desconto" no `checkout.html` que chama `/api/coupons/validate` e atualiza o total
+- ✅ Modelo `Coupon` no `prisma/schema.prisma`
+- ✅ Endpoints admin + `POST /api/coupons/validate`
+- ✅ Aplicação e revalidação de cupom no `POST /api/orders`
+- ✅ Aba de cupons no `admin.html` (criar/listar/ativar/desativar/excluir)
+- ✅ Campo de cupom no `checkout.html` com atualização de total
+
+**Ajuste extra (2026-04-30): checkout multi-método e painel otimizado**
+- ✅ Checkout agora respeita métodos habilitados no admin (`CARD`, `PIX`, `BOLETO`, `WHATSAPP`)
+- ✅ Painel de pagamentos permite configurar métodos habilitados + provedor por método
+- ✅ Configuração persistida em `PaymentConfig` (`enabledMethods`, `methodProviders`, `cardBrands`)
+- ✅ Melhoria de performance no dashboard (`fetchProducts` + `loadOrders` em paralelo)
+- ✅ Estabilização de auth no admin: bootstrap e `fetchJSON` aguardam `admin-ready` para evitar `401 Token não fornecido` na entrada do painel
+- ✅ Latência do admin reduzida em ações comuns:
+  - categorias + subcategorias carregadas em paralelo
+  - CRUD de cupons com atualização local imediata (sem recarregar lista inteira)
+  - remoção/edição de categorias e subcategorias com re-render local
+  - carregamento da aba equipe com chamadas paralelas (`/users` + `/me`)
 
 ### Phase B (sequência confirmada com o usuário)
-- [ ] **B-a: Cupons & descontos** ← próximo
+- [x] **B-a: Cupons & descontos** ✅ concluído
 - [ ] **B-b: Carrinho persistido + recuperação de venda** (sync com DB + email de carrinho abandonado)
 - [ ] **B-c: Newsletter & ofertas** (lista + dispatcher de email)
 
@@ -362,6 +360,7 @@ Plano detalhado:
 
 1. O cliente Prisma fica em `src/generated/prisma/` — gerado, não editar
 2. Após mudar `prisma/schema.prisma`: `npx prisma db push && npx prisma generate`
+   - Ambiente atual fixado em Prisma `6.19` por compatibilidade com Node `20.18.x`
 3. Carrinho usa `localStorage` chave `eletrica_moro_cart`
 4. Tema usa `localStorage` chave `eletrica_moro_theme` (cache anti-FOUC)
 5. Em produção, **`SUPABASE_*` deve estar definido** — sem isso o servidor não sobe

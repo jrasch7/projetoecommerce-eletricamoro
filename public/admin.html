@@ -382,6 +382,9 @@
             <button data-tab="payments" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
                 <i class="ph ph-credit-card text-base md:text-lg"></i> Pagamentos
             </button>
+            <button data-tab="coupons" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
+                <i class="ph ph-ticket text-base md:text-lg"></i> Cupons
+            </button>
             <button data-tab="team" class="tab-btn px-4 py-2 md:px-5 md:py-2.5 rounded-t-xl font-semibold text-xs md:text-sm transition-all text-slate-500 hover:text-primary whitespace-nowrap">
                 <i class="ph ph-users-three text-base md:text-lg"></i> Equipe
             </button>
@@ -745,6 +748,28 @@
                             </button>
                         </div>
                         
+                        <!-- Announcement Bar -->
+                        <div class="pt-4 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                                <i class="ph ph-megaphone text-accent"></i> Barra de Anúncios
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-medium text-slate-600">Exibir barra de anúncios</label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="bannerEnabled" class="sr-only peer" checked>
+                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Texto do anúncio</label>
+                                    <textarea id="bannerText" rows="2" placeholder="🚚 Entrega ágil · 🔧 Assistência técnica · 💳 3x sem juros (separe com ·)"
+                                              class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm resize-none"></textarea>
+                                    <p class="text-[11px] text-slate-400 mt-1">Separe frases com <code class="bg-slate-100 px-1 rounded">·</code> para criar efeito de rolagem</p>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Social Media -->
                         <div class="pt-4 border-t border-slate-200">
                             <h3 class="text-sm font-bold text-primary mb-4 flex items-center gap-2">
@@ -837,15 +862,69 @@
                         <i class="ph ph-credit-card text-accent"></i> Configurações de Pagamento
                     </h2>
                     <form id="paymentConfigForm" class="space-y-6">
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h3 class="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                                <i class="ph ph-toggle-left text-accent"></i> Métodos habilitados no checkout
+                            </h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="methodCard" class="w-4 h-4 text-accent" checked>
+                                    <span class="text-sm">Cartão</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="methodPix" class="w-4 h-4 text-accent" checked>
+                                    <span class="text-sm">Pix</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="methodBoleto" class="w-4 h-4 text-accent">
+                                    <span class="text-sm">Boleto</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" id="methodWhatsapp" class="w-4 h-4 text-accent">
+                                    <span class="text-sm">WhatsApp</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Provedor para Cartão</label>
+                                <select id="cardProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                    <option value="PagBank">PagBank</option>
+                                    <option value="MercadoPago">MercadoPago</option>
+                                    <option value="Cielo">Cielo</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Provedor para Pix</label>
+                                <select id="pixProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                    <option value="PagBank">PagBank</option>
+                                    <option value="MercadoPago">MercadoPago</option>
+                                    <option value="WhatsApp">WhatsApp</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Provedor para Boleto</label>
+                                <select id="boletoProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                    <option value="PagBank">PagBank</option>
+                                    <option value="MercadoPago">MercadoPago</option>
+                                    <option value="WhatsApp">WhatsApp</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Provedor fallback</label>
+                                <select id="paymentProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                    <option value="WhatsApp">WhatsApp (Pedido via mensagem)</option>
+                                    <option value="PagBank">PagBank (Checkout Transparente)</option>
+                                    <option value="MercadoPago">MercadoPago</option>
+                                    <option value="Cielo">Cielo</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Provedor de Pagamento Ativo</label>
-                            <select id="paymentProvider" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
-                                <option value="WhatsApp">WhatsApp (Pedido via mensagem)</option>
-                                <option value="PagBank">PagBank (Checkout Transparente)</option>
-                                <option value="MercadoPago">MercadoPago</option>
-                                <option value="Cielo">Cielo</option>
-                            </select>
-                            <p class="text-xs text-slate-500 mt-1">Selecione o provedor que processará os pagamentos da loja</p>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Credenciais do provedor ativo</label>
+                            <p class="text-xs text-slate-500 mt-1">Esses dados são usados conforme o provedor escolhido para cada método.</p>
                         </div>
 
                         <!-- Dynamic provider fields -->
@@ -943,6 +1022,53 @@
                 </div>
             </div>
         </div>
+
+        <!-- CUPONS -->
+        <div id="couponsPanel" class="tab-pane hidden">
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-5 border-b border-slate-100">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="ph ph-ticket text-primary"></i> Cupons cadastrados
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Gerencie códigos promocionais e uso no checkout.</p>
+                    </div>
+                    <div id="couponListContainer" class="p-6">
+                        <p class="text-slate-400 text-sm">Carregando cupons...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6">
+                    <h3 class="text-base font-bold text-primary mb-4 flex items-center gap-2">
+                        <i class="ph ph-plus-circle text-accent"></i> Novo cupom
+                    </h3>
+                    <form id="couponForm" class="space-y-3">
+                        <input id="couponCode" type="text" required placeholder="Ex: BLACK10" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                        <div class="grid grid-cols-2 gap-3">
+                            <select id="couponType" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm bg-white">
+                                <option value="PERCENT">Percentual (%)</option>
+                                <option value="FIXED">Valor fixo (R$)</option>
+                            </select>
+                            <input id="couponValue" type="number" min="0.01" step="0.01" required placeholder="Valor" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input id="couponMinOrder" type="number" min="0" step="0.01" placeholder="Pedido mínimo (opcional)" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                            <input id="couponMaxUses" type="number" min="1" step="1" placeholder="Limite de uso (opcional)" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Expira em (opcional)</label>
+                            <input id="couponExpiresAt" type="datetime-local" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none text-sm">
+                        </div>
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                            <input id="couponActive" type="checkbox" checked class="w-4 h-4 text-accent"> Ativo
+                        </label>
+                        <button type="submit" class="w-full bg-primary text-white font-semibold py-2.5 rounded-xl hover:bg-slate-800 transition flex items-center justify-center gap-2">
+                            <i class="ph ph-floppy-disk"></i> Salvar cupom
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- ===== FOOTER SULCORE (visível em todas as abas administrativas) ===== -->
@@ -990,12 +1116,14 @@
         const ORDERS_URL = `${API_BASE}/orders`;
         const CATEGORIES_URL = `${API_BASE}/categories`;
         const SUBCATEGORIES_URL = `${API_BASE}/subcategories`;
+        const COUPONS_URL = `${API_BASE}/coupons`;
 
         // Dados globais
         let allProducts = [];
         let allCategories = [];
         let allSubcategories = [];
         let ordersData = [];
+        let couponsData = [];
         let currentSearchTerm = '';
         let myChartInstance = null;
 
@@ -1009,10 +1137,16 @@
         const cropCancelBtn = document.getElementById('cropCancelBtn');
         const cropConfirmBtn = document.getElementById('cropConfirmBtn');
 
-        function openCropper(imageFile, callback) {
+        function openCropper(imageFile, callback, options = {}) {
             if (isCropperActive) return;
             isCropperActive = true;
             currentCropCallback = callback;
+            const aspect = options.aspectRatio !== undefined ? options.aspectRatio : 1;
+            const width = options.width || 600;
+            const height = options.height || 600;
+            // Store dimensions to use in closeCropper
+            window._currentCropWidth = width;
+            window._currentCropHeight = height;
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -1021,7 +1155,7 @@
                 cropModal.classList.add('flex');
                 if (cropperInstance) cropperInstance.destroy();
                 cropperInstance = new Cropper(cropImage, {
-                    aspectRatio: 1,
+                    aspectRatio: aspect,
                     viewMode: 1,
                     dragMode: 'move',
                     autoCropArea: 0.9,
@@ -1029,8 +1163,8 @@
                     guides: true,
                     center: true,
                     highlight: false,
-                    cropBoxMovable: false,
-                    cropBoxResizable: false,
+                    cropBoxMovable: isNaN(aspect) ? true : false,
+                    cropBoxResizable: isNaN(aspect) ? true : false,
                     toggleDragModeOnDblclick: false,
                 });
             };
@@ -1040,7 +1174,12 @@
         function closeCropper(confirm = false) {
             if (!isCropperActive) return;
             if (confirm && cropperInstance && currentCropCallback) {
-                cropperInstance.getCroppedCanvas({ width: 600, height: 600 }).toBlob((blob) => {
+                const opts = {};
+                if (!isNaN(cropperInstance.options.aspectRatio)) {
+                    opts.width = window._currentCropWidth || 600;
+                    opts.height = window._currentCropHeight || 600;
+                }
+                cropperInstance.getCroppedCanvas(opts).toBlob((blob) => {
                     currentCropCallback(blob);
                     cleanupCropper();
                 }, 'image/jpeg', 0.92);
@@ -1145,8 +1284,10 @@
             if (!name) return;
             const submitBtn = subcategoryForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
+            }
             try {
                 await fetchJSON(SUBCATEGORIES_URL, {
                     method: 'POST',
@@ -1224,7 +1365,7 @@
                 categoryPhotoPreviewImg.src = URL.createObjectURL(blob);
                 categoryPhotoPreview.classList.remove('hidden');
                 categoryPhotoInput.value = '';
-            });
+            }, { aspectRatio: NaN }); // Free aspect ratio for bento grid
         });
 
         if (openAddCategoryBtn) openAddCategoryBtn.addEventListener('click', openCategoryModal);
@@ -1430,8 +1571,10 @@
             
             // Remove campo photos original e adiciona os blobs
             formData.delete('photos');
+            // Remove categoryId: auxiliar de UI, não faz parte do UpdateProductSchema
+            formData.delete('categoryId');
             editSelectedFiles.forEach((blob, i) => {
-                formData.append('photos', blob, `photo_${i}.jpg`);
+                formData.append('images', blob, `photo_${i}.jpg`);
             });
 
             const submitBtn = editForm.querySelector('button[type="submit"]');
@@ -1439,11 +1582,24 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
             try {
+                // Aguarda auth antes de enviar
+                await waitForAdminReady(6000).catch(() => {});
                 const res = await fetch(`${PRODUCTS_URL}/${productId}`, {
                     method: 'PUT',
                     body: formData
                 });
-                if (!res.ok) throw new Error(await res.text() || 'Erro ao atualizar');
+                if (!res.ok) {
+                    let errMsg = `Erro ${res.status}`;
+                    try {
+                        const errData = await res.json();
+                        if (errData.fields && Array.isArray(errData.fields)) {
+                            errMsg = 'Dados inválidos: ' + errData.fields.map(f => `${f.field}: ${f.message}`).join('; ');
+                        } else {
+                            errMsg = errData.message || errData.error || errMsg;
+                        }
+                    } catch { errMsg = await res.text() || errMsg; }
+                    throw new Error(errMsg);
+                }
                 await res.json();
                 closeEditModal();
                 showToast('Produto atualizado com sucesso!', 'success');
@@ -1465,6 +1621,16 @@
         // Anexa Bearer token do Supabase Auth quando disponível.
         async function fetchJSON(url, options = {}) {
             try {
+                const isApiCall = typeof url === 'string' && url.includes('/api/');
+                // Aguarda o admin-ready para QUALQUER chamada autenticada,
+                // garantindo que o monkey-patch e o token estejam disponíveis.
+                if (isApiCall) {
+                    try {
+                        await waitForAdminReady(6000);
+                    } catch {
+                        // timeout: segue e tenta com o que houver
+                    }
+                }
                 const headers = new Headers(options.headers || {});
                 if (window.adminAuth) {
                     const token = await window.adminAuth.getToken();
@@ -1475,7 +1641,12 @@
                     let errorMsg = `Erro ${res.status}`;
                     try {
                         const errData = await res.json();
-                        errorMsg = errData.message || errData.error || errorMsg;
+                        // Mostra campos inválidos do Zod (422) de forma legível
+                        if (errData.fields && Array.isArray(errData.fields)) {
+                            errorMsg = errData.fields.map(f => `${f.field}: ${f.message}`).join('; ');
+                        } else {
+                            errorMsg = errData.message || errData.error || errorMsg;
+                        }
                     } catch (e) {}
                     throw new Error(errorMsg);
                 }
@@ -1491,14 +1662,39 @@
             }
         }
 
+        async function waitForAdminReady(timeoutMs = 6000) {
+            if (window.adminAuth) return;
+            await new Promise((resolve, reject) => {
+                let done = false;
+                const onReady = () => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    window.removeEventListener('admin-ready', onReady);
+                    resolve();
+                };
+                const timer = setTimeout(() => {
+                    if (done) return;
+                    done = true;
+                    window.removeEventListener('admin-ready', onReady);
+                    reject(new Error('Sessão admin não inicializou a tempo'));
+                }, timeoutMs);
+                window.addEventListener('admin-ready', onReady, { once: true });
+            });
+        }
+
         // ---------- CATEGORIAS ----------
         async function loadCategories() {
             const container = document.getElementById('categoriesListContainer');
             if (!container) return;
             container.innerHTML = '<p class="text-slate-400 text-center py-8">Carregando categorias...</p>';
             try {
-                allCategories = await fetchJSON(CATEGORIES_URL);
-                await loadSubcategories();
+                const [categories, subcategories] = await Promise.all([
+                    fetchJSON(CATEGORIES_URL),
+                    fetchJSON(SUBCATEGORIES_URL).catch(() => []),
+                ]);
+                allCategories = categories;
+                allSubcategories = Array.isArray(subcategories) ? subcategories : [];
                 renderCategorySelect();
                 renderCategoriesList();
             } catch(err) {
@@ -1611,9 +1807,12 @@
         window.deleteCategoryHandler = (id) => {
             showConfirmModal('Excluir categoria', 'Tem certeza que deseja excluir esta categoria e todas as suas subcategorias?', async () => {
                 try {
-                    await fetch(`${CATEGORIES_URL}/${id}`, { method: 'DELETE' });
+                    await fetchJSON(`${CATEGORIES_URL}/${id}`, { method: 'DELETE' });
+                    allCategories = allCategories.filter((c) => c.id !== id);
+                    allSubcategories = allSubcategories.filter((s) => s.categoryId !== id);
+                    renderCategorySelect();
+                    renderCategoriesList();
                     showToast('Categoria excluída com sucesso', 'success');
-                    await loadCategories();
                 } catch(e) {
                     showToast('Erro ao excluir categoria: ' + e.message, 'error');
                 }
@@ -1670,7 +1869,7 @@
                 editCategoryPhotoPreviewImg.src = URL.createObjectURL(blob);
                 editCategoryPhotoPreview.classList.remove('hidden');
                 editCategoryPhotoInput.value = '';
-            });
+            }, { aspectRatio: NaN }); // Free aspect ratio for bento grid
         });
 
         const closeEditCategoryModalBtn = document.getElementById('closeEditCategoryModalBtn'); if (closeEditCategoryModalBtn) closeEditCategoryModalBtn.addEventListener('click', closeEditCategoryModal);
@@ -1693,9 +1892,13 @@
                 }
                 const res = await fetch(`${CATEGORIES_URL}/${id}`, { method: 'PUT', body: formData });
                 if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || `Erro ${res.status}`); }
+                const updated = await res.json();
                 closeEditCategoryModal();
+                const idx = allCategories.findIndex((c) => c.id === id);
+                if (idx !== -1) allCategories[idx] = { ...allCategories[idx], ...updated };
+                renderCategorySelect();
+                renderCategoriesList();
                 showToast('Categoria atualizada com sucesso!', 'success');
-                await loadCategories();
                 clearEditCategoryPreview();
             } catch (error) {
                 showToast('Erro ao atualizar categoria: ' + error.message, 'error');
@@ -1713,23 +1916,13 @@
         window.deleteSubcategoryHandler = (id) => {
             showConfirmModal('Excluir subcategoria', 'Tem certeza que deseja excluir esta subcategoria?', async () => {
                 try {
-                    await fetch(`${SUBCATEGORIES_URL}/${id}`, { method: 'DELETE' });
-                    showToast('Subcategoria excluída com sucesso', 'success');
-                    await loadSubcategories();
+                    await fetchJSON(`${SUBCATEGORIES_URL}/${id}`, { method: 'DELETE' });
+                    allSubcategories = allSubcategories.filter((s) => s.id !== id);
                     renderCategoriesList();
+                    renderCategorySelect();
                     const catSelect = document.getElementById('productCategorySelect');
-                    if(catSelect.value) {
-                        const subs = await fetchJSON(`${API_BASE}/categories/${catSelect.value}/subcategories`);
-                        const subSelect = document.getElementById('productSubcategorySelect');
-                        subSelect.innerHTML = '<option value="">Selecione a subcategoria *</option>';
-                        subs.forEach(sub => { 
-                            let opt = document.createElement('option'); 
-                            opt.value = sub.id; 
-                            opt.textContent = sub.name; 
-                            subSelect.appendChild(opt); 
-                        });
-                        subSelect.disabled = subs.length === 0;
-                    }
+                    if (catSelect && catSelect.value) catSelect.dispatchEvent(new Event('change'));
+                    showToast('Subcategoria excluída com sucesso', 'success');
                 } catch(e) {
                     showToast('Erro ao excluir subcategoria: ' + e.message, 'error');
                 }
@@ -1817,14 +2010,28 @@
             try {
                 const formData = new FormData(form);
                 formData.delete('photos');
+                // Remove categoryId: usado só no front para carregar subcategorias,
+                // não faz parte do CreateProductSchema do backend.
+                formData.delete('categoryId');
                 selectedFiles.forEach((blob, i) => {
                     formData.append('images', blob, `photo_${i}.jpg`);
                 });
 
+                // Aguarda auth antes de enviar (evita 401 por race condition)
+                await waitForAdminReady(6000).catch(() => {});
+
                 const res = await fetch(PRODUCTS_URL, { method: 'POST', body: formData });
                 if (!res.ok) {
-                    const errorText = await res.text();
-                    throw new Error(errorText || 'Erro no cadastro');
+                    let errMsg = `Erro ${res.status}`;
+                    try {
+                        const errData = await res.json();
+                        if (errData.fields && Array.isArray(errData.fields)) {
+                            errMsg = 'Dados inválidos: ' + errData.fields.map(f => `${f.field}: ${f.message}`).join('; ');
+                        } else {
+                            errMsg = errData.message || errData.error || errMsg;
+                        }
+                    } catch { errMsg = await res.text() || errMsg; }
+                    throw new Error(errMsg);
                 }
                 await res.json();
                 
@@ -2048,8 +2255,7 @@
 
         async function refreshDashboard() {
             try {
-                await fetchProducts();
-                await loadOrders();
+                await Promise.all([fetchProducts(), loadOrders()]);
                 updateDashboardStats();
                 initChart();
                 updateChartWithFilters();
@@ -2084,6 +2290,7 @@
                 orders: document.getElementById('ordersPanel'),
                 customizable: document.getElementById('customizablePanel'),
                 payments: document.getElementById('paymentsPanel'),
+                coupons: document.getElementById('couponsPanel'),
                 team: document.getElementById('teamPanel'),
             };
             
@@ -2116,6 +2323,7 @@
                     if(tab === 'orders') loadOrders();
                     if(tab === 'customizable') loadConfig();
                     if(tab === 'payments') loadPaymentConfig();
+                    if(tab === 'coupons' && typeof loadCoupons === 'function') loadCoupons();
                     if(tab === 'team' && typeof loadTeam === 'function') loadTeam();
                 });
             });
@@ -2318,6 +2526,9 @@
                     setVal('whatsappUrl', config.whatsappUrl || '');
                     setVal('facebookUrl', config.facebookUrl || '');
                     setVal('footerText', config.footerText || '© 2026 Elétrica Moro - Todos os direitos reservados');
+                    setVal('bannerText', config.bannerText || '');
+                    const bannerToggle = document.getElementById('bannerEnabled');
+                    if (bannerToggle) bannerToggle.checked = config.bannerEnabled !== false;
 
                     if (config.logo) {
                         setSrc('logoPreview', config.logo);
@@ -2363,6 +2574,8 @@
                 metaTitle: getVal('metaTitle'),
                 metaDescription: getVal('metaDescription'),
                 metaKeywords: getVal('metaKeywords'),
+                bannerText: getVal('bannerText'),
+                bannerEnabled: document.getElementById('bannerEnabled')?.checked ?? true,
                 banners: banners,
                 benefits: benefits,
             };
@@ -2635,18 +2848,29 @@ if (paymentProvider) {
 // Load payment config
 async function loadPaymentConfig() {
     try {
-        const res = await fetch(PAYMENTS_CONFIG_URL);
-        const data = await res.json();
+        const data = await fetchJSON(PAYMENTS_CONFIG_URL);
         paymentConfig = data;
         
         if (data) {
             const paymentProviderEl = document.getElementById('paymentProvider');
             if (paymentProviderEl) {
                 paymentProviderEl.value = data.activeProvider || 'WhatsApp';
-                
-                // Trigger change to show correct fields
                 paymentProviderEl.dispatchEvent(new Event('change'));
             }
+
+            const enabled = Array.isArray(data.enabledMethods) ? data.enabledMethods : ['CARD', 'PIX'];
+            document.getElementById('methodCard').checked = enabled.includes('CARD');
+            document.getElementById('methodPix').checked = enabled.includes('PIX');
+            document.getElementById('methodBoleto').checked = enabled.includes('BOLETO');
+            document.getElementById('methodWhatsapp').checked = enabled.includes('WHATSAPP');
+
+            const methodProviders = (data.methodProviders && typeof data.methodProviders === 'object') ? data.methodProviders : {};
+            const cardProvider = document.getElementById('cardProvider');
+            if (cardProvider) cardProvider.value = methodProviders.CARD || 'PagBank';
+            const pixProvider = document.getElementById('pixProvider');
+            if (pixProvider) pixProvider.value = methodProviders.PIX || 'PagBank';
+            const boletoProvider = document.getElementById('boletoProvider');
+            if (boletoProvider) boletoProvider.value = methodProviders.BOLETO || 'PagBank';
             
             // Load provider-specific fields
             if (data.activeProvider === 'WhatsApp' && data.apiKey) {
@@ -2669,6 +2893,12 @@ async function loadPaymentConfig() {
             
             const webhookUrl = document.getElementById('webhookUrl');
             if (webhookUrl && data.webhookUrl) webhookUrl.value = data.webhookUrl;
+
+            const brands = Array.isArray(data.cardBrands) ? data.cardBrands : [];
+            ['visa', 'mastercard', 'amex', 'elo', 'hipercard'].forEach((brand) => {
+                const el = document.getElementById(brand);
+                if (el) el.checked = brands.length ? brands.includes(brand) : ['visa', 'mastercard'].includes(brand);
+            });
         }
     } catch (err) {
         console.error('Error loading payment config:', err);
@@ -2687,7 +2917,22 @@ if (paymentConfigForm) {
         const formData = {
             activeProvider: provider,
             webhookUrl: document.getElementById('webhookUrl')?.value,
+            enabledMethods: [],
+            methodProviders: {
+                CARD: document.getElementById('cardProvider')?.value || 'PagBank',
+                PIX: document.getElementById('pixProvider')?.value || 'PagBank',
+                BOLETO: document.getElementById('boletoProvider')?.value || 'PagBank',
+                WHATSAPP: 'WhatsApp'
+            }
         };
+        if (document.getElementById('methodCard')?.checked) formData.enabledMethods.push('CARD');
+        if (document.getElementById('methodPix')?.checked) formData.enabledMethods.push('PIX');
+        if (document.getElementById('methodBoleto')?.checked) formData.enabledMethods.push('BOLETO');
+        if (document.getElementById('methodWhatsapp')?.checked) formData.enabledMethods.push('WHATSAPP');
+        if (!formData.enabledMethods.length) {
+            showToast('Selecione pelo menos um método de pagamento.', 'warning');
+            return;
+        }
         
         // Collect provider-specific fields
         if (provider === 'WhatsApp') {
@@ -2712,29 +2957,156 @@ if (paymentConfigForm) {
         formData.cardBrands = cardBrands;
         
         try {
-            const res = await fetch(PAYMENTS_CONFIG_URL, {
+            const submitBtn = paymentConfigForm.querySelector('button[type="submit"]');
+            const prevLabel = submitBtn ? submitBtn.innerHTML : '';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Salvando...';
+            paymentConfig = await fetchJSON(PAYMENTS_CONFIG_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-            
-            if (res.ok) {
-                showToast('Configurações de pagamento salvas com sucesso!', 'success');
-                paymentConfig = await res.json();
-            } else {
-                showToast('Erro ao salvar configurações de pagamento', 'error');
+            showToast('Configurações de pagamento salvas com sucesso!', 'success');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = prevLabel;
             }
         } catch (err) {
             console.error('Error saving payment config:', err);
             showToast('Erro ao salvar configurações de pagamento', 'error');
+            const submitBtn = paymentConfigForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="ph ph-floppy-disk"></i> Salvar Configurações de Pagamento';
+            }
         }
     });
 }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchProducts();
-            loadCategories();
-            initTabs();
+        // ---------- CUPONS ----------
+        function parseLocalDateTimeToIso(value) {
+            if (!value) return null;
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return null;
+            return date.toISOString();
+        }
+
+        function renderCoupons() {
+            const container = document.getElementById('couponListContainer');
+            if (!container) return;
+            if (!couponsData.length) {
+                container.innerHTML = '<p class="text-slate-400 text-sm">Nenhum cupom cadastrado.</p>';
+                return;
+            }
+
+            container.innerHTML = couponsData.map((coupon) => {
+                const expires = coupon.expiresAt ? new Date(coupon.expiresAt).toLocaleString('pt-BR') : 'Sem validade';
+                const maxUses = coupon.maxUses ?? 'Ilimitado';
+                const minOrder = coupon.minOrder !== null && coupon.minOrder !== undefined ? `R$ ${Number(coupon.minOrder).toFixed(2)}` : 'Sem mínimo';
+                const discountLabel = coupon.type === 'PERCENT' ? `${Number(coupon.value)}%` : `R$ ${Number(coupon.value).toFixed(2)}`;
+                return `
+                    <div class="border border-slate-200 rounded-xl p-4 mb-3 bg-slate-50/70">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-800">${escapeHtml(coupon.code)}</span>
+                                    <span class="text-xs px-2 py-0.5 rounded-full ${coupon.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}">${coupon.active ? 'Ativo' : 'Inativo'}</span>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1">Desconto: ${discountLabel} · Mínimo: ${minOrder}</p>
+                                <p class="text-xs text-slate-500">Usos: ${coupon.usedCount} / ${maxUses} · Expira: ${expires}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="toggleCouponActive('${coupon.id}', ${!coupon.active})" class="px-2 py-1 text-xs rounded-lg border border-slate-200 hover:bg-white">${coupon.active ? 'Desativar' : 'Ativar'}</button>
+                                <button onclick="deleteCoupon('${coupon.id}')" class="px-2 py-1 text-xs rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadCoupons() {
+            const container = document.getElementById('couponListContainer');
+            if (container) container.innerHTML = '<p class="text-slate-400 text-sm">Carregando cupons...</p>';
+            try {
+                couponsData = await fetchJSON(COUPONS_URL);
+                renderCoupons();
+            } catch (err) {
+                couponsData = [];
+                if (container) container.innerHTML = '<p class="text-rose-500 text-sm">Erro ao carregar cupons.</p>';
+                showToast('Erro ao carregar cupons', 'error');
+            }
+        }
+
+        window.toggleCouponActive = async (id, active) => {
+            try {
+                const updated = await fetchJSON(`${COUPONS_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active }),
+                });
+                const idx = couponsData.findIndex((c) => c.id === id);
+                if (idx !== -1) couponsData[idx] = { ...couponsData[idx], ...updated };
+                renderCoupons();
+                showToast('Cupom atualizado', 'success');
+            } catch (err) {
+                showToast('Erro ao atualizar cupom: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteCoupon = async (id) => {
+            showConfirmModal('Excluir cupom', 'Tem certeza que deseja excluir este cupom?', async () => {
+                try {
+                    await fetchJSON(`${COUPONS_URL}/${id}`, { method: 'DELETE' });
+                    couponsData = couponsData.filter((c) => c.id !== id);
+                    renderCoupons();
+                    showToast('Cupom excluído', 'success');
+                } catch (err) {
+                    showToast('Erro ao excluir cupom: ' + err.message, 'error');
+                }
+            });
+        };
+
+        const couponForm = document.getElementById('couponForm');
+        if (couponForm) couponForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                code: document.getElementById('couponCode')?.value?.trim(),
+                type: document.getElementById('couponType')?.value || 'PERCENT',
+                value: Number(document.getElementById('couponValue')?.value || 0),
+                minOrder: document.getElementById('couponMinOrder')?.value ? Number(document.getElementById('couponMinOrder').value) : null,
+                maxUses: document.getElementById('couponMaxUses')?.value ? Number(document.getElementById('couponMaxUses').value) : null,
+                expiresAt: parseLocalDateTimeToIso(document.getElementById('couponExpiresAt')?.value || ''),
+                active: !!document.getElementById('couponActive')?.checked,
+            };
+
+            try {
+                const created = await fetchJSON(COUPONS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                couponForm.reset();
+                const activeEl = document.getElementById('couponActive');
+                if (activeEl) activeEl.checked = true;
+                couponsData.unshift(created);
+                renderCoupons();
+                showToast('Cupom criado com sucesso', 'success');
+            } catch (err) {
+                showToast('Erro ao criar cupom: ' + err.message, 'error');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await waitForAdminReady();
+                fetchProducts();
+                loadCategories();
+                initTabs();
+            } catch (err) {
+                console.error('Falha ao iniciar painel admin:', err);
+                showToast('Erro de autenticação do painel. Recarregue a página.', 'error');
+            }
         });
 
         // ========== EQUIPE (gestão de admins) ==========
@@ -2756,9 +3128,12 @@ if (paymentConfigForm) {
             if (!list) return;
             list.innerHTML = '<p class="text-slate-400 text-sm p-6">Carregando…</p>';
             try {
-                const res = await fetch(`${ADMIN_API}/users`);
-                if (!res.ok) throw new Error('Falha ao carregar equipe');
-                const users = await res.json();
+                const [usersRes, meRes] = await Promise.all([
+                    fetch(`${ADMIN_API}/users`),
+                    fetch(`${ADMIN_API}/me`).catch(() => null),
+                ]);
+                if (!usersRes.ok) throw new Error('Falha ao carregar equipe');
+                const users = await usersRes.json();
                 if (!users.length) {
                     list.innerHTML = `
                         <div class="p-10 text-center">
@@ -2767,8 +3142,7 @@ if (paymentConfigForm) {
                         </div>`;
                     return;
                 }
-                const meRes = await fetch(`${ADMIN_API}/me`);
-                const me = meRes.ok ? await meRes.json() : null;
+                const me = meRes && meRes.ok ? await meRes.json() : null;
                 const initials = (s) => (s || '?').split(/[@.\s]/)[0].slice(0, 2).toUpperCase();
                 const colors = ['bg-rose-100 text-rose-700', 'bg-amber-100 text-amber-700', 'bg-emerald-100 text-emerald-700', 'bg-sky-100 text-sky-700', 'bg-violet-100 text-violet-700'];
                 list.innerHTML = users.map((u, i) => {

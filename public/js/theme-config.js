@@ -52,8 +52,16 @@
         root.style.setProperty('--color-accent', config.accentColor || defaultConfig.accentColor);
         root.style.setProperty('--font-family', `${fontFamily}, sans-serif`);
         
-        // Update Tailwind config dynamically
+        // Update Tailwind config dynamically.
+        // Some pages load this script before setting `tailwind.config`,
+        // so we defensively create the nested objects.
         if (window.tailwind) {
+            if (!window.tailwind.config) window.tailwind.config = {};
+            if (!window.tailwind.config.theme) window.tailwind.config.theme = {};
+            if (!window.tailwind.config.theme.extend) window.tailwind.config.theme.extend = {};
+            if (!window.tailwind.config.theme.extend.colors) window.tailwind.config.theme.extend.colors = {};
+            if (!window.tailwind.config.theme.extend.fontFamily) window.tailwind.config.theme.extend.fontFamily = {};
+
             window.tailwind.config.theme.extend.colors.primary = config.primaryColor || defaultConfig.primaryColor;
             window.tailwind.config.theme.extend.colors.secondary = config.secondaryColor || defaultConfig.secondaryColor;
             window.tailwind.config.theme.extend.colors.accent = config.accentColor || defaultConfig.accentColor;

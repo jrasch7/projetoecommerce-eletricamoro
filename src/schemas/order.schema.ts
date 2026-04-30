@@ -14,6 +14,12 @@ export const CreateOrderSchema = z.object({
   customerId: z.string().uuid().optional(),
   customerEmail: z.string().email().optional(),
   customerCpf: z.string().optional(),
+  couponCode: z
+    .string()
+    .trim()
+    .max(50)
+    .nullish()
+    .transform((v): string | null => (v ? v.toUpperCase() : null)),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items: z.array(z.any()).default([]),
 });

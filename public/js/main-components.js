@@ -84,38 +84,33 @@
             imageUrl = product.image_url;
         }
 
-        const specs = [product.brand, product.model, product.voltage].filter(Boolean).join(' · ');
-        const badges = [];
-        
-        // Best Seller badge based on actual order count
         const orderCount = product.orderCount || 0;
-        if (orderCount > 0) {
-            badges.push('<span class="absolute top-3 left-3 z-10 bg-green-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Mais Vendido</span>');
-        } else if (product.is_featured) {
-            badges.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
-        }
-        
+        const badges = [];
+        if (orderCount > 0) badges.push('<span class="pcard-badge" style="background:#16a34a">Mais Vendido</span>');
+        else if (product.is_featured) badges.push('<span class="pcard-badge" style="background:#2563eb">Destaque</span>');
         if (desconto > 0) {
-            const badgePosition = (orderCount > 0 || product.is_featured) ? 'left-20' : 'left-3';
-            badges.push(`<span class="absolute top-3 ${badgePosition} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
+            const left = (orderCount > 0 || product.is_featured) ? 'left:76px' : 'left:12px';
+            badges.push(`<span class="pcard-badge" style="background:var(--color-accent);${left}">-${desconto}%</span>`);
         }
 
         const productJson = JSON.stringify({ id: product.id, name: product.name, price, image: imageUrl }).replace(/'/g, "&apos;");
 
-        return `<div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
-            ${badges.join('')}
-            <a href="/produto.html?id=${product.id}" class="block p-4 flex items-center justify-center bg-gray-50">
-                <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Produto'">
+        return `<div class="pcard">
+            <div class="pcard-badges">${badges.join('')}</div>
+            <a href="/produto.html?id=${product.id}" class="pcard-img-wrap">
+                <img src="${imageUrl}" alt="${product.name}" loading="lazy" class="pcard-img" onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Produto'">
             </a>
-            <div class="p-4 flex flex-col flex-grow">
-                <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]"><a href="/produto.html?id=${product.id}" class="hover:text-primary transition">${product.name}</a></h3>
-                ${specs ? `<p class="text-[10px] text-gray-400 mt-1 truncate">${specs}</p>` : ''}
-                <div class="mt-2">
-                    ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
-                    <div class="text-xl font-bold text-primary">R$ ${precoFinal}</div>
-                    <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
+            <div class="pcard-body">
+                <p class="pcard-brand">${product.brand || '&nbsp;'}</p>
+                <h3 class="pcard-name"><a href="/produto.html?id=${product.id}">${product.name}</a></h3>
+                <div class="pcard-price-wrap">
+                    ${desconto > 0 ? `<span class="pcard-oldprice">R$ ${price.toFixed(2)}</span>` : ''}
+                    <span class="pcard-price">R$ ${precoFinal}</span>
+                    <p class="pcard-installment">${parcelas}x R$ ${valorParcela.toFixed(2)} sem juros</p>
                 </div>
-                <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all" data-product='${productJson}'>Adicionar</button>
+                <button class="pcard-btn add-to-cart-btn" data-product='${productJson}'>
+                    <i class="ph ph-shopping-cart-simple"></i> Adicionar
+                </button>
             </div>
         </div>`;
     }
@@ -125,63 +120,92 @@
         const headerPlaceholder = document.getElementById('global-header');
         if (!headerPlaceholder) return;
 
+        // Announcement bar text from config (loaded async, updated later)
+        const cfg = window.storeConfig || {};
+        const bannerText = cfg.bannerText || '🚚 Entrega ágil para todo o Brasil  ·  🔧 Assistência técnica especializada  ·  💳 Parcele em até 3x sem juros';
+        const bannerEnabled = cfg.bannerEnabled !== false;
+
         headerPlaceholder.innerHTML = `
-            <!-- Top Bar -->
-            <div class="bg-primary text-white top-bar-height flex items-center overflow-hidden relative border-b border-white/5">
-                <div class="w-full flex items-center h-full top-bar-container">
-                    <div class="animate-slide whitespace-nowrap">
-                        <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-                        <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-                        <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-                        <span class="px-12 text-[13px] font-medium">🚚 Entrega ágil para todo o Brasil</span>
-                        <span class="px-12 text-[13px] font-medium">🔧 Assistência técnica especializada | Peças originais</span>
-                        <span class="px-12 text-[13px] font-medium">💳 Parcele em até 3x sem juros em todo o site</span>
-                    </div>
+            ${bannerEnabled ? `<!-- Announcement Bar -->
+            <div id="announcement-bar" style="background:var(--color-accent);color:white;height:34px;display:flex;align-items:center;overflow:hidden;position:relative;font-size:12px;font-weight:500;">
+                <div style="mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);width:100%;overflow:hidden;">
+                    <div class="animate-slide" id="announcement-text">${bannerText.split('·').map(t => `<span style="padding:0 2.5rem;">${t.trim()}</span>`).join('')}${bannerText.split('·').map(t => `<span style="padding:0 2.5rem;">${t.trim()}</span>`).join('')}</div>
                 </div>
-            </div>
-            <!-- Header principal -->
-            <header class="bg-primary shadow-xl sticky top-0 z-50 py-5">
-                <div class="container mx-auto px-4 flex flex-wrap items-center justify-between gap-6">
-                    <a href="/" class="flex items-center shrink-0">
-                        <img src="img/logo-moro.webp" alt="Elétrica Moro" class="h-12 w-auto object-contain" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=El%C3%A9trica+Moro'">
+            </div>` : ''}
+            <!-- Main Header -->
+            <header id="main-header" style="background:var(--color-primary);position:sticky;top:0;z-index:100;transition:box-shadow .3s;">
+                <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;height:72px;display:flex;align-items:center;gap:1.5rem;">
+                    <!-- Logo -->
+                    <a href="/" style="flex-shrink:0;display:flex;align-items:center;">
+                        <img id="header-logo" src="${cfg.logo || 'img/logo-moro.webp'}" alt="${cfg.storeName || 'Loja'}" style="height:42px;width:auto;object-fit:contain;filter:brightness(0) invert(1);" onerror="this.style.display='none';document.getElementById('header-logo-text').style.display='flex'">
+                        <span id="header-logo-text" style="display:none;font-weight:800;font-size:1.25rem;color:#fff;letter-spacing:-.02em;">${cfg.storeName || 'Elétrica Moro'}</span>
                     </a>
-                    <form class="flex-grow max-w-2xl relative order-3 md:order-none w-full md:w-auto" onsubmit="event.preventDefault(); AppCore.showMessage('Busca','Funcionalidade em desenvolvimento.');">
-                        <input type="search" placeholder="Buscar peças, eletrodomésticos ou serviços..." class="w-full py-3.5 px-6 rounded-full text-sm focus:ring-2 focus:ring-accent outline-none bg-white">
-                        <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 text-primary text-xl">
-                            <i class="ph ph-magnifying-glass"></i>
-                        </button>
+                    <!-- Search -->
+                    <form id="header-search-form" style="flex:1;max-width:600px;position:relative;" onsubmit="event.preventDefault();const v=document.getElementById('header-search-input').value.trim();if(v)window.location.href='/categoria.html?search='+encodeURIComponent(v);">
+                        <div style="display:flex;align-items:center;background:rgba(255,255,255,.15);border-radius:10px;border:1.5px solid rgba(255,255,255,.2);transition:all .25s;overflow:hidden;" id="search-box">
+                            <i class="ph ph-magnifying-glass" style="padding:0 .75rem;font-size:1.1rem;color:rgba(255,255,255,.6);flex-shrink:0;"></i>
+                            <input id="header-search-input" type="search" placeholder="Buscar produtos..." autocomplete="off"
+                                style="flex:1;background:transparent;border:none;outline:none;padding:.7rem 0;font-size:.85rem;color:#fff;" 
+                                onfocus="document.getElementById('search-box').style.background='rgba(255,255,255,.25)';document.getElementById('search-box').style.borderColor='rgba(255,255,255,.4)'"
+                                onblur="document.getElementById('search-box').style.background='rgba(255,255,255,.15)';document.getElementById('search-box').style.borderColor='rgba(255,255,255,.2)'">
+                            <button type="submit" style="background:rgba(255,255,255,.2);color:white;border:none;padding:.7rem 1.25rem;font-size:.78rem;font-weight:600;cursor:pointer;flex-shrink:0;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.35)'" onmouseleave="this.style.background='rgba(255,255,255,.2)'">Buscar</button>
+                        </div>
                     </form>
-                    <nav class="flex items-center gap-4">
-                        <div id="accountWidget" class="relative">
-                            <!-- Renderizado dinamicamente por updateAccountWidget() -->
-                            <button class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all opacity-50">
-                                <i class="ph ph-user text-2xl"></i>
-                                <span class="hidden lg:inline text-sm font-medium">Carregando…</span>
+                    <!-- Nav icons -->
+                    <nav style="display:flex;align-items:center;gap:.25rem;flex-shrink:0;">
+                        <div id="accountWidget" style="position:relative;">
+                            <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:.625rem;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.85);font-size:.85rem;font-weight:500;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='transparent'">
+                                <i class="ph ph-user" style="font-size:1.3rem;"></i>
+                                <span class="hide-mobile">Conta</span>
                             </button>
                         </div>
-                        <button onclick="AppCore.toggleCart()" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-                            <div class="relative">
-                                <i class="ph ph-shopping-cart text-2xl"></i>
-                                <span id="cartCount" class="absolute -top-2 -right-2 bg-accent text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                        <button onclick="AppCore.toggleCart()" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:.625rem;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.85);font-size:.85rem;font-weight:500;transition:background .2s;position:relative;" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='transparent'">
+                            <div style="position:relative;">
+                                <i class="ph ph-shopping-bag" style="font-size:1.3rem;"></i>
+                                <span id="cartCount" style="display:none;position:absolute;top:-7px;right:-7px;background:var(--color-accent);color:white;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;">0</span>
                             </div>
-                            <span class="hidden lg:inline text-sm font-medium">Carrinho</span>
+                            <span class="hide-mobile">Carrinho</span>
                         </button>
                     </nav>
                 </div>
             </header>
-            <!-- Mega Menu (dinâmico) -->
-            <section class="bg-white border-b border-gray-200 relative">
-                <div class="container mx-auto px-4">
-                    <ul id="dynamicMenu" class="flex items-center gap-8 py-4 overflow-x-auto hide-scrollbar whitespace-nowrap text-sm font-medium text-gray-700">
-                        <li><a href="/categoria.html" class="flex items-center gap-2 hover:text-primary transition-colors"><i class="ph ph-list"></i> Todas as Categorias</a></li>
+            <!-- Category Nav -->
+            <nav id="category-nav" style="background:#fff;border-bottom:1px solid #f0f0f0;">
+                <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;">
+                    <ul id="dynamicMenu" style="display:flex;align-items:center;gap:0;list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none;white-space:nowrap;">
+                        <li><a href="/categoria.html" style="display:flex;align-items:center;gap:.35rem;padding:.75rem 1rem;font-size:.83rem;font-weight:600;color:var(--color-primary);text-decoration:none;border-bottom:2px solid var(--color-primary);"><i class="ph ph-squares-four"></i> Todas</a></li>
                     </ul>
                 </div>
-            </section>
+            </nav>
         `;
 
-        // Preencher menu com categorias reais/mock
+        // Update announcement bar when config loads
+        window.addEventListener('themeLoaded', (e) => {
+            const c = e.detail || {};
+            const bar = document.getElementById('announcement-bar');
+            const textEl = document.getElementById('announcement-text');
+            if (bar && c.bannerEnabled === false) bar.style.display = 'none';
+            if (textEl && c.bannerText) {
+                const parts = c.bannerText.split('·').map(t => `<span style="padding:0 2.5rem;">${t.trim()}</span>`).join('');
+                textEl.innerHTML = parts + parts;
+            }
+            // Update logo
+            const logo = document.getElementById('header-logo');
+            const logoText = document.getElementById('header-logo-text');
+            if (logo && c.logo) logo.src = c.logo;
+            if (logoText && c.storeName) logoText.textContent = c.storeName;
+        });
+
+        // Scroll shadow effect
+        window.addEventListener('scroll', () => {
+            const h = document.getElementById('main-header');
+            if (h) h.style.boxShadow = window.scrollY > 10 ? '0 4px 24px rgba(0,0,0,.15)' : 'none';
+        });
+
         populateMegaMenu();
     }
+
+
 
     async function populateMegaMenu() {
         const menu = document.getElementById('dynamicMenu');
@@ -195,13 +219,7 @@
 
         categories.forEach(cat => {
             const li = document.createElement('li');
-            li.className = 'group/mega static';
-            li.innerHTML = `
-                <a href="/categoria.html?categoryId=${cat.id}" class="flex items-center gap-1 hover:text-primary transition-colors pb-4 -mb-4">
-                    ${cat.name} 
-                    ${cat.subcategories && cat.subcategories.length ? '<i class="ph ph-caret-down text-[10px] rotate-icon"></i>' : ''}
-                </a>
-            `;
+            li.innerHTML = `<a href="/categoria.html?categoryId=${cat.id}" style="display:block;padding:.75rem 1rem;font-size:.83rem;font-weight:500;color:#374151;text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;" onmouseenter="this.style.color='var(--color-primary)';this.style.borderBottomColor='var(--color-primary)'" onmouseleave="this.style.color='#374151';this.style.borderBottomColor='transparent'">${cat.name}</a>`;
             menu.appendChild(li);
         });
     }
@@ -235,55 +253,52 @@
         }
 
         footerPlaceholder.innerHTML = `
-            <footer class="bg-primary text-white pt-16 pb-8">
-                <div class="container mx-auto px-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                        <div class="space-y-6">
-                            <img src="${logo}" alt="Logo" class="h-12 w-auto object-contain brightness-0 invert" onerror="this.src='https://placehold.co/200x48/0a2540/white?text=Logo'">
-                            <p class="text-white/60 text-sm leading-relaxed">Especialistas em peças para eletrodomésticos e assistência técnica autorizada. Qualidade e confiança desde 1990.</p>
-                            <div class="flex gap-4">
-                                ${instagramUrl ? `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-instagram-logo text-xl"></i></a>` : ''}
-                                ${facebookUrl ? `<a href="${facebookUrl}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-facebook-logo text-xl"></i></a>` : ''}
-                                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-all"><i class="ph ph-whatsapp-logo text-xl"></i></a>` : ''}
+            <footer style="background:#111827;color:rgba(255,255,255,.7);font-size:.83rem;">
+                <div style="max-width:1280px;margin:0 auto;padding:2rem 1.25rem 1rem;">
+                    <!-- Top row: Logo + Links -->
+                    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.08);">
+                        <div style="display:flex;flex-direction:column;gap:.75rem;">
+                            <img src="${logo}" alt="Logo" style="height:32px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:.9;" onerror="this.style.display='none'">
+                            <div style="display:flex;gap:.5rem;">
+                                ${instagramUrl ? `<a href="${instagramUrl}" target="_blank" rel="noopener" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .2s;" onmouseenter="this.style.background='var(--color-accent)';this.style.color='#fff'" onmouseleave="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.5)'"><i class="ph ph-instagram-logo" style="font-size:1rem;"></i></a>` : ''}
+                                ${facebookUrl ? `<a href="${facebookUrl}" target="_blank" rel="noopener" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .2s;" onmouseenter="this.style.background='var(--color-accent)';this.style.color='#fff'" onmouseleave="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.5)'"><i class="ph ph-facebook-logo" style="font-size:1rem;"></i></a>` : ''}
+                                ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" rel="noopener" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .2s;" onmouseenter="this.style.background='#25d366';this.style.color='#fff'" onmouseleave="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.5)'"><i class="ph ph-whatsapp-logo" style="font-size:1rem;"></i></a>` : ''}
                             </div>
                         </div>
-                        <div>
-                            <h4 class="text-lg font-bold mb-6 relative inline-block">Institucional<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                            <ul class="space-y-4 text-sm text-white/60">
-                                <li><a href="javascript:void(0)" onclick="AppCore.openInstitucional('sobre')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Sobre Nós</a></li>
-                                <li><a href="javascript:void(0)" onclick="AppCore.openInstitucional('entrega')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Política de Entrega</a></li>
-                                <li><a href="javascript:void(0)" onclick="AppCore.openInstitucional('privacidade')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Privacidade</a></li>
-                                <li><a href="javascript:void(0)" onclick="AppCore.openInstitucional('termos')" class="hover:text-white hover:translate-x-1 flex items-center gap-2"><i class="ph ph-caret-right text-[10px]"></i> Termos e Condições</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-bold mb-6 relative inline-block">Atendimento<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                            <ul class="space-y-4 text-sm text-white/60">
-                                <li class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg transition-all" onclick="AppCore.openMapModal()">
-                                    <i class="ph ph-map-pin text-xl text-accent"></i>
-                                    <span>Rua Santa Sofia 53 - Ideal<br>Novo Hamburgo - RS, 93336-200</span>
-                                </li>
-                                <li class="flex items-center gap-3"><i class="ph ph-phone text-xl text-accent"></i><span>(51) 3581-5940</span></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="text-lg font-bold mb-6 relative inline-block">Segurança<span class="absolute -bottom-2 left-0 w-8 h-1 bg-accent"></span></h4>
-                            <div class="flex flex-wrap gap-3 mb-6">
-                                <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2"><i class="ph ph-shield-check text-2xl text-green-400"></i><span class="text-[10px] leading-tight uppercase font-bold">Site<br>Seguro</span></div>
-                                <div class="bg-white/5 p-2 rounded border border-white/10 flex items-center gap-2"><i class="ph ph-lock-key text-2xl text-blue-400"></i><span class="text-[10px] leading-tight uppercase font-bold">SSL<br>256-bit</span></div>
+                        <div style="display:flex;gap:3rem;flex-wrap:wrap;">
+                            <div>
+                                <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin:0 0 .625rem;">Institucional</p>
+                                <div style="display:flex;flex-direction:column;gap:.4rem;">
+                                    <a href="javascript:void(0)" onclick="AppCore.openInstitucional('sobre')" style="color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.55)'">Sobre Nós</a>
+                                    <a href="javascript:void(0)" onclick="AppCore.openInstitucional('entrega')" style="color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.55)'">Política de Entrega</a>
+                                    <a href="javascript:void(0)" onclick="AppCore.openInstitucional('privacidade')" style="color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.55)'">Privacidade</a>
+                                    <a href="javascript:void(0)" onclick="AppCore.openInstitucional('termos')" style="color:rgba(255,255,255,.55);text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='#fff'" onmouseleave="this.style.color='rgba(255,255,255,.55)'">Termos</a>
+                                </div>
                             </div>
-                            <h4 class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Pagamento</h4>
-                            <div class="flex flex-wrap gap-2 opacity-60"><i class="ph ph-credit-card text-2xl"></i><i class="ph ph-barcode text-2xl"></i><i class="ph ph-pix-logo text-2xl"></i></div>
+                            <div>
+                                <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin:0 0 .625rem;">Contato</p>
+                                <div style="display:flex;flex-direction:column;gap:.4rem;">
+                                    <span style="display:flex;align-items:center;gap:.35rem;cursor:pointer;" onclick="AppCore.openMapModal()"><i class="ph ph-map-pin" style="color:var(--color-accent);"></i> Novo Hamburgo - RS</span>
+                                    <span style="display:flex;align-items:center;gap:.35rem;"><i class="ph ph-phone" style="color:var(--color-accent);"></i> (51) 3581-5940</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin:0 0 .625rem;">Segurança</p>
+                                <div style="display:flex;gap:.5rem;align-items:center;">
+                                    <span style="display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:rgba(255,255,255,.4);"><i class="ph ph-shield-check" style="color:#4ade80;"></i> Site Seguro</span>
+                                    <span style="display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:rgba(255,255,255,.4);"><i class="ph ph-lock-key" style="color:#60a5fa;"></i> SSL</span>
+                                </div>
+                                <div style="display:flex;gap:.375rem;margin-top:.5rem;color:rgba(255,255,255,.3);"><i class="ph ph-credit-card" style="font-size:1.25rem;"></i><i class="ph ph-barcode" style="font-size:1.25rem;"></i><i class="ph ph-pix-logo" style="font-size:1.25rem;"></i></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-[11px]">
-                        <p>${footerText}</p>
-                        <a href="https://sulcore.com" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 hover:text-white/80 transition" title="Sistema desenvolvido por SulCore">
-                            <span class="w-4 h-4 rounded flex items-center justify-center bg-white/10">
-                                <i class="ph-bold ph-cube text-[8px]"></i>
-                            </span>
-                            <span style="font-family: 'Inter', monospace; letter-spacing: 0.18em; font-size: 0.6rem;">SULCORE</span>
-                            <span class="text-white/30">· © ${year}</span>
+                    <!-- Bottom row -->
+                    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding-top:.875rem;gap:.5rem;font-size:.7rem;color:rgba(255,255,255,.3);">
+                        <p style="margin:0;">${footerText}</p>
+                        <a href="https://sulcore.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='rgba(255,255,255,.6)'" onmouseleave="this.style.color='rgba(255,255,255,.3)'">
+                            <span style="width:14px;height:14px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);"><i class="ph-bold ph-cube" style="font-size:7px;"></i></span>
+                            <span style="font-family:'Inter',monospace;letter-spacing:.15em;font-size:.6rem;">SULCORE</span>
+                            <span>· © ${year}</span>
                         </a>
                     </div>
                 </div>
@@ -329,53 +344,100 @@
                 </div>
             </div>
             <!-- Carrinho Drawer -->
-            <div id="cart-overlay" class="fixed inset-0 z-[130] bg-black/50 opacity-0 invisible transition-all duration-300" onclick="AppCore.closeCart()"></div>
-            <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl z-[140] transform translate-x-full transition-transform duration-400 flex flex-col">
-                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                    <h3 class="text-xl font-bold text-primary flex items-center gap-2"><i class="ph ph-shopping-cart text-2xl"></i> Meu Carrinho</h3>
-                    <button onclick="AppCore.closeCart()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="ph ph-x text-xl"></i></button>
+            <div id="cart-overlay" style="position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:all .3s;" onclick="AppCore.closeCart()"></div>
+            <div id="cart-drawer" style="position:fixed;top:0;right:0;height:100%;width:100%;max-width:420px;background:#fff;box-shadow:-4px 0 40px rgba(0,0,0,.12);z-index:140;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.25rem 1rem;border-bottom:1px solid #f0f0f0;">
+                    <div style="display:flex;align-items:center;gap:.625rem;">
+                        <i class="ph ph-shopping-bag" style="font-size:1.4rem;color:var(--color-primary);"></i>
+                        <h3 style="font-size:1rem;font-weight:700;color:#111;margin:0;">Meu Carrinho</h3>
+                        <span id="cart-header-count" style="background:var(--color-primary);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:none;">0</span>
+                    </div>
+                    <button onclick="AppCore.closeCart()" style="width:36px;height:36px;border-radius:50%;border:none;background:#f4f5f7;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;" onmouseenter="this.style.background='#e5e7eb'" onmouseleave="this.style.background='#f4f5f7'">
+                        <i class="ph ph-x" style="font-size:1rem;"></i>
+                    </button>
                 </div>
-                <div id="cart-items-list" class="flex-1 overflow-y-auto cart-items-container p-5 space-y-4"></div>
-                <div class="border-t border-gray-100 p-5 space-y-4">
-                    <div class="flex items-center justify-between"><span class="text-gray-600 font-medium">Subtotal</span><span id="cart-subtotal" class="text-2xl font-bold text-primary">R$ 0,00</span></div>
-                    <button class="w-full bg-accent hover:bg-accent/90 text-white py-4 rounded-xl font-bold text-lg shadow-lg" onclick="AppCore.showMessage('Finalizar Pedido','Redirecionando para checkout...')">Finalizar Pedido</button>
-                    <button onclick="AppCore.closeCart()" class="w-full text-gray-500 text-sm hover:text-gray-700">Continuar Comprando</button>
+                <div id="cart-items-list" style="flex:1;overflow-y:auto;padding:1rem;"></div>
+                <div style="border-top:1px solid #f0f0f0;padding:1.25rem;background:#fff;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                        <span style="font-size:.875rem;color:#6b7280;font-weight:500;">Subtotal</span>
+                        <span id="cart-subtotal" style="font-size:1.5rem;font-weight:800;color:var(--color-primary);">R$ 0,00</span>
+                    </div>
+                    <button onclick="window.location.href='/checkout.html'" style="width:100%;padding:1rem;border-radius:12px;border:none;background:var(--color-primary);color:white;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:.5rem;transition:opacity .2s;" onmouseenter="this.style.opacity='.88'" onmouseleave="this.style.opacity='1'">Finalizar Pedido →</button>
+                    <button onclick="AppCore.closeCart()" style="width:100%;padding:.65rem;border-radius:12px;border:1.5px solid #e5e7eb;background:transparent;color:#6b7280;font-size:.83rem;font-weight:500;cursor:pointer;transition:all .2s;" onmouseenter="this.style.borderColor='#9ca3af';this.style.color='#374151'" onmouseleave="this.style.borderColor='#e5e7eb';this.style.color='#6b7280'">Continuar Comprando</button>
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modalsHTML);
     }
-    // Estilos específicos para garantir scroll no painel institucional
+    // ---------- ESTILOS GLOBAIS DO DESIGN SYSTEM ----------
 const style = document.createElement('style');
 style.textContent = `
-    .panel-content {
-        max-height: calc(90vh - 100px);
-        overflow-y: auto;
-        padding-right: 4px;
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 #f1f5f9;
+    @keyframes slideBanner { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .animate-slide { animation: slideBanner 40s linear infinite; }
+    .hide-mobile { }
+    @media (max-width: 768px) { .hide-mobile { display: none !important; } }
+
+    /* Product Card */
+    .pcard { background:#fff;border-radius:14px;overflow:hidden;border:1px solid #f0f0f0;display:flex;flex-direction:column;height:100%;transition:box-shadow .25s,transform .25s;position:relative; }
+    .pcard:hover { box-shadow:0 8px 30px rgba(0,0,0,.11);transform:translateY(-3px); }
+    .pcard-badges { position:absolute;top:12px;left:12px;z-index:10;display:flex;gap:6px; }
+    .pcard-badge { font-size:10px;font-weight:700;color:#fff;padding:3px 8px;border-radius:20px; }
+    .pcard-img-wrap { display:block;position:relative;padding-bottom:100%;overflow:hidden;background:#f8f9fa; }
+    .pcard-img { position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:14px;transition:transform .4s ease; }
+    .pcard:hover .pcard-img { transform:scale(1.06); }
+    .pcard-body { padding:1rem;display:flex;flex-direction:column;flex:1; }
+    .pcard-brand { font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:0 0 4px; }
+    .pcard-name { font-size:.83rem;font-weight:600;color:#1f2937;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin:0 0 10px; }
+    .pcard-name a { color:inherit;text-decoration:none; }
+    .pcard-name a:hover { color:var(--color-primary); }
+    .pcard-price-wrap { border-top:1px solid #f4f5f7;padding-top:10px;margin-top:auto; }
+    .pcard-oldprice { font-size:11px;color:#9ca3af;text-decoration:line-through;display:block; }
+    .pcard-price { font-size:1.2rem;font-weight:800;color:var(--color-primary);display:block;line-height:1.2; }
+    .pcard-installment { font-size:10.5px;color:#9ca3af;margin:2px 0 10px; }
+    .pcard-btn { width:100%;padding:.625rem;border-radius:10px;border:none;background:color-mix(in srgb,var(--color-primary) 8%,white);color:var(--color-primary);font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s; }
+    .pcard-btn:hover { background:var(--color-primary);color:#fff; }
+
+    /* Cart items */
+    .cart-item { display:flex;gap:.875rem;padding:.875rem;background:#f9fafb;border-radius:12px;align-items:flex-start; }
+    .cart-item-img { width:64px;height:64px;background:#fff;border-radius:8px;object-fit:contain;flex-shrink:0;border:1px solid #f0f0f0; }
+    .cart-item-body { flex:1;min-width:0; }
+    .cart-item-name { font-size:.82rem;font-weight:600;color:#1f2937;line-height:1.3;margin:0 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .cart-item-price { font-size:.9rem;font-weight:700;color:var(--color-primary); }
+    .cart-item-remove { background:none;border:none;color:#d1d5db;cursor:pointer;padding:4px;border-radius:6px;transition:color .2s;flex-shrink:0; }
+    .cart-item-remove:hover { color:#ef4444; }
+
+    /* Panel institucional */
+    .panel-content { max-height:calc(90vh - 100px);overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:#cbd5e1 #f1f5f9; }
+    .panel-content::-webkit-scrollbar { width:4px; }
+    .panel-content::-webkit-scrollbar-thumb { background-color:#cbd5e1;border-radius:4px; }
+    @media (min-width:768px) {
+        #institucional-panel { max-width:720px;left:50%;transform:translateX(-50%) translateY(100%); }
+        #institucional-panel.translate-y-0 { transform:translateX(-50%) translateY(0) !important; }
     }
-    .panel-content::-webkit-scrollbar {
-        width: 4px;
+    /* Map iframe */
+    .map-iframe { width:100%;height:300px;border:0; }
+
+    /* Search placeholder */
+    #header-search-input::placeholder { color:rgba(255,255,255,.45); }
+    #header-search-input::-webkit-search-cancel-button { filter:invert(1); }
+
+    /* Carousel nav buttons show on hover */
+    .group:hover button[id$="PrevBtn"], .group:hover button[id$="NextBtn"] { opacity:1 !important; }
+
+    /* Bento grid responsive */
+    @media (max-width: 768px) {
+        #bentoCategoryGrid { grid-template-columns:repeat(2,1fr) !important;grid-auto-rows:140px !important; }
+        #bentoCategoryGrid > a:first-child { grid-column:span 2 !important;grid-row:span 1 !important; }
     }
-    .panel-content::-webkit-scrollbar-thumb {
-        background-color: #cbd5e1;
-        border-radius: 4px;
-    }
-    .panel-content::-webkit-scrollbar-track {
-        background: #f1f5f9;
-    }
-    /* Ajuste para desktop: centralização e limite de altura */
-    @media (min-width: 768px) {
-        #institucional-panel {
-            max-width: 720px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100%);
-        }
-        #institucional-panel.translate-y-0 {
-            transform: translateX(-50%) translateY(0) !important;
-        }
-    }
+
+    /* Smooth fade for dynamic sections */
+    @keyframes fadeUp { from { opacity:0;transform:translateY(12px); } to { opacity:1;transform:translateY(0); } }
+    #bentoCategoryGrid > a { animation: fadeUp .5s ease both; }
+    #bentoCategoryGrid > a:nth-child(2) { animation-delay:.05s; }
+    #bentoCategoryGrid > a:nth-child(3) { animation-delay:.1s; }
+    #bentoCategoryGrid > a:nth-child(4) { animation-delay:.15s; }
+    #bentoCategoryGrid > a:nth-child(5) { animation-delay:.2s; }
+    #bentoCategoryGrid > a:nth-child(6) { animation-delay:.25s; }
 `;
 document.head.appendChild(style);
 
@@ -398,29 +460,37 @@ document.head.appendChild(style);
 
     function updateCartUI() {
         const counter = document.getElementById('cartCount');
+        const headerCount = document.getElementById('cart-header-count');
         const itemsContainer = document.getElementById('cart-items-list');
         const subtotalEl = document.getElementById('cart-subtotal');
-        if (!counter || !itemsContainer || !subtotalEl) return;
+        if (!itemsContainer || !subtotalEl) return;
 
         const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-        counter.textContent = totalItems;
-        counter.style.display = totalItems > 0 ? 'flex' : 'none';
+        if (counter) { counter.textContent = totalItems; counter.style.display = totalItems > 0 ? 'flex' : 'none'; }
+        if (headerCount) { headerCount.textContent = totalItems; headerCount.style.display = totalItems > 0 ? 'inline-block' : 'none'; }
 
         if (cartItems.length === 0) {
-            itemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 py-12"><i class="ph ph-shopping-cart text-6xl mb-4 opacity-40"></i><p class="text-lg font-medium">Seu carrinho está vazio</p></div>`;
+            itemsContainer.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:3rem 1rem;color:#9ca3af;text-align:center;"><i class="ph ph-shopping-bag" style="font-size:3rem;margin-bottom:1rem;opacity:.4;"></i><p style="font-size:.9rem;font-weight:500;">Seu carrinho está vazio</p><p style="font-size:.8rem;margin-top:.25rem;">Adicione produtos para continuar</p></div>`;
             subtotalEl.textContent = 'R$ 0,00';
             return;
         }
 
-        let html = '';
+        let html = '<div style="display:flex;flex-direction:column;gap:.625rem;">';
         cartItems.forEach(item => {
-            const img = item.image || 'https://placehold.co/100x100?text=Produto';
+            const img = item.image || 'https://placehold.co/64x64/f3f4f6/9ca3af?text=P';
             const qty = item.quantity || 1;
-            html += `<div class="flex gap-4 bg-gray-50 p-3 rounded-xl">
-                <div class="w-20 h-20 bg-white rounded-lg flex items-center justify-center p-1"><img src="${img}" alt="${item.name}" class="max-w-full max-h-full object-contain" onerror="this.src='https://placehold.co/100x100'"></div>
-                <div class="flex-1"><h4 class="font-semibold text-gray-800 text-sm line-clamp-2">${item.name}</h4><div class="flex items-center justify-between mt-2"><span class="text-primary font-bold">R$ ${(item.price * qty).toFixed(2)}</span><button onclick="AppCore.removeFromCart('${item.id}')" class="text-gray-400 hover:text-accent"><i class="ph ph-trash text-lg"></i></button></div>${qty>1?`<p class="text-xs text-gray-500 mt-1">Qtd: ${qty}</p>`:''}</div>
+            html += `<div class="cart-item">
+                <img src="${img}" alt="${item.name}" class="cart-item-img" onerror="this.src='https://placehold.co/64x64/f3f4f6/9ca3af?text=P'">
+                <div class="cart-item-body">
+                    <p class="cart-item-name">${item.name}${qty > 1 ? ` <span style="color:#9ca3af;font-weight:400;">×${qty}</span>` : ''}</p>
+                    <span class="cart-item-price">R$ ${(item.price * qty).toFixed(2)}</span>
+                </div>
+                <button class="cart-item-remove" onclick="AppCore.removeFromCart('${item.id}')" title="Remover">
+                    <i class="ph ph-x" style="font-size:.875rem;"></i>
+                </button>
             </div>`;
         });
+        html += '</div>';
         itemsContainer.innerHTML = html;
         subtotalEl.textContent = `R$ ${calcTotal().toFixed(2)}`;
     }
@@ -452,30 +522,24 @@ document.head.appendChild(style);
 
     function toggleCart() {
         const drawer = document.getElementById('cart-drawer');
-        if (drawer.classList.contains('translate-x-full')) {
-            openCart();
-        } else {
-            closeCart();
-        }
+        if (!drawer) return;
+        const isOpen = drawer.style.transform === 'translateX(0%)';
+        isOpen ? closeCart() : openCart();
     }
 
     function openCart() {
         const drawer = document.getElementById('cart-drawer');
         const overlay = document.getElementById('cart-overlay');
-        drawer.classList.remove('translate-x-full');
-        drawer.classList.add('translate-x-0');
-        overlay.classList.remove('opacity-0', 'invisible');
-        overlay.classList.add('opacity-100');
+        if (drawer) drawer.style.transform = 'translateX(0%)';
+        if (overlay) { overlay.style.opacity = '1'; overlay.style.visibility = 'visible'; }
         document.body.style.overflow = 'hidden';
     }
 
     function closeCart() {
         const drawer = document.getElementById('cart-drawer');
         const overlay = document.getElementById('cart-overlay');
-        drawer.classList.add('translate-x-full');
-        drawer.classList.remove('translate-x-0');
-        overlay.classList.add('opacity-0', 'invisible');
-        overlay.classList.remove('opacity-100');
+        if (drawer) drawer.style.transform = 'translateX(100%)';
+        if (overlay) { overlay.style.opacity = '0'; overlay.style.visibility = 'hidden'; }
         document.body.style.overflow = '';
     }
 
@@ -660,9 +724,9 @@ document.head.appendChild(style);
         const user = _currentUser;
         if (!user) {
             widget.innerHTML = `
-                <button id="openLoginBtn" type="button" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-                    <i class="ph ph-sign-in text-2xl"></i>
-                    <span class="hidden lg:inline text-sm font-medium">Entrar</span>
+                <button id="openLoginBtn" type="button" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:.625rem;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.85);font-size:.85rem;font-weight:500;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='transparent'">
+                    <i class="ph ph-user" style="font-size:1.3rem;"></i>
+                    <span class="hide-mobile">Entrar</span>
                 </button>
             `;
             document.getElementById('openLoginBtn').addEventListener('click', () => openAuthModal('login'));
@@ -677,10 +741,10 @@ document.head.appendChild(style);
             ? `<li class="border-t border-slate-100 mt-1 pt-1"><a href="/admin.html" class="flex items-center gap-3 px-4 py-2.5 text-sm text-amber-700 hover:bg-amber-50 transition"><i class="ph-bold ph-shield-check text-base"></i> Painel administrativo</a></li>`
             : '';
         widget.innerHTML = `
-            <button id="accountBtn" class="flex items-center gap-2 text-white p-2 hover:bg-white/10 rounded-lg transition-all">
-                <span class="w-8 h-8 rounded-full bg-accent text-white text-sm font-bold flex items-center justify-center">${initial}</span>
-                <span class="hidden lg:inline text-sm font-medium truncate max-w-[140px]">${displayName}</span>
-                <i class="ph ph-caret-down text-xs"></i>
+            <button id="accountBtn" style="display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:.625rem;background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.85);font-size:.85rem;font-weight:500;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='transparent'">
+                <span style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;">${initial}</span>
+                <span class="hide-mobile" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${displayName}</span>
+                <i class="ph ph-caret-down" style="font-size:.65rem;"></i>
             </button>
             <div id="accountMenu" class="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl py-2 hidden border border-slate-200 z-50 overflow-hidden">
                 <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">

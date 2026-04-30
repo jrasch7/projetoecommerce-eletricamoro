@@ -35,65 +35,18 @@
         }
     </script>
     <style>
-        /* ===== ESTILOS GLOBAIS (mantidos para a home) ===== */
-        @keyframes slideBanner {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-slide {
-            display: inline-block;
-            white-space: nowrap;
-            animation: slideBanner 40s linear infinite;
-        }
-        .top-bar-height { height: 32px; }
-        .top-bar-container {
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        button, a, .clickable { transition: all 0.3s ease; }
-
-        /* Carrosséis */
+        /* Carousel */
         #featuredTrack, #homeTrack {
-            display: flex;
-            gap: 1.25rem;
-            will-change: transform;
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            cursor: grab;
+            display: flex; gap: 1rem; will-change: transform;
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1); cursor: grab;
         }
         #featuredTrack:active, #homeTrack:active { cursor: grabbing; }
-        .feature-card, .home-card {
-            flex: 0 0 calc((100% - 5rem) / 5);
-        }
-        @media (max-width: 1024px) {
-            .feature-card, .home-card { flex: 0 0 calc((100% - 2.5rem) / 3); }
-        }
-        @media (max-width: 640px) {
-            .feature-card, .home-card { flex: 0 0 calc((100% - 1.25rem) / 2); }
-        }
-        .product-img {
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
-            background: #f9fafb;
-            transition: transform 0.3s ease;
-        }
-        .group:hover .product-img { transform: scale(1.03); }
-        .hero-dot {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .hero-dot.active {
-            background-color: var(--color-accent) !important;
-            width: 2rem !important;
-        }
-        .category-card { transition: all 0.3s ease; }
-        .category-card:hover {
-            background-color: var(--color-primary);
-            color: white;
-            transform: translateY(-4px);
-        }
-        .category-card:hover i { color: white; }
+        .feature-card, .home-card { flex: 0 0 calc((100% - 4rem) / 5); }
+        @media (max-width: 1024px) { .feature-card, .home-card { flex: 0 0 calc((100% - 2rem) / 3); } }
+        @media (max-width: 640px) { .feature-card, .home-card { flex: 0 0 calc((100% - 1rem) / 2); } }
+        /* Hero */
+        .hero-dot { transition: all 0.2s ease; cursor: pointer; }
+        .hero-dot.active { background-color: var(--color-accent) !important; width: 2rem !important; }
     </style>
 </head>
 <body class="bg-light-gray font-sans text-gray-900">
@@ -104,90 +57,86 @@
 <!-- ===== CONTEÚDO PRINCIPAL (HOME) ===== -->
 
 <!-- Hero Slider -->
-<section class="relative overflow-hidden bg-gray-900">
-    <div class="relative h-[450px] md:h-[520px] w-full">
-        <div id="heroTrack" class="flex h-full transition-transform duration-700 ease-out"></div>
-        <button id="heroPrevBtn" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white w-12 h-12 rounded-full flex items-center justify-center"><i class="ph ph-caret-left text-2xl"></i></button>
-        <button id="heroNextBtn" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white w-12 h-12 rounded-full flex items-center justify-center"><i class="ph ph-caret-right text-2xl"></i></button>
-        <div id="heroDots" class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-20"></div>
+<section style="position:relative;overflow:hidden;background:#0f172a;">
+    <div style="position:relative;height:480px;width:100%;">
+        <div id="heroTrack" style="display:flex;height:100%;transition:transform .7s ease-out;"></div>
+        <button id="heroPrevBtn" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:20;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.3)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'"><i class="ph ph-caret-left" style="font-size:1.2rem;"></i></button>
+        <button id="heroNextBtn" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:20;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;" onmouseenter="this.style.background='rgba(255,255,255,.3)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'"><i class="ph ph-caret-right" style="font-size:1.2rem;"></i></button>
+        <div id="heroDots" style="position:absolute;bottom:24px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:20;"></div>
     </div>
 </section>
 
 <main>
-    <!-- Benefits Bar (Dynamic from StoreConfig) -->
-    <section id="benefitsBar" class="py-10 bg-[#f9fafb] border-b border-gray-100">
-        <div class="container mx-auto px-4">
-            <div id="benefitsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-                <!-- Benefits will be loaded dynamically -->
-            </div>
+    <!-- Benefits Bar -->
+    <section id="benefitsBar" style="padding:1.5rem 0;background:#fff;border-bottom:1px solid #f0f0f0;">
+        <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;">
+            <div id="benefitsContainer" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;"></div>
         </div>
     </section>
 
-    <!-- Navegue por Categoria -->
-    <section class="py-12 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-bold text-primary italic uppercase tracking-tighter">Navegue por Categoria</h2>
-                <div class="h-[2px] flex-grow mx-6 bg-gray-100 hidden md:block"></div>
-            </div>
-            <div id="categoryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-        </div>
-    </section>
+
 
     <!-- Produtos em Destaque -->
-    <section class="py-16 bg-light-gray" id="featuredSection">
-        <div class="container mx-auto px-4 relative">
-            <div class="flex items-end justify-between mb-10">
-                <div><h2 class="text-3xl md:text-4xl font-bold text-primary">Produtos em Destaque</h2><div class="w-20 h-1.5 bg-accent rounded-full mt-2"></div><p class="text-gray-500 mt-2 text-sm">Peças e eletros com alta performance</p></div>
+    <section id="featuredSection" style="padding:3.5rem 0;background:#f8f9fa;">
+        <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;position:relative;">
+            <div style="margin-bottom:2rem;">
+                <h2 style="font-size:1.5rem;font-weight:800;color:var(--color-primary);margin:0 0 .25rem;">Produtos em Destaque</h2>
+                <p style="font-size:.875rem;color:#6b7280;margin:0;">Peças e eletros com alta performance</p>
             </div>
-            <div class="relative group">
-                <button id="featuredPrevBtn" class="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white shadow-xl hover:bg-primary hover:text-white text-primary w-12 h-12 rounded-full flex items-center justify-center border border-gray-200 opacity-0 group-hover:opacity-100"><i class="ph ph-caret-left text-2xl"></i></button>
-                <div class="overflow-hidden rounded-2xl"><div id="featuredTrack" class="flex gap-5"></div></div>
-                <button id="featuredNextBtn" class="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white shadow-xl hover:bg-primary hover:text-white text-primary w-12 h-12 rounded-full flex items-center justify-center border border-gray-200 opacity-0 group-hover:opacity-100"><i class="ph ph-caret-right text-2xl"></i></button>
+            <div style="position:relative;" class="group">
+                <button id="featuredPrevBtn" style="position:absolute;left:-18px;top:50%;transform:translateY(-50%);z-index:20;width:40px;height:40px;border-radius:50%;border:1px solid #e5e7eb;background:#fff;color:var(--color-primary);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;"><i class="ph ph-caret-left" style="font-size:1rem;"></i></button>
+                <div style="overflow:hidden;border-radius:14px;"><div id="featuredTrack"></div></div>
+                <button id="featuredNextBtn" style="position:absolute;right:-18px;top:50%;transform:translateY(-50%);z-index:20;width:40px;height:40px;border-radius:50%;border:1px solid #e5e7eb;background:#fff;color:var(--color-primary);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;"><i class="ph ph-caret-right" style="font-size:1rem;"></i></button>
             </div>
         </div>
     </section>
 
-    <!-- Bento Grid -->
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-[260px]">
-                <div class="md:col-span-1 md:row-span-2 relative rounded-2xl overflow-hidden group shadow-xl cursor-pointer" onclick="AppCore.showMessage('Oficina Premium','Em breve mais informações.')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1556911220-e150213ff7ad?auto=format&fit=crop&w=800&q=80');"></div><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center p-6 text-white text-center"><h3 class="text-2xl font-bold mb-2">Oficina Premium</h3><p class="text-sm opacity-90">Diagnóstico gratuito e garantia estendida</p><span class="mt-5 bg-white/20 backdrop-blur-sm hover:bg-white hover:text-primary px-5 py-2 rounded-full text-sm font-semibold transition-all">Ver mais →</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Geladeiras')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Geladeiras</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Máquinas de Lavar')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Máquinas de Lavar</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Micro-ondas')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1585515325310-e89a39c7d213?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Micro-ondas</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
-                <div class="relative rounded-2xl overflow-hidden group shadow-md cursor-pointer" onclick="AppCore.showMessage('Categoria','Refrigeração')"><div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style="background-image: url('https://images.unsplash.com/photo-1581791055773-5f8d8c3b64f3?auto=format&fit=crop&w=400&q=80');"></div><div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white"><h4 class="font-bold text-xl">Refrigeração</h4><span class="text-xs underline mt-2">Ver mais</span></div></div>
+    <!-- Explore por Categoria (Dynamic Bento) -->
+    <section style="padding:3.5rem 0;background:#fff;">
+        <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;">
+                <div>
+                    <h2 style="font-size:1.5rem;font-weight:800;color:var(--color-primary);margin:0 0 .25rem;">Explore por Categoria</h2>
+                    <p style="font-size:.875rem;color:#6b7280;margin:0;">Encontre exatamente o que precisa</p>
+                </div>
+                <a href="/categoria.html" style="display:inline-flex;align-items:center;gap:6px;font-size:.83rem;font-weight:600;color:var(--color-primary);text-decoration:none;transition:gap .2s;" onmouseenter="this.style.gap='10px'" onmouseleave="this.style.gap='6px'">Ver todas <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div id="bentoCategoryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:180px;gap:1rem;">
+                <!-- Populated by JS -->
             </div>
         </div>
     </section>
 
     <!-- Para sua casa -->
-    <section class="py-16 bg-light-gray" id="homeSection">
-        <div class="container mx-auto px-4 relative">
-            <div class="flex items-end justify-between mb-10">
-                <div><h2 class="text-3xl md:text-4xl font-bold text-primary">Para sua casa</h2><div class="w-20 h-1.5 bg-accent rounded-full mt-2"></div><p class="text-gray-500 mt-2 text-sm">Utensílios e eletroportáteis com até 3x sem juros</p></div>
+    <section id="homeSection" style="padding:3.5rem 0;background:#f8f9fa;">
+        <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;position:relative;">
+            <div style="margin-bottom:2rem;">
+                <h2 style="font-size:1.5rem;font-weight:800;color:var(--color-primary);margin:0 0 .25rem;">Para sua casa</h2>
+                <p style="font-size:.875rem;color:#6b7280;margin:0;">Utensílios e eletroportáteis com até 3x sem juros</p>
             </div>
-            <div class="relative group">
-                <button id="homePrevBtn" class="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white shadow-xl hover:bg-primary hover:text-white text-primary w-12 h-12 rounded-full flex items-center justify-center border border-gray-200 opacity-0 group-hover:opacity-100"><i class="ph ph-caret-left text-2xl"></i></button>
-                <div class="overflow-hidden rounded-2xl"><div id="homeTrack" class="flex gap-5"></div></div>
-                <button id="homeNextBtn" class="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white shadow-xl hover:bg-primary hover:text-white text-primary w-12 h-12 rounded-full flex items-center justify-center border border-gray-200 opacity-0 group-hover:opacity-100"><i class="ph ph-caret-right text-2xl"></i></button>
+            <div style="position:relative;" class="group">
+                <button id="homePrevBtn" style="position:absolute;left:-18px;top:50%;transform:translateY(-50%);z-index:20;width:40px;height:40px;border-radius:50%;border:1px solid #e5e7eb;background:#fff;color:var(--color-primary);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;"><i class="ph ph-caret-left" style="font-size:1rem;"></i></button>
+                <div style="overflow:hidden;border-radius:14px;"><div id="homeTrack"></div></div>
+                <button id="homeNextBtn" style="position:absolute;right:-18px;top:50%;transform:translateY(-50%);z-index:20;width:40px;height:40px;border-radius:50%;border:1px solid #e5e7eb;background:#fff;color:var(--color-primary);box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;"><i class="ph ph-caret-right" style="font-size:1rem;"></i></button>
             </div>
         </div>
     </section>
 </main>
 
 <!-- Atendimento -->
-<section class="py-16 bg-primary text-white">
-    <div class="container mx-auto px-4 max-w-5xl text-center">
-        <h2 class="text-3xl font-bold mb-3">Atendimento Especializado</h2>
-        <p class="text-white/70 text-lg mb-10">Segunda a Sexta: 08:00 às 18:00 · Sábado: 08:00 às 12:00</p>
-        <div class="flex flex-wrap justify-center gap-6">
-            <button id="openChatModalBtn" class="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-accent hover:border-accent transition-all flex items-center gap-3 shadow-xl"><i class="ph ph-chats-circle text-2xl"></i> Iniciar Conversa</button>
-            <button id="openCallModalBtn" class="bg-accent text-white px-10 py-5 rounded-2xl font-bold text-lg hover:scale-105 transition-all flex items-center gap-3 shadow-xl"><i class="ph ph-phone-call text-2xl"></i> Ligar agora</button>
+<section style="padding:4rem 0;background:var(--color-primary);color:#fff;">
+    <div style="max-width:720px;margin:0 auto;padding:0 1.25rem;text-align:center;">
+        <h2 style="font-size:1.75rem;font-weight:800;margin:0 0 .5rem;">Atendimento Especializado</h2>
+        <p style="opacity:.6;font-size:.95rem;margin:0 0 2.5rem;">Segunda a Sexta: 08:00 às 18:00 · Sábado: 08:00 às 12:00</p>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;">
+            <button id="openChatModalBtn" style="display:flex;align-items:center;gap:.625rem;padding:1rem 2rem;border-radius:12px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);backdrop-filter:blur(8px);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;" onmouseenter="this.style.background='var(--color-accent)';this.style.borderColor='var(--color-accent)'" onmouseleave="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.2)'"><i class="ph ph-chats-circle" style="font-size:1.3rem;"></i> Iniciar Conversa</button>
+            <button id="openCallModalBtn" style="display:flex;align-items:center;gap:.625rem;padding:1rem 2rem;border-radius:12px;border:none;background:var(--color-accent);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:transform .15s;" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform='scale(1)'"><i class="ph ph-phone-call" style="font-size:1.3rem;"></i> Ligar agora</button>
         </div>
-        <p class="text-white/50 text-sm mt-8 flex items-center justify-center gap-1"><i class="ph ph-shield-check"></i> Atendimento humanizado e seguro</p>
+        <p style="opacity:.35;font-size:.8rem;margin:2rem 0 0;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="ph ph-shield-check"></i> Atendimento humanizado e seguro</p>
     </div>
 </section>
+
+
 
 <!-- Modais específicos da Home (Chat e Ligação) -->
 <div id="chatModal" class="fixed inset-0 z-[100] flex items-center justify-center p-5 invisible opacity-0 transition-all duration-300">
@@ -311,17 +260,63 @@
                 render();
             }
 
-            // Preencher grid de categorias
+            // Preencher grid de categorias (mini scrollbar)
             async function buildCategoryGrid() {
                 const cats = await AppCore.fetchCategories();
                 const grid = document.getElementById('categoryGrid');
-                const icons = ['ph-blender', 'ph-snowflake', 'ph-wrench', 'ph-lamp'];
+                if (!grid) return;
+                const icons = ['ph-blender', 'ph-snowflake', 'ph-wrench', 'ph-lamp', 'ph-engine', 'ph-fire', 'ph-drop', 'ph-lightning'];
                 grid.innerHTML = cats.slice(0, 8).map((c, i) => {
                     const thumb = c.imageUrl
-                        ? `<div class="w-full h-36 rounded-xl overflow-hidden mb-4"><img src="${c.imageUrl}" alt="${c.name}" class="w-full h-full object-cover" onerror="this.parentElement.outerHTML='<div class=\'w-full h-36 rounded-xl bg-white text-primary flex items-center justify-center text-5xl mb-4 group-hover:bg-accent group-hover:text-white\'><i class=\'ph ${icons[i%icons.length]}\'></i></div>'"></div>`
-                        : `<div class="w-full h-36 rounded-xl bg-white text-primary flex items-center justify-center text-5xl mb-4 group-hover:bg-accent group-hover:text-white"><i class="ph ${icons[i%icons.length]}"></i></div>`;
-                    return `<a href="/categoria.html?categoryId=${c.id}" class="group relative overflow-hidden rounded-2xl bg-light-gray p-4 flex flex-col items-center text-center transition-all hover:bg-primary hover:shadow-2xl hover:-translate-y-2">${thumb}<h3 class="font-bold text-primary group-hover:text-white text-lg">${c.name}</h3></a>`;
+                        ? `<div style="width:100%;height:140px;border-radius:12px;overflow:hidden;margin-bottom:1rem;"><img src="${c.imageUrl}" alt="${c.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--color-primary);background:#f0f4ff;border-radius:12px;\\'><i class=\\'ph ${icons[i%icons.length]}\\'></i></div>'"></div>`
+                        : `<div style="width:100%;height:140px;border-radius:12px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--color-primary);margin-bottom:1rem;"><i class="ph ${icons[i%icons.length]}"></i></div>`;
+                    return `<a href="/categoria.html?categoryId=${c.id}" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:1rem;border-radius:16px;background:#f9fafb;text-decoration:none;transition:all .25s;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseleave="this.style.transform='translateY(0)';this.style.boxShadow='none'">${thumb}<h3 style="font-size:.95rem;font-weight:700;color:var(--color-primary);margin:0;">${c.name}</h3></a>`;
                 }).join('');
+            }
+
+            // Bento Grid de Categorias (visual premium)
+            async function buildBentoCategoryGrid() {
+                const cats = await AppCore.fetchCategories();
+                const grid = document.getElementById('bentoCategoryGrid');
+                if (!grid || cats.length === 0) { if(grid) grid.parentElement.style.display='none'; return; }
+
+                const gradients = [
+                    'linear-gradient(135deg, #0a2540 0%, #1a4a7a 100%)',
+                    'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                    'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
+                    'linear-gradient(135deg, #164e63 0%, #0e7490 100%)',
+                    'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                    'linear-gradient(135deg, #14532d 0%, #166534 100%)',
+                ];
+                const icons = ['ph-wrench','ph-snowflake','ph-blender','ph-lightning','ph-engine','ph-fire','ph-drop','ph-thermometer'];
+
+                const maxCats = Math.min(cats.length, 6);
+                const displayed = cats.slice(0, maxCats);
+
+                // Layout: first card = 2col, rest = 1col; max 2 rows
+                grid.innerHTML = displayed.map((c, i) => {
+                    const hasImage = c.imageUrl && c.imageUrl.length > 5;
+                    const span = i === 0 ? 'grid-column:span 2;grid-row:span 2;' : '';
+                    const bg = hasImage
+                        ? `background-image:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.6) 100%),url('${c.imageUrl}');background-size:cover;background-position:center;`
+                        : `background:${gradients[i % gradients.length]};`;
+
+                    const iconFallback = !hasImage ? `<i class="ph ${icons[i % icons.length]}" style="font-size:${i === 0 ? '3.5rem' : '2.5rem'};color:rgba(255,255,255,.15);position:absolute;top:1rem;right:1rem;"></i>` : '';
+
+                    return `<a href="/categoria.html?categoryId=${c.id}" style="${span}position:relative;border-radius:16px;overflow:hidden;${bg}display:flex;flex-direction:column;justify-content:flex-end;padding:${i === 0 ? '2rem' : '1.25rem'};text-decoration:none;transition:transform .3s,box-shadow .3s;cursor:pointer;" onmouseenter="this.style.transform='scale(1.02)';this.style.boxShadow='0 12px 40px rgba(0,0,0,.2)'" onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='none'">
+                        ${iconFallback}
+                        <div style="position:relative;z-index:2;">
+                            <h3 style="color:#fff;font-size:${i === 0 ? '1.5rem' : '1rem'};font-weight:800;margin:0 0 .25rem;text-shadow:0 1px 3px rgba(0,0,0,.3);">${c.name}</h3>
+                            <span style="display:inline-flex;align-items:center;gap:4px;font-size:.75rem;color:rgba(255,255,255,.7);font-weight:500;">Ver produtos <i class="ph ph-arrow-right" style="font-size:.7rem;"></i></span>
+                        </div>
+                    </a>`;
+                }).join('');
+
+                // Responsive: on mobile use 2 cols
+                const mediaQuery = window.matchMedia('(max-width: 768px)');
+                function adjustGrid(e) { grid.style.gridTemplateColumns = e.matches ? 'repeat(2,1fr)' : 'repeat(4,1fr)'; }
+                adjustGrid(mediaQuery);
+                mediaQuery.addEventListener('change', adjustGrid);
             }
 
             // Hero slider
@@ -469,6 +464,7 @@
             (async function initHome() {
                 // Carregar categorias para o grid
                 await buildCategoryGrid();
+                await buildBentoCategoryGrid();
                 
                 // Carregar produtos e iniciar carrosséis
                 const prods = await fetchProducts();

@@ -22,7 +22,7 @@ Sistema desenvolvido por **SulCore** (assinatura visível em todas as telas admi
 | Runtime | Node.js (ESM, `"type": "module"`) |
 | Linguagem | TypeScript 5.9 (strict + `exactOptionalPropertyTypes` + `noUncheckedIndexedAccess`) |
 | Framework | Express 4 |
-| ORM | Prisma 7 com adaptador `@prisma/adapter-pg` |
+| ORM | Prisma 6.19 com adaptador `@prisma/adapter-pg` |
 | Banco | PostgreSQL (Supabase) |
 | **Auth** | **Supabase Auth** (cliente + admin unificados via `user_metadata.is_admin`) |
 | **Storage** | **Supabase Storage** (bucket público `uploads`) |
@@ -345,6 +345,13 @@ GET    /api/payments/config                                       → sem secret
 POST   /api/payments/config                             [admin]
 POST   /api/payments/process
 POST   /api/payments/webhook                                      → callback
+
+# Cupons
+GET    /api/coupons                                      [admin]
+POST   /api/coupons                                     [admin]
+PUT    /api/coupons/:id                                 [admin]
+DELETE /api/coupons/:id                                 [admin]
+POST   /api/coupons/validate
 ```
 
 Rate limiting: **100 req / 15min** por IP.
@@ -354,9 +361,16 @@ Rate limiting: **100 req / 15min** por IP.
 ## Roadmap (em ordem de prioridade)
 
 ### Phase B (próxima)
-- [ ] **Cupons & descontos** — modelo `Coupon` + UI admin + apply no checkout
+- [x] **Cupons & descontos** — concluído (modelo, API, admin e checkout)
 - [ ] **Carrinho persistido + recuperação** — sync localStorage↔DB + email de carrinho abandonado
 - [ ] **Newsletter & ofertas** — lista + dispatcher de email
+
+### Atualização de sessão (2026-04-30)
+- Checkout atualizado para múltiplos métodos configuráveis via admin (cartão, pix, boleto, whatsapp)
+- `PaymentConfig` agora também guarda `enabledMethods`, `methodProviders` e `cardBrands`
+- Dashboard admin otimizado para carregar produtos e pedidos em paralelo no refresh inicial
+- Painel admin com init/auth mais robusto: espera `admin-ready` antes das cargas e no `fetchJSON` para evitar erro de token ausente no primeiro carregamento
+- Latência percebida no admin melhorada com atualizações locais em cupons/categorias/subcategorias e carregamentos paralelos na aba equipe
 
 ### Médio prazo
 - [ ] **Wishlist/Interesses funcional** (botão coração + UI minha-conta)
@@ -377,6 +391,7 @@ Rate limiting: **100 req / 15min** por IP.
 
 1. Banco vazio em dev → `npx prisma db push` é OK; com dados → `prisma migrate dev --create-only` + revisar SQL antes
 2. Após mudar `prisma/schema.prisma`: `npx prisma db push && npx prisma generate`
+   - Projeto fixado em Prisma `6.19` por compatibilidade com Node `20.18.x` deste ambiente
 3. Carrinho usa `localStorage` chave `eletrica_moro_cart`
 4. Tema usa `localStorage` chave `eletrica_moro_theme` (cache anti-FOUC)
 5. Em produção, `SUPABASE_*` e `DIRECT_URL` são obrigatórios — server falha no startup sem eles

@@ -35,41 +35,8 @@
         }
     </script>
     <style>
-        /* Estilos compartilhados */
-        @keyframes slideBanner {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-slide {
-            display: inline-block;
-            white-space: nowrap;
-            animation: slideBanner 40s linear infinite;
-        }
-        .top-bar-height { height: 32px; }
-        .top-bar-container {
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        button, a, .clickable { transition: all 0.3s ease; }
-        .product-img, .category-img {
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
-            background: #f9fafb;
-            transition: transform 0.3s ease;
-        }
-        .group:hover .product-img, .group:hover .category-img { transform: scale(1.03); }
-        .loader {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #e2e8f0;
-            border-bottom-color: var(--color-primary);
-            border-radius: 50%;
-            display: inline-block;
-            animation: rotation 1s linear infinite;
-        }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader { width:48px;height:48px;border:4px solid #e2e8f0;border-bottom-color:var(--color-primary);border-radius:50%;display:inline-block;animation:rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
     </style>
 </head>
 <body class="bg-light-gray font-sans text-gray-900">
@@ -79,19 +46,19 @@
 
 <!-- ===== CONTEÚDO PRINCIPAL: CATEGORIA (dinâmico) ===== -->
 <main class="pb-16">
-    <section class="bg-white border-b border-gray-200 py-8">
-        <div class="container mx-auto px-4">
-            <nav class="flex text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
-                <ol class="flex items-center space-x-2">
-                    <li><a href="/" class="hover:text-primary transition">Home</a></li>
-                    <li><i class="ph ph-caret-right text-xs"></i></li>
-                    <li><a href="/categoria.html" id="breadcrumb-categories-link" class="hover:text-primary transition">Categorias</a></li>
-                    <li id="breadcrumb-separator" class="hidden"><i class="ph ph-caret-right text-xs"></i></li>
-                    <li id="breadcrumb-category" class="text-primary font-medium truncate hidden">Carregando...</li>
+    <section style="background:#fff;border-bottom:1px solid #f0f0f0;padding:2rem 0;">
+        <div style="max-width:1280px;margin:0 auto;padding:0 1.25rem;">
+            <nav style="font-size:.8rem;color:#9ca3af;margin-bottom:.5rem;" aria-label="Breadcrumb">
+                <ol style="display:flex;align-items:center;gap:.5rem;list-style:none;padding:0;margin:0;">
+                    <li><a href="/" style="color:#9ca3af;text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='var(--color-primary)'" onmouseleave="this.style.color='#9ca3af'">Home</a></li>
+                    <li><i class="ph ph-caret-right" style="font-size:.6rem;"></i></li>
+                    <li><a href="/categoria.html" id="breadcrumb-categories-link" style="color:#9ca3af;text-decoration:none;transition:color .2s;" onmouseenter="this.style.color='var(--color-primary)'" onmouseleave="this.style.color='#9ca3af'">Categorias</a></li>
+                    <li id="breadcrumb-separator" class="hidden"><i class="ph ph-caret-right" style="font-size:.6rem;"></i></li>
+                    <li id="breadcrumb-category" style="color:var(--color-primary);font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="hidden">Carregando...</li>
                 </ol>
             </nav>
-            <h1 id="page-title" class="text-3xl md:text-4xl font-bold text-primary">Carregando...</h1>
-            <div id="category-description" class="text-gray-600 mt-2 max-w-3xl"></div>
+            <h1 id="page-title" style="font-size:1.5rem;font-weight:800;color:var(--color-primary);margin:0 0 .25rem;">Carregando...</h1>
+            <div id="category-description" style="color:#6b7280;font-size:.875rem;max-width:720px;"></div>
         </div>
     </section>
 
@@ -196,67 +163,20 @@
         }
 
         function renderCategoryCard(category) {
-            const imageUrl = category.imageUrl || category.image || 'https://placehold.co/400x400?text=Categoria';
-            return `
-                <a href="/categoria.html?categoryId=${category.id}" class="group bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 flex flex-col h-full">
-                    <div class="p-4 flex items-center justify-center bg-gray-50">
-                        <img src="${imageUrl}" alt="${category.name}" class="category-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Categoria'">
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow text-center">
-                        <h3 class="text-lg font-bold text-primary group-hover:text-accent transition-colors">${category.name}</h3>
-                        ${category.description ? `<p class="text-sm text-gray-500 mt-1 line-clamp-2">${category.description}</p>` : ''}
-                        <div class="mt-4 text-accent font-medium text-sm flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver produtos <i class="ph ph-arrow-right"></i>
-                        </div>
-                    </div>
-                </a>
-            `;
+            const imageUrl = category.imageUrl || category.image || 'https://placehold.co/300x300/f3f4f6/9ca3af?text=Categoria';
+            return `<a href="/categoria.html?categoryId=${category.id}" class="pcard" style="text-decoration:none;">
+                <div class="pcard-img-wrap"><img src="${imageUrl}" alt="${category.name}" loading="lazy" class="pcard-img" onerror="this.src='https://placehold.co/300x300/f3f4f6/9ca3af?text=Categoria'"></div>
+                <div class="pcard-body" style="text-align:center;justify-content:center;align-items:center;">
+                    <h3 style="font-size:1rem;font-weight:700;color:var(--color-primary);margin:0 0 .25rem;">${category.name}</h3>
+                    ${category.description ? `<p style="font-size:.8rem;color:#6b7280;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${category.description}</p>` : ''}
+                    <span style="margin-top:.75rem;font-size:.8rem;font-weight:600;color:var(--color-primary);display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .2s;">Ver produtos <i class="ph ph-arrow-right"></i></span>
+                </div>
+            </a>`;
         }
 
+        // Reutilizar o product card global
         function renderProductCard(product) {
-            const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
-            const parcelas = 3;
-            const valorParcela = price / parcelas;
-            const desconto = product.on_sale ? Math.floor(Math.random() * 12 + 5) : 0;
-            const precoComDesconto = desconto > 0 ? (price * (1 - desconto / 100)).toFixed(2) : price.toFixed(2);
-
-            let imageUrl = 'https://placehold.co/400x400?text=Eletrica+Moro';
-            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-                imageUrl = product.images[0];
-            } else if (product.image_url) {
-                imageUrl = product.image_url;
-            }
-
-            const badgeHtml = [];
-            if (product.is_featured) badgeHtml.push('<span class="absolute top-3 left-3 z-10 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Destaque</span>');
-            if (product.on_sale || desconto > 0) badgeHtml.push(`<span class="absolute top-3 ${product.is_featured ? 'left-20' : 'left-3'} z-10 bg-accent text-white text-[10px] font-bold px-2.5 py-1 rounded-full">-${desconto}%</span>`);
-
-            const productData = {
-                id: product.id,
-                name: product.name,
-                price: price,
-                image: imageUrl
-            };
-            const productJson = JSON.stringify(productData).replace(/'/g, "&apos;");
-
-            return `
-                <div class="bg-white rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-100 relative flex flex-col h-full">
-                    ${badgeHtml.join('')}
-                    <a href="/produto.html?id=${product.id}" class="block p-4 flex items-center justify-center bg-gray-50">
-                        <img src="${imageUrl}" alt="${product.name}" class="product-img w-full h-auto max-h-44 object-contain" loading="lazy" onerror="this.src='https://placehold.co/400x400?text=Eletrica+Moro'">
-                    </a>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h3 class="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]"><a href="/produto.html?id=${product.id}" class="hover:text-primary transition">${product.name}</a></h3>
-                        ${product.brand ? `<p class="text-xs text-gray-500 mt-1">${product.brand}</p>` : ''}
-                        <div class="mt-2">
-                            ${desconto > 0 ? `<span class="text-gray-400 text-xs line-through">R$ ${price.toFixed(2)}</span>` : ''}
-                            <div class="text-xl font-bold text-primary">R$ ${desconto > 0 ? precoComDesconto : price.toFixed(2)}</div>
-                            <div class="text-[11px] text-gray-500 mt-1">ou ${parcelas}x de R$ ${valorParcela.toFixed(2)} <span class="font-semibold">sem juros</span></div>
-                        </div>
-                        <button class="add-to-cart-btn mt-4 w-full bg-primary/5 hover:bg-primary text-primary hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300" data-product='${productJson}'>Adicionar</button>
-                    </div>
-                </div>
-            `;
+            return AppCore.renderProductCard(product);
         }
 
         // Store products globally for filtering

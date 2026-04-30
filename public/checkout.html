@@ -4,251 +4,378 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>Checkout · Finalizar Compra</title>
-    
-    <!-- Tailwind + Phosphor + Inter -->
+    <meta name="description" content="Finalize sua compra com segurança na Elétrica Moro.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0a2540',
-                        secondary: '#1a365d',
-                        accent: '#e74c3c',
-                        'light-gray': '#f4f4f4',
+                        primary: 'var(--color-primary, #0a2540)',
+                        secondary: 'var(--color-secondary, #1a365d)',
+                        accent: 'var(--color-accent, #e74c3c)',
+                        'surface': '#ffffff',
+                        'surface-alt': '#f8f9fb',
+                        'surface-hover': '#f1f3f5',
+                        'border-subtle': '#e8eaed',
+                        'text-primary': '#1a1f36',
+                        'text-secondary': '#697386',
+                        'text-muted': '#a3acb9',
+                        'success': '#0d9e6c',
+                        'success-light': '#e6f9f1',
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    boxShadow: {
+                        'card': '0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06)',
+                        'card-hover': '0 4px 12px rgba(0,0,0,.08)',
+                        'elevated': '0 8px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04)',
+                        'input-focus': '0 0 0 3px rgba(10,37,64,.1)',
                     },
-                    borderRadius: {
-                        'xl': '1rem',
-                        '2xl': '1.5rem',
-                    }
+                    borderRadius: { 'xl': '0.75rem', '2xl': '1rem', '3xl': '1.25rem' }
                 }
             }
         }
     </script>
     <style>
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        button, a { transition: all 0.3s ease; }
-        
-        /* Trust Bar Animations */
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { background: #f5f6f8; }
+        button, a { transition: all 0.2s ease; }
+
+        /* Inputs */
+        .checkout-input {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem;
+            border: 1.5px solid #e0e3e8; font-size: 0.875rem; color: #1a1f36;
+            background: #fff; transition: all 0.2s ease; outline: none;
         }
-        .trust-icon { animation: pulse-soft 2s ease-in-out infinite; }
-        
-        /* Loading spinner */
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .checkout-input:focus { border-color: var(--color-primary, #0a2540); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0a2540) 8%, transparent); }
+        .checkout-input::placeholder { color: #a3acb9; }
+        .checkout-input.error { border-color: #e74c3c; }
+
+        /* Radio / Method buttons */
+        .method-option {
+            border: 1.5px solid #e0e3e8; border-radius: 0.75rem; padding: 1rem;
+            cursor: pointer; transition: all 0.2s; background: #fff; position: relative;
         }
-        .animate-spin { animation: spin 1s linear infinite; }
-        
-        /* Toast animations */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .method-option:hover { border-color: #c4c8ce; background: #fafbfc; }
+        .method-option.active { border-color: var(--color-primary, #0a2540); background: color-mix(in srgb, var(--color-primary, #0a2540) 6%, white); }
+        .method-option.active::after {
+            content: ''; position: absolute; top: 0.75rem; right: 0.75rem;
+            width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--color-primary, #0a2540);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+            background-size: 14px; background-repeat: no-repeat; background-position: center;
         }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
+
+        /* Identity cards */
+        .id-card {
+            border: 1.5px solid #e0e3e8; border-radius: 0.75rem; padding: 1.25rem;
+            cursor: pointer; transition: all 0.2s; background: #fff; text-align: center;
         }
-        .toast-enter {
-            animation: slideIn 0.3s ease forwards;
-        }
-        .toast-exit {
-            animation: fadeOut 0.2s ease forwards;
+        .id-card:hover { border-color: var(--color-primary, #0a2540); background: #fafbfc; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+        .id-card.active { border-color: var(--color-primary, #0a2540); background: color-mix(in srgb, var(--color-primary, #0a2540) 6%, white); }
+
+        /* Section transitions */
+        @keyframes fadeSlideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .animate-in { animation: fadeSlideIn .3s ease forwards; }
+
+        /* Skeleton */
+        @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200px 100%; animation: shimmer 1.5s infinite; border-radius: 0.5rem; }
+
+        /* Badge pulse */
+        @keyframes securePulse { 0%,100% { opacity:1; } 50% { opacity:.7; } }
+
+        /* Toast */
+        @keyframes toastIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+        .toast-in { animation: toastIn 0.3s ease; }
+        .toast-out { animation: toastOut 0.2s ease forwards; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+        /* Responsive */
+        @media (max-width: 1023px) {
+            .checkout-layout { display: flex; flex-direction: column-reverse; }
         }
     </style>
 </head>
-<body class="bg-light-gray font-sans text-gray-900 min-h-screen">
+<body class="font-sans text-text-primary min-h-screen flex flex-col">
 
 <!-- Toast Container -->
-<div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 w-72 md:w-96"></div>
+<div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-md px-4"></div>
 
-<!-- Header -->
-<header id="checkoutHeader" class="bg-primary text-white py-4 shadow-md sticky top-0 z-20">
-    <div class="container mx-auto px-4 md:px-6 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <img id="headerLogo" src="img/logo-moro.webp" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
-            <h1 id="headerTitle" class="text-lg md:text-xl font-bold uppercase tracking-wider">Finalizar Compra</h1>
-        </div>
-        <a href="/" class="text-sm hover:text-accent transition flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
-            <i class="ph ph-arrow-left"></i> Continuar Comprando
+<!-- Minimal Header (Shopify-style) -->
+<header class="bg-white border-b border-border-subtle">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <img id="headerLogo" src="img/logo-moro.webp" alt="Logo" class="h-8 w-auto object-contain">
         </a>
+        <div class="flex items-center gap-6">
+            <div class="hidden sm:flex items-center gap-4 text-xs text-text-secondary">
+                <span class="flex items-center gap-1.5"><i class="ph-fill ph-lock-simple text-success"></i>Conexão segura</span>
+                <span class="flex items-center gap-1.5"><i class="ph-fill ph-shield-check text-success"></i>Compra protegida</span>
+            </div>
+            <a href="/" class="text-sm text-text-secondary hover:text-primary transition flex items-center gap-1.5">
+                <i class="ph ph-arrow-left text-base"></i><span class="hidden sm:inline">Voltar à loja</span>
+            </a>
+        </div>
     </div>
 </header>
 
-<!-- Trust Bar -->
-<div id="trustBar" class="bg-white border-b border-gray-200 py-3">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm">
-            <div class="flex items-center gap-2 text-gray-600">
-                <i class="ph ph-lock-key trust-icon text-green-600 text-xl"></i>
-                <span class="font-medium">Compra Segura</span>
-            </div>
-            <div class="flex items-center gap-2 text-gray-600">
-                <i class="ph ph-shield-check trust-icon text-blue-600 text-xl"></i>
-                <span class="font-medium">SSL Certificado</span>
-            </div>
-            <div class="flex items-center gap-2 text-gray-600">
-                <i class="ph ph-check-circle trust-icon text-emerald-600 text-xl"></i>
-                <span class="font-medium">Dados Protegidos</span>
-            </div>
-            <div class="flex items-center gap-2 text-gray-600">
-                <i class="ph ph-credit-card trust-icon text-accent text-xl"></i>
-                <span class="font-medium">Pagamento Verificado</span>
-            </div>
-        </div>
+<!-- Mobile security badge -->
+<div class="sm:hidden bg-success-light border-b border-green-200">
+    <div class="px-4 py-2 flex items-center justify-center gap-4 text-xs text-success font-medium">
+        <span class="flex items-center gap-1"><i class="ph-fill ph-lock-simple"></i>Seguro</span>
+        <span class="flex items-center gap-1"><i class="ph-fill ph-shield-check"></i>Protegido</span>
+        <span class="flex items-center gap-1"><i class="ph-fill ph-seal-check"></i>Verificado</span>
     </div>
 </div>
 
-<!-- Card Brands Bar -->
-<div id="cardBrandsBar" class="bg-gray-50 border-b border-gray-200 py-2">
-    <div class="container mx-auto px-4">
-        <div class="flex flex-wrap items-center justify-center gap-4">
-            <span class="text-xs text-gray-500 font-medium">Aceitamos:</span>
-            <div id="cardBrandsContainer" class="flex items-center gap-3">
-                <!-- Card brands will be dynamically loaded -->
-            </div>
-        </div>
-    </div>
-</div>
+<main class="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 lg:py-10">
+    <div class="checkout-layout grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
-<main class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Order Summary -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                    <i class="ph ph-shopping-cart text-accent"></i> Resumo do Pedido
-                </h2>
-                <div id="orderItems" class="space-y-4">
-                    <!-- Order items will be dynamically loaded -->
+        <!-- LEFT COLUMN: Steps -->
+        <div class="lg:col-span-7 space-y-6">
+
+            <!-- Breadcrumb steps -->
+            <nav class="flex items-center gap-2 text-xs text-text-muted mb-2">
+                <span id="bc1" class="font-semibold text-primary">Identificação</span>
+                <i class="ph ph-caret-right text-[10px]"></i>
+                <span id="bc2" class="text-text-muted">Entrega</span>
+                <i class="ph ph-caret-right text-[10px]"></i>
+                <span id="bc3" class="text-text-muted">Pagamento</span>
+            </nav>
+
+            <!-- STEP 1: Identity -->
+            <section id="identitySection" class="animate-in">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-text-primary">Como deseja prosseguir?</h2>
+                    <p class="text-sm text-text-secondary mt-1">Escolha uma opção para continuar com sua compra.</p>
                 </div>
-                <div class="border-t border-gray-200 mt-6 pt-4">
-                    <div class="flex justify-between items-center text-lg font-bold">
-                        <span>Total:</span>
-                        <span id="orderTotal" class="text-accent">R$ 0,00</span>
+
+                <!-- Already logged in -->
+                <div id="loggedInBanner" class="hidden bg-success-light border border-green-200 rounded-2xl p-4 mb-4 animate-in">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center"><i class="ph-fill ph-user-circle text-success text-2xl"></i></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm text-gray-800">Olá, <span id="loggedInName">Cliente</span>!</p>
+                            <p class="text-xs text-text-secondary truncate" id="loggedInEmail"></p>
+                        </div>
+                        <button onclick="checkoutApp.logout()" class="text-xs text-text-muted hover:text-red-500 transition underline underline-offset-2">Trocar conta</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Customer Information -->
-            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                    <i class="ph ph-user text-accent"></i> Seus Dados
-                </h2>
-                <form id="customerForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
-                        <input type="text" id="customerName" required placeholder="Seu nome completo"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                <!-- Identity cards -->
+                <div id="identityCards" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="id-card" onclick="checkoutApp.selectIdentity('login')">
+                        <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center mx-auto mb-3"><i class="ph ph-sign-in text-xl text-primary"></i></div>
+                        <h3 class="font-semibold text-sm text-text-primary">Já tenho conta</h3>
+                        <p class="text-xs text-text-muted mt-1">Fazer login</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
-                        <input type="email" id="customerEmail" required placeholder="seu@email.com"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    <div class="id-card" onclick="checkoutApp.selectIdentity('register')">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-3"><i class="ph ph-user-plus text-xl text-emerald-600"></i></div>
+                        <h3 class="font-semibold text-sm text-text-primary">Criar conta</h3>
+                        <p class="text-xs text-text-muted mt-1">É rápido e fácil</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone/WhatsApp *</label>
-                        <input type="tel" id="customerPhone" required placeholder="(00) 00000-0000"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
+                    <div class="id-card" onclick="checkoutApp.selectIdentity('guest')">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center mx-auto mb-3"><i class="ph ph-lightning text-xl text-sky-600"></i></div>
+                        <h3 class="font-semibold text-sm text-text-primary">Sem cadastro</h3>
+                        <p class="text-xs text-text-muted mt-1">Vincule ao e-mail/CPF</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Endereço de Entrega *</label>
-                        <textarea id="customerAddress" required rows="3" placeholder="Rua, número, bairro, cidade, UF"
-                                  class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none"></textarea>
-                    </div>
-                </form>
-            </div>
-        </div>
+                </div>
 
-        <!-- Payment Section -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-6 sticky top-24">
-                <h2 class="text-xl font-bold text-primary mb-6 flex items-center gap-2">
-                    <i class="ph ph-credit-card text-accent"></i> Pagamento
-                </h2>
-                
-                <div id="paymentLoading" class="text-center py-8">
-                    <i class="ph ph-spinner animate-spin text-4xl text-primary mb-2"></i>
-                    <p class="text-gray-500 text-sm">Carregando opções de pagamento...</p>
+                <!-- Login form -->
+                <div id="loginForm" class="hidden mt-4 animate-in">
+                    <div class="bg-white border border-border-subtle rounded-2xl p-5 space-y-3">
+                        <h3 class="font-semibold text-sm text-text-primary mb-1">Entrar na sua conta</h3>
+                        <input type="email" id="loginEmail" placeholder="E-mail" class="checkout-input">
+                        <input type="password" id="loginPassword" placeholder="Senha" class="checkout-input">
+                        <p id="loginError" class="text-red-500 text-xs hidden bg-red-50 p-2 rounded-lg"></p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="checkoutApp.doLogin()" id="loginBtn" class="flex-1 bg-primary text-white font-semibold py-2.5 rounded-lg hover:bg-secondary transition text-sm">Entrar</button>
+                            <button onclick="checkoutApp.selectIdentity(null)" class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-hover text-sm transition">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register form -->
+                <div id="registerForm" class="hidden mt-4 animate-in">
+                    <div class="bg-white border border-border-subtle rounded-2xl p-5 space-y-3">
+                        <h3 class="font-semibold text-sm text-text-primary mb-1">Criar sua conta</h3>
+                        <input type="text" id="regName" placeholder="Nome completo" class="checkout-input">
+                        <input type="email" id="regEmail" placeholder="E-mail" class="checkout-input">
+                        <input type="password" id="regPassword" placeholder="Senha (mín. 6 caracteres)" class="checkout-input">
+                        <input type="tel" id="regPhone" placeholder="Telefone (opcional)" class="checkout-input">
+                        <p id="regError" class="text-red-500 text-xs hidden bg-red-50 p-2 rounded-lg"></p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="checkoutApp.doRegister()" id="regBtn" class="flex-1 bg-success text-white font-semibold py-2.5 rounded-lg hover:bg-emerald-700 transition text-sm">Cadastrar e continuar</button>
+                            <button onclick="checkoutApp.selectIdentity(null)" class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-hover text-sm transition">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guest form -->
+                <div id="guestForm" class="hidden mt-4 animate-in">
+                    <div class="bg-white border border-border-subtle rounded-2xl p-5 space-y-3">
+                        <h3 class="font-semibold text-sm text-text-primary mb-1">Continuar sem cadastro</h3>
+                        <p class="text-xs text-text-muted -mt-1">Você poderá rastrear seu pedido pelo e-mail ou CPF informado.</p>
+                        <input type="text" id="guestName" placeholder="Nome completo *" class="checkout-input">
+                        <input type="email" id="guestEmail" placeholder="E-mail *" class="checkout-input">
+                        <input type="text" id="guestCpf" placeholder="CPF ou CNPJ (opcional)" class="checkout-input">
+                        <input type="tel" id="guestPhone" placeholder="Telefone/WhatsApp *" class="checkout-input">
+                        <p id="guestError" class="text-red-500 text-xs hidden bg-red-50 p-2 rounded-lg"></p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="checkoutApp.confirmGuest()" class="flex-1 bg-sky-600 text-white font-semibold py-2.5 rounded-lg hover:bg-sky-700 transition text-sm">Continuar</button>
+                            <button onclick="checkoutApp.selectIdentity(null)" class="px-4 py-2.5 rounded-lg text-text-secondary hover:bg-surface-hover text-sm transition">Voltar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 2: Address -->
+            <section id="addressSection" class="hidden animate-in">
+                <h2 class="text-lg font-bold text-text-primary mb-4">Endereço de entrega</h2>
+                <div class="bg-white border border-border-subtle rounded-2xl p-5 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">CEP *</label>
+                            <input type="text" id="addrCep" maxlength="9" placeholder="00000-000" class="checkout-input">
+                            <p id="cepFeedback" class="text-xs mt-1 text-text-muted"></p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">Logradouro</label>
+                            <input type="text" id="addrStreet" placeholder="Rua, Avenida..." class="checkout-input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">Número *</label>
+                            <input type="text" id="addrNumber" placeholder="Nº" class="checkout-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">Complemento</label>
+                            <input type="text" id="addrComplement" placeholder="Apto, Sala..." class="checkout-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">Bairro</label>
+                            <input type="text" id="addrNeighborhood" placeholder="Bairro" class="checkout-input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">Cidade</label>
+                            <input type="text" id="addrCity" placeholder="Cidade" class="checkout-input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-text-secondary mb-1.5">UF</label>
+                            <input type="text" id="addrState" maxlength="2" placeholder="RS" class="checkout-input uppercase">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 3: Payment -->
+            <section id="paymentSection" class="animate-in">
+                <h2 class="text-lg font-bold text-text-primary mb-4">Forma de pagamento</h2>
+
+                <div id="paymentLoading" class="bg-white border border-border-subtle rounded-2xl p-8 text-center">
+                    <div class="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
+                    <p class="text-sm text-text-muted">Carregando métodos de pagamento...</p>
                 </div>
 
                 <div id="paymentContent" class="hidden space-y-4">
-                    <!-- Payment provider info -->
-                    <div id="paymentProviderInfo" class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
-                        <p>Pagamento processado via: <strong id="providerName">Carregando...</strong></p>
-                    </div>
+                    <!-- Payment method tabs -->
+                    <div id="paymentMethodsSelector" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
 
-                    <!-- WhatsApp Payment -->
-                    <div id="whatsappPayment" class="hidden space-y-4">
-                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="ph ph-whatsapp-logo text-green-600 text-2xl"></i>
-                                <div>
-                                    <h3 class="font-bold text-green-800">Pagamento via WhatsApp</h3>
-                                    <p class="text-xs text-green-600">Você será redirecionado para finalizar o pedido</p>
-                                </div>
+                    <!-- WhatsApp -->
+                    <div id="whatsappPayment" class="hidden animate-in">
+                        <div class="bg-white border border-border-subtle rounded-2xl p-5">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"><i class="ph-fill ph-whatsapp-logo text-green-600 text-xl"></i></div>
+                                <div><h3 class="font-semibold text-sm">Pedido via WhatsApp</h3><p class="text-xs text-text-muted">Conclua diretamente com nossa equipe</p></div>
                             </div>
-                        </div>
-                        <button id="whatsappPayBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                            <i class="ph ph-whatsapp-logo text-xl"></i> Finalizar no WhatsApp
-                        </button>
-                    </div>
-
-                    <!-- PagBank Transparent Checkout -->
-                    <div id="pagbankPayment" class="hidden space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="ph ph-bank text-blue-600 text-2xl"></i>
-                                <div>
-                                    <h3 class="font-bold text-blue-800">PagBank Checkout Transparente</h3>
-                                    <p class="text-xs text-blue-600">Pague sem sair do site</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="pagbankCheckoutContainer">
-                            <!-- PagBank checkout will be loaded here -->
+                            <button id="whatsappPayBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 text-sm"><i class="ph-fill ph-whatsapp-logo text-lg"></i>Enviar pedido pelo WhatsApp</button>
                         </div>
                     </div>
-
-                    <!-- MercadoPago Payment -->
-                    <div id="mercadopagoPayment" class="hidden space-y-4">
-                        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="ph ph-handshake text-sky-600 text-2xl"></i>
-                                <div>
-                                    <h3 class="font-bold text-sky-800">MercadoPago</h3>
-                                    <p class="text-xs text-sky-600">Diversas opções de pagamento</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="mercadopagoCheckoutContainer">
-                            <!-- MercadoPago checkout will be loaded here -->
+                    <!-- PagBank -->
+                    <div id="pagbankPayment" class="hidden animate-in"><div class="bg-white border border-border-subtle rounded-2xl p-5"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="ph ph-bank text-blue-600 text-xl"></i></div><div><h3 class="font-semibold text-sm">Cartão de Crédito</h3><p class="text-xs text-text-muted">Processado com segurança via PagBank</p></div></div><div id="pagbankCheckoutContainer"></div></div></div>
+                    <!-- MercadoPago -->
+                    <div id="mercadopagoPayment" class="hidden animate-in"><div class="bg-white border border-border-subtle rounded-2xl p-5"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center"><i class="ph ph-handshake text-sky-600 text-xl"></i></div><div><h3 class="font-semibold text-sm">MercadoPago</h3><p class="text-xs text-text-muted">Diversas opções de pagamento</p></div></div><div id="mercadopagoCheckoutContainer"></div></div></div>
+                    <!-- Cielo -->
+                    <div id="cieloPayment" class="hidden animate-in"><div class="bg-white border border-border-subtle rounded-2xl p-5"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center"><i class="ph ph-credit-card text-orange-600 text-xl"></i></div><div><h3 class="font-semibold text-sm">Cielo</h3><p class="text-xs text-text-muted">Cartão de crédito e débito</p></div></div><div id="cieloCheckoutContainer"></div></div></div>
+                    <!-- Pix -->
+                    <div id="pixPayment" class="hidden animate-in">
+                        <div class="bg-white border border-border-subtle rounded-2xl p-5">
+                            <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><i class="ph-fill ph-pix-logo text-emerald-600 text-xl"></i></div><div><h3 class="font-semibold text-sm">Pix</h3><p class="text-xs text-text-muted">Aprovação instantânea</p></div></div>
+                            <button id="pixPayBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition text-sm">Gerar código Pix</button>
                         </div>
                     </div>
+                    <!-- Boleto -->
+                    <div id="boletoPayment" class="hidden animate-in">
+                        <div class="bg-white border border-border-subtle rounded-2xl p-5">
+                            <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><i class="ph ph-barcode text-amber-600 text-xl"></i></div><div><h3 class="font-semibold text-sm">Boleto Bancário</h3><p class="text-xs text-text-muted">Vencimento em 3 dias úteis</p></div></div>
+                            <button id="boletoPayBtn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition text-sm">Gerar Boleto</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
 
-                    <!-- Cielo Payment -->
-                    <div id="cieloPayment" class="hidden space-y-4">
-                        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="ph ph-credit-card text-orange-600 text-2xl"></i>
-                                <div>
-                                    <h3 class="font-bold text-orange-800">Cielo</h3>
-                                    <p class="text-xs text-orange-600">Pagamento com cartão</p>
-                                </div>
+        <!-- RIGHT COLUMN: Order Summary (sticky) -->
+        <div class="lg:col-span-5">
+            <div class="lg:sticky lg:top-6 space-y-4">
+                <div class="bg-white border border-border-subtle rounded-2xl overflow-hidden">
+                    <div class="px-5 py-4 border-b border-border-subtle bg-surface-alt">
+                        <h2 class="font-bold text-sm text-text-primary flex items-center gap-2">
+                            <i class="ph ph-receipt text-text-muted"></i>Resumo do pedido
+                            <span id="itemCountBadge" class="ml-auto bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                        </h2>
+                    </div>
+                    <div id="orderItems" class="p-5 space-y-3 max-h-[320px] overflow-y-auto"></div>
+                    <div class="border-t border-border-subtle p-5 space-y-3">
+                        <!-- Coupon -->
+                        <div>
+                            <div class="flex gap-2">
+                                <input type="text" id="couponCodeInput" placeholder="Código do cupom" class="checkout-input flex-1 !py-2 text-xs">
+                                <button id="applyCouponBtn" class="px-3 py-2 bg-surface-alt border border-border-subtle rounded-lg hover:bg-surface-hover text-xs font-semibold text-text-primary transition">Aplicar</button>
+                            </div>
+                            <p id="couponFeedback" class="text-xs mt-1.5 text-text-muted"></p>
+                        </div>
+                        <!-- Totals -->
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between text-text-secondary"><span>Subtotal</span><span id="subtotalDisplay">R$ 0,00</span></div>
+                            <div id="discountRow" class="hidden justify-between text-success font-medium"><span>Desconto</span><span id="discountAmount">- R$ 0,00</span></div>
+                            <div class="flex justify-between text-text-secondary"><span>Frete</span><span class="text-success font-medium">Grátis</span></div>
+                        </div>
+                        <div class="border-t border-border-subtle pt-3">
+                            <div class="flex justify-between items-baseline">
+                                <span class="font-bold text-text-primary">Total</span>
+                                <span id="orderTotal" class="text-xl font-bold text-text-primary">R$ 0,00</span>
                             </div>
                         </div>
-                        <div id="cieloCheckoutContainer">
-                            <!-- Cielo checkout will be loaded here -->
-                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust signals -->
+                <div class="bg-white border border-border-subtle rounded-2xl p-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center gap-2.5 text-xs text-text-secondary"><div class="w-8 h-8 rounded-lg bg-success-light flex items-center justify-center flex-shrink-0"><i class="ph-fill ph-lock-simple text-success"></i></div><span>Pagamento<br><b class="text-text-primary">100% seguro</b></span></div>
+                        <div class="flex items-center gap-2.5 text-xs text-text-secondary"><div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0"><i class="ph-fill ph-shield-check text-blue-500"></i></div><span>Dados<br><b class="text-text-primary">criptografados</b></span></div>
+                        <div class="flex items-center gap-2.5 text-xs text-text-secondary"><div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"><i class="ph-fill ph-medal text-amber-500"></i></div><span>Satisfação<br><b class="text-text-primary">garantida</b></span></div>
+                        <div class="flex items-center gap-2.5 text-xs text-text-secondary"><div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0"><i class="ph-fill ph-headset text-purple-500"></i></div><span>Suporte<br><b class="text-text-primary">humanizado</b></span></div>
+                    </div>
+                </div>
+
+                <!-- Card brands -->
+                <div id="cardBrandsBar" class="hidden bg-white border border-border-subtle rounded-2xl p-3">
+                    <div class="flex items-center justify-center gap-3 flex-wrap">
+                        <span class="text-[10px] text-text-muted font-medium uppercase tracking-wider">Aceitamos</span>
+                        <div id="cardBrandsContainer" class="flex items-center gap-2"></div>
                     </div>
                 </div>
             </div>
@@ -256,476 +383,429 @@
     </div>
 </main>
 
-<!-- Footer -->
-<footer class="bg-primary text-white py-6 mt-12">
-    <div class="container mx-auto px-4 text-center">
-        <p class="text-white/70 text-sm">© 2026 Elétrica Moro. Todos os direitos reservados.</p>
+<!-- Minimal Footer -->
+<footer class="border-t border-border-subtle bg-white py-4 mt-auto">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-text-muted">
+        <p>© 2026 Elétrica Moro · Todos os direitos reservados</p>
+        <a href="https://sulcore.com" target="_blank" class="hover:text-text-secondary transition flex items-center gap-1">
+            <i class="ph-bold ph-cube text-[8px]"></i>
+            <span style="letter-spacing:0.15em;font-size:0.6rem;">SULCORE</span>
+        </a>
     </div>
 </footer>
 
 <script>
-    (function() {
-        "use strict";
-        
-        const API_BASE = '/api';
-        const PAYMENTS_CONFIG_URL = `${API_BASE}/payments/config`;
-        const CONFIG_URL = `${API_BASE}/config`;
-        
-        let paymentConfig = null;
-        let storeConfig = null;
-        let cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
-        
-        // Toast notification function
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            
-            const bgColor = type === 'success' ? 'bg-green-500' : 
-                           type === 'error' ? 'bg-red-500' : 
-                           type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
-            
-            const icon = type === 'success' ? 'ph-check-circle' : 
-                        type === 'error' ? 'ph-x-circle' : 
-                        type === 'warning' ? 'ph-warning' : 'ph-info';
-            
-            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 toast-enter`;
-            toast.innerHTML = `
-                <i class="ph ${icon} text-xl"></i>
-                <span class="flex-1 text-sm font-medium">${message}</span>
-                <button class="text-white/80 hover:text-white" onclick="this.parentElement.remove()">
-                    <i class="ph ph-x"></i>
-                </button>
-            `;
-            
-            container.appendChild(toast);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                toast.classList.remove('toast-enter');
-                toast.classList.add('toast-exit');
-                setTimeout(() => toast.remove(), 200);
-            }, 5000);
-        }
-        
-        // Card brand icons mapping
-        const cardBrandIcons = {
-            visa: '<div class="w-10 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">VISA</div>',
-            mastercard: '<div class="w-10 h-6 bg-red-600 rounded flex items-center justify-center text-white text-xs font-bold">MC</div>',
-            amex: '<div class="w-10 h-6 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">AMEX</div>',
-            elo: '<div class="w-10 h-6 bg-yellow-500 rounded flex items-center justify-center text-black text-xs font-bold">ELO</div>',
-            hipercard: '<div class="w-10 h-6 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">HIPER</div>'
-        };
-        
-        // Load store configuration for visual customization
-        async function loadStoreConfig() {
-            try {
-                const res = await fetch(CONFIG_URL);
-                const data = await res.json();
-                storeConfig = data;
-                
-                if (data.config) {
-                    const config = data.config;
-                    
-                    // Apply colors
-                    if (config.primaryColor) {
-                        document.documentElement.style.setProperty('--primary', config.primaryColor);
-                        tailwind.config.theme.extend.colors.primary = config.primaryColor;
-                    }
-                    if (config.accentColor) {
-                        document.documentElement.style.setProperty('--accent', config.accentColor);
-                        tailwind.config.theme.extend.colors.accent = config.accentColor;
-                    }
-                    
-                    // Update logo
-                    if (config.logo) {
-                        document.getElementById('headerLogo').src = config.logo;
-                    }
-                    
-                    // Update store name
-                    if (config.storeName) {
-                        document.getElementById('headerTitle').textContent = config.storeName;
-                    }
-                }
-            } catch (err) {
-                console.error('Error loading store config:', err);
-            }
-        }
-        
-        // Load payment configuration
-        async function loadPaymentConfig() {
-            try {
-                const res = await fetch(PAYMENTS_CONFIG_URL);
-                const data = await res.json();
-                paymentConfig = data;
-                
-                // Update provider name
-                document.getElementById('providerName').textContent = data.activeProvider || 'WhatsApp';
-                
-                // Show appropriate payment method
-                showPaymentMethod(data.activeProvider);
-                
-                // Load card brands
-                if (data.cardBrands && Array.isArray(data.cardBrands)) {
-                    renderCardBrands(data.cardBrands);
-                }
-                
-                document.getElementById('paymentLoading').classList.add('hidden');
-                document.getElementById('paymentContent').classList.remove('hidden');
-            } catch (err) {
-                console.error('Error loading payment config:', err);
-                document.getElementById('paymentLoading').innerHTML = `
-                    <p class="text-red-500 text-sm">Erro ao carregar configurações de pagamento</p>
-                `;
-            }
-        }
-        
-        // Show appropriate payment method based on provider
-        function showPaymentMethod(provider) {
-            // Hide all payment methods
-            document.getElementById('whatsappPayment').classList.add('hidden');
-            document.getElementById('pagbankPayment').classList.add('hidden');
-            document.getElementById('mercadopagoPayment').classList.add('hidden');
-            document.getElementById('cieloPayment').classList.add('hidden');
-            
-            // Show selected payment method
-            switch(provider) {
-                case 'WhatsApp':
-                    document.getElementById('whatsappPayment').classList.remove('hidden');
-                    break;
-                case 'PagBank':
-                    document.getElementById('pagbankPayment').classList.remove('hidden');
-                    initPagBankCheckout();
-                    break;
-                case 'MercadoPago':
-                    document.getElementById('mercadopagoPayment').classList.remove('hidden');
-                    initMercadoPagoCheckout();
-                    break;
-                case 'Cielo':
-                    document.getElementById('cieloPayment').classList.remove('hidden');
-                    initCieloCheckout();
-                    break;
-                default:
-                    document.getElementById('whatsappPayment').classList.remove('hidden');
-            }
-        }
-        
-        // Render card brands
-        function renderCardBrands(brands) {
-            const container = document.getElementById('cardBrandsContainer');
-            container.innerHTML = brands.map(brand => cardBrandIcons[brand] || '').join('');
-        }
-        
-        // Initialize PagBank Transparent Checkout
-        function initPagBankCheckout() {
-            const container = document.getElementById('pagbankCheckoutContainer');
-            container.innerHTML = `
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Número do Cartão</label>
-                        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Validade</label>
-                            <input type="text" id="cardExpiry" placeholder="MM/AA"
-                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                            <input type="text" id="cardCvv" placeholder="123"
-                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome no Cartão</label>
-                        <input type="text" id="cardName" placeholder="Nome como está no cartão"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <button id="pagbankPayBtn" class="w-full bg-primary hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all shadow-md">
-                        Pagar Agora
-                    </button>
-                </div>
-            `;
-            
-            // Add payment handler
-            document.getElementById('pagbankPayBtn').addEventListener('click', processPagBankPayment);
-        }
-        
-        // Initialize MercadoPago Checkout
-        function initMercadoPagoCheckout() {
-            const container = document.getElementById('mercadopagoCheckoutContainer');
-            container.innerHTML = `
-                <div class="text-center py-4">
-                    <p class="text-sm text-gray-600 mb-3">Checkout MercadoPago será carregado aqui</p>
-                    <button id="mpPayBtn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-xl transition-all shadow-md">
-                        Continuar com MercadoPago
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('mpPayBtn').addEventListener('click', processMercadoPagoPayment);
-        }
-        
-        // Initialize Cielo Checkout
-        function initCieloCheckout() {
-            const container = document.getElementById('cieloCheckoutContainer');
-            container.innerHTML = `
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Número do Cartão</label>
-                        <input type="text" id="cieloCardNumber" placeholder="0000 0000 0000 0000"
-                               class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Validade</label>
-                            <input type="text" id="cieloCardExpiry" placeholder="MM/AA"
-                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
-                            <input type="text" id="cieloCardCvv" placeholder="123"
-                                   class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary outline-none">
-                        </div>
-                    </div>
-                    <button id="cieloPayBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-md">
-                        Pagar com Cielo
-                    </button>
-                </div>
-            `;
-            
-            document.getElementById('cieloPayBtn').addEventListener('click', processCieloPayment);
-        }
-        
-        // Process WhatsApp payment
-        document.getElementById('whatsappPayBtn').addEventListener('click', processWhatsAppPayment);
-        
-        async function processWhatsAppPayment() {
-            const customerData = getCustomerData();
-            if (!validateCustomerData(customerData)) return;
-            
-            const orderData = {
-                customer: customerData.name,
-                email: customerData.email,
-                phone: customerData.phone,
-                address: customerData.address,
-                items: cartItems,
-                total: calculateTotal()
-            };
-            
-            // Format WhatsApp message
-            const message = formatWhatsAppMessage(orderData);
-            const whatsappNumber = paymentConfig.apiKey || '5551999999999';
-            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-            
-            window.open(whatsappUrl, '_blank');
-            
-            // Save order to backend
-            await saveOrder(orderData, 'WhatsApp');
-        }
-        
-        async function processPagBankPayment() {
-            const customerData = getCustomerData();
-            if (!validateCustomerData(customerData)) return;
-            
-            // Disable button and show loading
-            const payBtn = document.getElementById('pagbankPayBtn');
-            payBtn.disabled = true;
-            payBtn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Processando...';
-            
-            const orderData = {
-                orderId: null, // Will be set after order creation
-                customerName: customerData.name,
-                customerEmail: customerData.email,
-                customerPhone: customerData.phone,
-                customerTaxId: null,
-                cardNumber: document.getElementById('cardNumber').value.replace(/\s/g, ''),
-                cardExpiry: document.getElementById('cardExpiry').value,
-                cardCvv: document.getElementById('cardCvv').value,
-                cardName: document.getElementById('cardName').value,
-                total: calculateTotal(),
-                items: cartItems
-            };
-            
-            try {
-                // First, create the order
-                const orderRes = await fetch(`${API_BASE}/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customer: customerData.name,
-                        total: orderData.total,
-                        payment: 'PagBank',
-                        paymentMethod: 'Cartão de Crédito - PagBank',
-                        address: customerData.address,
-                        items: cartItems
-                    })
-                });
-                
-                if (!orderRes.ok) {
-                    throw new Error('Erro ao criar pedido');
-                }
-                
-                const order = await orderRes.json();
-                orderData.orderId = order.id;
-                
-                // Process payment through backend
-                const paymentRes = await fetch(`${API_BASE}/payments/process`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
-                
-                const paymentResult = await paymentRes.json();
-                
-                if (paymentResult.status === 'approved') {
-                    // Save order details for success page
-                    localStorage.setItem('lastOrderId', order.id);
-                    localStorage.setItem('lastOrderTotal', orderData.total.toString());
-                    localStorage.setItem('lastPaymentMethod', 'Cartão de Crédito - PagBank');
-                    localStorage.setItem('lastTransactionId', paymentResult.transactionId);
-                    
-                    // Clear cart
-                    localStorage.removeItem('cart');
-                    
-                    // Redirect to success page
-                    window.location.href = `/sucesso.html?orderId=${order.id}&total=${orderData.total}&paymentMethod=Cartão de Crédito - PagBank&transactionId=${paymentResult.transactionId}`;
-                } else {
-                    showToast('Pagamento recusado. Tente outro cartão.', 'error');
-                    // Re-enable button
-                    payBtn.disabled = false;
-                    payBtn.innerHTML = 'Pagar Agora';
-                }
-            } catch (error) {
-                console.error('Payment error:', error);
-                showToast('Erro ao processar pagamento. Tente novamente.', 'error');
-                // Re-enable button
-                payBtn.disabled = false;
-                payBtn.innerHTML = 'Pagar Agora';
-            }
-        }
-        
-        async function processMercadoPagoPayment() {
-            const customerData = getCustomerData();
-            if (!validateCustomerData(customerData)) return;
-            
-            // TODO: Implement MercadoPago preference creation
-            alert('MercadoPago integration - checkout would open here');
-        }
-        
-        async function processCieloPayment() {
-            const customerData = getCustomerData();
-            if (!validateCustomerData(customerData)) return;
-            
-            // TODO: Implement Cielo payment processing
-            alert('Cielo integration - payment processing would happen here');
-        }
-        
-        function formatWhatsAppMessage(orderData) {
-            const items = orderData.items.map(item => 
-                `${item.name} - R$ ${item.price.toFixed(2)} x ${item.quantity}`
-            ).join('\n');
-            
-            return `🛒 *NOVO PEDIDO*
+(function() {
+    "use strict";
+    const API = '/api';
+    let sb = null, session = null, paymentConfig = null, cartItems = [], appliedCoupon = null, discountAmount = 0, selectedMethod = null, identityMode = null, authUser = null;
 
-*Cliente:* ${orderData.customer}
-*E-mail:* ${orderData.email}
-*Telefone:* ${orderData.phone}
+    function initSupabase() {
+        if (window.SUPABASE_CONFIG) sb = supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+    }
 
-*Endereço:*
-${orderData.address}
+    function showToast(msg, type) {
+        const c = document.getElementById('toastContainer'), t = document.createElement('div');
+        const styles = { success:'bg-success text-white', error:'bg-red-500 text-white', warning:'bg-amber-500 text-white', info:'bg-primary text-white' };
+        const icons = { success:'ph-check-circle', error:'ph-x-circle', warning:'ph-warning', info:'ph-info' };
+        t.className = `${styles[type]||styles.info} px-4 py-3 rounded-xl shadow-elevated flex items-center gap-3 toast-in text-sm`;
+        t.innerHTML = `<i class="ph-fill ${icons[type]||icons.info} text-lg"></i><span class="flex-1 font-medium">${msg}</span><button class="opacity-70 hover:opacity-100" onclick="this.parentElement.remove()"><i class="ph ph-x"></i></button>`;
+        c.appendChild(t);
+        setTimeout(() => { t.classList.remove('toast-in'); t.classList.add('toast-out'); setTimeout(() => t.remove(), 200); }, 4000);
+    }
 
-*Itens:*
-${items}
+    function loadCart() {
+        try { cartItems = JSON.parse(localStorage.getItem('eletrica_moro_cart') || '[]'); } catch { cartItems = []; }
+        if (!cartItems.length) { try { cartItems = JSON.parse(localStorage.getItem('cart') || '[]'); } catch { cartItems = []; } }
+    }
 
-*Total:* R$ ${orderData.total.toFixed(2)}`;
+    async function loadSession() {
+        let headers = {};
+        if (sb) { const { data } = await sb.auth.getSession(); if (data?.session?.access_token) headers['Authorization'] = `Bearer ${data.session.access_token}`; }
+        try {
+            const res = await fetch(`${API}/checkout/session`, { headers });
+            session = await res.json();
+            paymentConfig = session.paymentConfig;
+            applyTheme(session.storeConfig);
+            if (session.customer && session.customer.name) { authUser = session.customer; showLoggedIn(); }
+            renderPaymentMethods(paymentConfig);
+            if (paymentConfig.cardBrands && paymentConfig.cardBrands.length) { renderCardBrands(paymentConfig.cardBrands); document.getElementById('cardBrandsBar').classList.remove('hidden'); }
+            document.getElementById('paymentLoading').classList.add('hidden');
+            document.getElementById('paymentContent').classList.remove('hidden');
+        } catch (e) { console.error(e); document.getElementById('paymentLoading').innerHTML = '<p class="text-red-500 text-sm">Erro ao carregar</p>'; }
+    }
+
+    function applyTheme(cfg) {
+        if (!cfg) return;
+        const root = document.documentElement.style;
+        if (cfg.primaryColor) root.setProperty('--color-primary', cfg.primaryColor);
+        if (cfg.secondaryColor) root.setProperty('--color-secondary', cfg.secondaryColor);
+        if (cfg.accentColor) root.setProperty('--color-accent', cfg.accentColor);
+        if (cfg.logo) document.getElementById('headerLogo').src = cfg.logo;
+        if (cfg.favicon) {
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon'; link.rel = 'shortcut icon'; link.href = cfg.favicon;
+            document.head.appendChild(link);
         }
-        
-        function getCustomerData() {
-            return {
-                name: document.getElementById('customerName').value,
-                email: document.getElementById('customerEmail').value,
-                phone: document.getElementById('customerPhone').value,
-                address: document.getElementById('customerAddress').value
-            };
+        if (cfg.storeName) {
+            document.title = `Checkout · ${cfg.storeName}`;
+            const footerEl = document.querySelector('footer p');
+            if (footerEl) footerEl.textContent = `© ${new Date().getFullYear()} ${cfg.storeName} · Todos os direitos reservados`;
         }
-        
-        function validateCustomerData(data) {
-            if (!data.name || !data.email || !data.phone || !data.address) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
-                return false;
-            }
-            return true;
+        // Store the WhatsApp URL for payment use
+        if (cfg.whatsappUrl) window._storeWhatsApp = cfg.whatsappUrl;
+    }
+
+    function showLoggedIn() {
+        document.getElementById('loggedInBanner').classList.remove('hidden');
+        document.getElementById('loggedInName').textContent = authUser.name || authUser.email;
+        document.getElementById('loggedInEmail').textContent = authUser.email || '';
+        document.getElementById('identityCards').classList.add('hidden');
+        ['loginForm','registerForm','guestForm'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('addressSection').classList.remove('hidden');
+        updateBreadcrumb(2);
+        if (authUser.address) prefillAddress(authUser.address);
+    }
+
+    function updateBreadcrumb(step) {
+        for (let i = 1; i <= 3; i++) {
+            const el = document.getElementById('bc' + i);
+            if (i <= step) { el.classList.remove('text-text-muted'); el.classList.add('font-semibold','text-primary'); }
+            else { el.classList.add('text-text-muted'); el.classList.remove('font-semibold','text-primary'); }
         }
-        
-        function calculateTotal() {
-            return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function prefillAddress(addr) {
+        if (typeof addr === 'string' && addr.includes(',')) {
+            const p = addr.split(',').map(s => s.trim());
+            ['addrStreet','addrNumber','addrNeighborhood','addrCity','addrState'].forEach((id, i) => { if (p[i]) document.getElementById(id).value = p[i]; });
         }
-        
-        async function saveOrder(orderData, paymentMethod) {
-            try {
-                const res = await fetch(`${API_BASE}/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customer: orderData.customer,
-                        total: orderData.total,
-                        payment: paymentMethod,
-                        address: orderData.address,
-                        items: orderData.items
-                    })
-                });
-                
-                if (res.ok) {
-                    // Clear cart
-                    localStorage.removeItem('cart');
-                }
-            } catch (err) {
-                console.error('Error saving order:', err);
-            }
-        }
-        
-        // Render order items
-        function renderOrderItems() {
-            const container = document.getElementById('orderItems');
-            
-            if (cartItems.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <i class="ph ph-shopping-cart text-4xl mb-2"></i>
-                        <p>Seu carrinho está vazio</p>
-                        <a href="/" class="text-primary hover:underline mt-2 inline-block">Voltar às compras</a>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = cartItems.map(item => `
-                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-                        <i class="ph ph-package text-2xl text-gray-400"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-medium text-gray-800">${item.name}</h3>
-                        <p class="text-sm text-gray-500">Quantidade: ${item.quantity}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold text-primary">R$ ${(item.price * item.quantity).toFixed(2)}</p>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('orderTotal').textContent = `R$ ${calculateTotal().toFixed(2)}`;
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadStoreConfig();
-            loadPaymentConfig();
-            renderOrderItems();
+    }
+
+    function selectIdentity(mode) {
+        identityMode = mode;
+        document.getElementById('identityCards').classList.toggle('hidden', !!mode);
+        document.getElementById('loginForm').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('registerForm').classList.toggle('hidden', mode !== 'register');
+        document.getElementById('guestForm').classList.toggle('hidden', mode !== 'guest');
+        if (!mode) { document.getElementById('addressSection').classList.add('hidden'); updateBreadcrumb(1); }
+        // Highlight active card
+        document.querySelectorAll('.id-card').forEach((c, i) => {
+            const modes = ['login','register','guest'];
+            c.classList.toggle('active', modes[i] === mode);
         });
-    })();
+    }
+
+    async function doLogin() {
+        const email = document.getElementById('loginEmail').value.trim(), pass = document.getElementById('loginPassword').value;
+        const errEl = document.getElementById('loginError'), btn = document.getElementById('loginBtn');
+        if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; errEl.classList.remove('hidden'); return; }
+        btn.disabled = true; btn.textContent = 'Entrando...';
+        try {
+            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+            if (error) throw error;
+            const res = await fetch(`${API}/customer/me`, { headers: { 'Authorization': `Bearer ${data.session.access_token}` } });
+            authUser = res.ok ? await res.json() : { email, name: email };
+            identityMode = 'login'; showLoggedIn(); showToast('Login realizado!', 'success');
+        } catch (e) { errEl.textContent = e.message || 'Erro ao fazer login.'; errEl.classList.remove('hidden'); }
+        btn.disabled = false; btn.textContent = 'Entrar';
+    }
+
+    async function doRegister() {
+        const name = document.getElementById('regName').value.trim(), email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPassword').value, phone = document.getElementById('regPhone').value.trim();
+        const errEl = document.getElementById('regError'), btn = document.getElementById('regBtn');
+        if (!name || !email || !pass) { errEl.textContent = 'Preencha nome, e-mail e senha.'; errEl.classList.remove('hidden'); return; }
+        if (pass.length < 6) { errEl.textContent = 'Senha: mínimo 6 caracteres.'; errEl.classList.remove('hidden'); return; }
+        btn.disabled = true; btn.textContent = 'Cadastrando...';
+        try {
+            const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { name } } });
+            if (error) throw error;
+            if (data.session) {
+                await fetch(`${API}/customer/me`, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${data.session.access_token}`}, body:JSON.stringify({name,phone}) });
+                authUser = { id: data.user.id, name, email, phone };
+            } else { authUser = { name, email, phone }; }
+            identityMode = 'register'; showLoggedIn(); showToast('Conta criada!', 'success');
+        } catch (e) { errEl.textContent = e.message || 'Erro ao cadastrar.'; errEl.classList.remove('hidden'); }
+        btn.disabled = false; btn.textContent = 'Cadastrar e continuar';
+    }
+
+    function confirmGuest() {
+        const name = document.getElementById('guestName').value.trim(), email = document.getElementById('guestEmail').value.trim();
+        const cpf = document.getElementById('guestCpf').value.trim(), phone = document.getElementById('guestPhone').value.trim();
+        const errEl = document.getElementById('guestError');
+        if (!name || !email || !phone) { errEl.textContent = 'Preencha nome, e-mail e telefone.'; errEl.classList.remove('hidden'); return; }
+        authUser = { name, email, cpf: cpf || null, phone, guest: true };
+        identityMode = 'guest';
+        document.getElementById('identityCards').classList.add('hidden');
+        document.getElementById('guestForm').classList.add('hidden');
+        document.getElementById('loggedInBanner').classList.remove('hidden');
+        document.getElementById('loggedInName').textContent = name;
+        document.getElementById('loggedInEmail').textContent = email + (cpf ? ` · ${cpf}` : '') + ' (sem cadastro)';
+        document.getElementById('addressSection').classList.remove('hidden');
+        updateBreadcrumb(2); showToast('Dados confirmados!', 'success');
+    }
+
+    async function logout() {
+        if (sb) await sb.auth.signOut();
+        authUser = null; identityMode = null;
+        document.getElementById('loggedInBanner').classList.add('hidden');
+        document.getElementById('identityCards').classList.remove('hidden');
+        document.getElementById('addressSection').classList.add('hidden');
+        document.querySelectorAll('.id-card').forEach(c => c.classList.remove('active'));
+        updateBreadcrumb(1);
+    }
+
+    async function lookupCep() {
+        const raw = document.getElementById('addrCep').value.replace(/\D/g, '');
+        const fb = document.getElementById('cepFeedback');
+        if (raw.length !== 8) { fb.textContent = ''; return; }
+        fb.textContent = 'Buscando...'; fb.className = 'text-xs mt-1 text-sky-500';
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+            const d = await res.json();
+            if (d.erro) { fb.textContent = 'CEP não encontrado.'; fb.className = 'text-xs mt-1 text-red-500'; return; }
+            document.getElementById('addrStreet').value = d.logradouro || '';
+            document.getElementById('addrNeighborhood').value = d.bairro || '';
+            document.getElementById('addrCity').value = d.localidade || '';
+            document.getElementById('addrState').value = d.uf || '';
+            fb.textContent = '✓ Endereço encontrado'; fb.className = 'text-xs mt-1 text-success';
+            document.getElementById('addrNumber').focus();
+        } catch { fb.textContent = 'Erro ao buscar.'; fb.className = 'text-xs mt-1 text-red-500'; }
+    }
+
+    function maskCep(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,8);
+        e.target.value = v;
+        if (v.replace(/\D/g,'').length === 8) lookupCep();
+    }
+
+    window.checkoutApp = { selectIdentity, doLogin, doRegister, confirmGuest, logout };
+
+    // Card brands
+    const brandIcons = {
+        visa:'<div class="h-6 px-2 bg-white border border-gray-200 rounded flex items-center"><span class="text-[10px] font-bold text-blue-700 tracking-tight">VISA</span></div>',
+        mastercard:'<div class="h-6 px-2 bg-white border border-gray-200 rounded flex items-center"><span class="text-[10px] font-bold text-red-600 tracking-tight">MC</span></div>',
+        amex:'<div class="h-6 px-2 bg-white border border-gray-200 rounded flex items-center"><span class="text-[10px] font-bold text-blue-500 tracking-tight">AMEX</span></div>',
+        elo:'<div class="h-6 px-2 bg-white border border-gray-200 rounded flex items-center"><span class="text-[10px] font-bold text-yellow-600 tracking-tight">ELO</span></div>',
+        hipercard:'<div class="h-6 px-2 bg-white border border-gray-200 rounded flex items-center"><span class="text-[10px] font-bold text-red-500 tracking-tight">HIPER</span></div>'
+    };
+    function renderCardBrands(brands) { document.getElementById('cardBrandsContainer').innerHTML = brands.map(b => brandIcons[b]||'').join(''); }
+
+    function hideAllPaymentPanels() {
+        ['whatsappPayment','pagbankPayment','mercadopagoPayment','cieloPayment','pixPayment','boletoPayment'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    }
+    function showPaymentMethod(method, provider) {
+        hideAllPaymentPanels();
+        if (method === 'WHATSAPP') { document.getElementById('whatsappPayment').classList.remove('hidden'); return; }
+        if (method === 'PIX') { document.getElementById('pixPayment').classList.remove('hidden'); return; }
+        if (method === 'BOLETO') { document.getElementById('boletoPayment').classList.remove('hidden'); return; }
+        const map = { PagBank:'pagbankPayment', MercadoPago:'mercadopagoPayment', Cielo:'cieloPayment', WhatsApp:'whatsappPayment' };
+        const el = map[provider]; if (el) document.getElementById(el).classList.remove('hidden');
+        if (provider === 'PagBank') initPagBank();
+        if (provider === 'MercadoPago') initMercadoPago();
+        if (provider === 'Cielo') initCielo();
+    }
+
+    function renderPaymentMethods(data) {
+        const sel = document.getElementById('paymentMethodsSelector');
+        const methods = Array.isArray(data.enabledMethods) && data.enabledMethods.length ? data.enabledMethods : ['WHATSAPP'];
+        const mp = (data.methodProviders && typeof data.methodProviders === 'object') ? data.methodProviders : {};
+        const meta = {
+            CARD: { label:'Cartão', icon:'ph-credit-card', color:'text-blue-600' },
+            PIX: { label:'Pix', icon:'ph-pix-logo', color:'text-emerald-600' },
+            BOLETO: { label:'Boleto', icon:'ph-barcode', color:'text-amber-600' },
+            WHATSAPP: { label:'WhatsApp', icon:'ph-whatsapp-logo', color:'text-green-600' }
+        };
+        sel.innerHTML = methods.map((m,i) => {
+            const info = meta[m] || { label:m, icon:'ph-circle', color:'text-gray-600' };
+            return `<button data-method="${m}" class="method-option flex flex-col items-center gap-1.5 py-3 ${i===0?'active':''}">
+                <i class="ph-fill ${info.icon} text-xl ${info.color}"></i>
+                <span class="text-xs font-medium">${info.label}</span>
+            </button>`;
+        }).join('');
+        selectedMethod = methods[0] || 'WHATSAPP';
+        showPaymentMethod(selectedMethod, mp[selectedMethod] || data.activeProvider);
+        sel.querySelectorAll('.method-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sel.querySelectorAll('.method-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMethod = btn.getAttribute('data-method');
+                showPaymentMethod(selectedMethod, mp[selectedMethod] || data.activeProvider);
+            });
+        });
+        updateBreadcrumb(3);
+    }
+
+    function initPagBank() {
+        const c = document.getElementById('pagbankCheckoutContainer');
+        c.innerHTML = `<div class="space-y-3">
+            <div><label class="block text-xs font-medium text-text-secondary mb-1.5">Número do cartão</label><input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" class="checkout-input" maxlength="19"></div>
+            <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-medium text-text-secondary mb-1.5">Validade</label><input type="text" id="cardExpiry" placeholder="MM/AA" class="checkout-input" maxlength="5"></div><div><label class="block text-xs font-medium text-text-secondary mb-1.5">CVV</label><input type="text" id="cardCvv" placeholder="123" class="checkout-input" maxlength="4"></div></div>
+            <div><label class="block text-xs font-medium text-text-secondary mb-1.5">Nome no cartão</label><input type="text" id="cardName" placeholder="Como impresso no cartão" class="checkout-input"></div>
+            <button id="pagbankPayBtn" class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 rounded-xl transition text-sm mt-2" style="background:var(--color-primary,#0a2540)">Pagar agora</button></div>`;
+        document.getElementById('pagbankPayBtn').addEventListener('click', processPagBank);
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g,'');
+            v = v.match(/.{1,4}/g)?.join(' ') || v;
+            e.target.value = v;
+        });
+        document.getElementById('cardExpiry').addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g,'');
+            if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2,4);
+            e.target.value = v;
+        });
+    }
+    function initMercadoPago() {
+        document.getElementById('mercadopagoCheckoutContainer').innerHTML = `<button id="mpPayBtn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl transition text-sm">Continuar com MercadoPago</button>`;
+        document.getElementById('mpPayBtn').addEventListener('click', () => { if (!validateBeforePayment()) return; showToast('MercadoPago — integração em breve', 'info'); });
+    }
+    function initCielo() {
+        document.getElementById('cieloCheckoutContainer').innerHTML = `<div class="space-y-3"><div><label class="block text-xs font-medium text-text-secondary mb-1.5">Número do cartão</label><input type="text" id="cieloCardNumber" placeholder="0000 0000 0000 0000" class="checkout-input"></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-medium text-text-secondary mb-1.5">Validade</label><input type="text" id="cieloCardExpiry" placeholder="MM/AA" class="checkout-input"></div><div><label class="block text-xs font-medium text-text-secondary mb-1.5">CVV</label><input type="text" id="cieloCardCvv" placeholder="123" class="checkout-input"></div></div><button id="cieloPayBtn" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 rounded-xl transition text-sm">Pagar com Cielo</button></div>`;
+        document.getElementById('cieloPayBtn').addEventListener('click', () => { if (!validateBeforePayment()) return; showToast('Cielo — integração em breve', 'info'); });
+    }
+
+    // Validation & helpers
+    function getFullAddress() {
+        const fields = ['addrStreet','addrNumber','addrComplement','addrNeighborhood','addrCity','addrState','addrCep'];
+        return fields.map(id => document.getElementById(id).value.trim()).filter(Boolean).join(', ');
+    }
+    function validateBeforePayment() {
+        if (!authUser) { showToast('Identifique-se antes de pagar.', 'warning'); return false; }
+        if (!document.getElementById('addrNumber').value.trim()) { showToast('Preencha o número do endereço.', 'warning'); document.getElementById('addrNumber').focus(); return false; }
+        return true;
+    }
+    function buildOrderPayload(paymentLabel) {
+        return {
+            customer: authUser.name || authUser.email,
+            customerEmail: authUser.email || null,
+            customerCpf: authUser.cpf || null,
+            customerId: (!authUser.guest && authUser.id) ? authUser.id : null,
+            total: calculateFinalTotal(),
+            payment: paymentLabel,
+            paymentMethod: paymentLabel,
+            address: getFullAddress(),
+            items: cartItems,
+            couponCode: appliedCoupon?.code || null,
+            paymentMethodType: selectedMethod || 'WHATSAPP'
+        };
+    }
+
+    function calculateTotal() { return cartItems.reduce((s, i) => s + (i.price * i.quantity), 0); }
+    function calculateFinalTotal() { return Math.max(0, calculateTotal() - discountAmount); }
+
+    async function applyCoupon() {
+        const input = document.getElementById('couponCodeInput');
+        const fb = document.getElementById('couponFeedback');
+        const code = (input.value || '').trim().toUpperCase();
+        if (!code) { fb.textContent = 'Informe um código.'; fb.className = 'text-xs mt-1.5 text-red-500'; return; }
+        try {
+            const res = await fetch(`${API}/coupons/validate`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, total: calculateTotal() }) });
+            const data = await res.json();
+            if (!res.ok || !data.valid) throw new Error(data.error || 'Cupom inválido');
+            appliedCoupon = data.coupon; discountAmount = Number(data.discount || 0);
+            fb.textContent = `✓ Cupom "${appliedCoupon.code}" aplicado`; fb.className = 'text-xs mt-1.5 text-success font-medium';
+            renderOrderItems(); showToast('Cupom aplicado!', 'success');
+        } catch (e) {
+            appliedCoupon = null; discountAmount = 0;
+            fb.textContent = e.message; fb.className = 'text-xs mt-1.5 text-red-500';
+            renderOrderItems();
+        }
+    }
+
+    function renderOrderItems() {
+        const c = document.getElementById('orderItems');
+        const badge = document.getElementById('itemCountBadge');
+        const totalItems = cartItems.reduce((s,i) => s + (i.quantity||1), 0);
+        badge.textContent = totalItems;
+        if (!cartItems.length) {
+            c.innerHTML = '<div class="text-center py-8 text-text-muted"><i class="ph ph-shopping-cart text-3xl mb-2 opacity-40"></i><p class="text-sm">Carrinho vazio</p><a href="/" class="text-xs text-primary hover:underline mt-2 inline-block">Voltar às compras</a></div>';
+            return;
+        }
+        c.innerHTML = cartItems.map(item => {
+            const img = (item.image || item.imageUrl) ? `<img src="${item.image||item.imageUrl}" class="w-12 h-12 object-contain rounded-lg" alt="">` : '<div class="w-12 h-12 rounded-lg bg-surface-alt flex items-center justify-center"><i class="ph ph-package text-lg text-text-muted"></i></div>';
+            return `<div class="flex items-center gap-3">${img}<div class="flex-1 min-w-0"><p class="text-sm font-medium text-text-primary truncate">${item.name}</p><p class="text-xs text-text-muted">Qtd: ${item.quantity}</p></div><p class="text-sm font-semibold text-text-primary whitespace-nowrap">R$ ${(item.price*item.quantity).toFixed(2)}</p></div>`;
+        }).join('');
+        const sub = calculateTotal(), final_ = calculateFinalTotal();
+        document.getElementById('subtotalDisplay').textContent = `R$ ${sub.toFixed(2)}`;
+        const dr = document.getElementById('discountRow');
+        if (discountAmount > 0) { dr.classList.remove('hidden'); dr.classList.add('flex'); document.getElementById('discountAmount').textContent = `- R$ ${discountAmount.toFixed(2)}`; }
+        else { dr.classList.add('hidden'); }
+        document.getElementById('orderTotal').textContent = `R$ ${final_.toFixed(2)}`;
+    }
+
+    // Payment processors
+    async function processWhatsApp() {
+        if (!validateBeforePayment()) return;
+        const payload = buildOrderPayload('WhatsApp');
+        const items = payload.items.map(i => `• ${i.name} — R$ ${i.price.toFixed(2)} x ${i.quantity}`).join('\n');
+        const msg = `🛒 *NOVO PEDIDO*\n\n*Cliente:* ${payload.customer}\n*E-mail:* ${payload.customerEmail||'-'}\n*Telefone:* ${authUser.phone||'-'}\n\n*Endereço:*\n${payload.address}\n\n*Itens:*\n${items}\n\n*Total:* R$ ${payload.total.toFixed(2)}`;
+        const num = (paymentConfig.apiKey || window._storeWhatsApp || '5551999999999').replace(/\D/g, '');
+        window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+        await saveOrder(payload);
+    }
+
+    async function processPagBank() {
+        if (!validateBeforePayment()) return;
+        const btn = document.getElementById('pagbankPayBtn');
+        btn.disabled = true; btn.innerHTML = '<span class="flex items-center justify-center gap-2"><span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>Processando...</span>';
+        const payload = buildOrderPayload('Cartão de Crédito - PagBank');
+        try {
+            const orderRes = await fetch(`${API}/orders`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+            if (!orderRes.ok) throw new Error('Erro ao criar pedido');
+            const order = await orderRes.json();
+            const payData = { orderId:order.id, customerName:payload.customer, customerEmail:payload.customerEmail, customerPhone:authUser.phone, customerTaxId:authUser.cpf, cardNumber:(document.getElementById('cardNumber').value||'').replace(/\s/g,''), cardExpiry:document.getElementById('cardExpiry').value, cardCvv:document.getElementById('cardCvv').value, cardName:document.getElementById('cardName').value, total:payload.total, items:cartItems, couponCode:appliedCoupon?.code||null, paymentMethodType:selectedMethod||'CARD' };
+            const payRes = await fetch(`${API}/payments/process`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payData) });
+            const result = await payRes.json();
+            if (result.status === 'approved') {
+                localStorage.removeItem('eletrica_moro_cart'); localStorage.removeItem('cart');
+                const g = authUser.guest ? '&guest=1' : '';
+                window.location.href = `/sucesso.html?orderId=${order.id}&total=${payload.total}&paymentMethod=Cart%C3%A3o+-+PagBank&transactionId=${result.transactionId||''}${g}`;
+            } else { showToast('Pagamento recusado. Tente outro cartão.', 'error'); btn.disabled = false; btn.textContent = 'Pagar agora'; }
+        } catch (e) { console.error(e); showToast('Erro ao processar.', 'error'); btn.disabled = false; btn.textContent = 'Pagar agora'; }
+    }
+
+    async function processPix() {
+        if (!validateBeforePayment()) return;
+        await saveOrder(buildOrderPayload('Pix'));
+    }
+
+    async function processBoleto() {
+        if (!validateBeforePayment()) return;
+        await saveOrder(buildOrderPayload('Boleto'));
+    }
+
+    async function saveOrder(payload) {
+        try {
+            const res = await fetch(`${API}/orders`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+            if (res.ok) {
+                const order = await res.json();
+                localStorage.removeItem('eletrica_moro_cart'); localStorage.removeItem('cart');
+                const g = authUser && authUser.guest ? '&guest=1' : '';
+                window.location.href = `/sucesso.html?orderId=${order.id}&total=${payload.total}&paymentMethod=${encodeURIComponent(payload.payment)}${g}`;
+            } else { const err = await res.json().catch(()=>({})); showToast(err.error || 'Erro ao criar pedido.', 'error'); }
+        } catch (e) { console.error(e); showToast('Erro de conexão.', 'error'); }
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', async () => {
+        loadCart();
+        renderOrderItems();
+        try {
+            const scr = document.createElement('script');
+            scr.src = '/js/supabase-config.js';
+            scr.onload = async () => { initSupabase(); await loadSession(); };
+            document.head.appendChild(scr);
+        } catch { await loadSession(); }
+        document.getElementById('applyCouponBtn')?.addEventListener('click', applyCoupon);
+        document.getElementById('whatsappPayBtn')?.addEventListener('click', processWhatsApp);
+        document.getElementById('pixPayBtn')?.addEventListener('click', processPix);
+        document.getElementById('boletoPayBtn')?.addEventListener('click', processBoleto);
+        document.getElementById('addrCep')?.addEventListener('input', maskCep);
+    });
+})();
 </script>
 </body>
 </html>

@@ -14,6 +14,8 @@ import configRouter from "./routes/config.js";
 import paymentsRouter from "./routes/payments.js";
 import customerRouter from "./routes/customer.js";
 import adminRouter from "./routes/admin.js";
+import couponsRouter from "./routes/coupons.js";
+import checkoutRouter from "./routes/checkout.js";
 import { errorHandler } from "./middleware/error.js";
 
 const app = express();
@@ -111,6 +113,8 @@ app.use("/api/config", configRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/coupons", couponsRouter);
+app.use("/api/checkout", checkoutRouter);
 
 app.use(errorHandler);
 

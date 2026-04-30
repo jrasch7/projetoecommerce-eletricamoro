@@ -5,6 +5,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Product {
@@ -63,6 +65,9 @@ model Order {
   customerId     String?
   customerEmail  String?
   customerCpf    String?
+  couponCode     String?
+  discountAmount Float    @default(0)
+  subtotal       Float?
   total          Float
   status         String   @default("Pendente")
   payment        String   @default("Não informado")
@@ -104,6 +109,23 @@ model PaymentConfig {
   merchantId     String?
   pixKey         String?
   webhookUrl     String?
+  cardBrands     Json?
+  enabledMethods Json?
+  methodProviders Json?
   updatedAt      DateTime @updatedAt
   createdAt      DateTime @default(now())
+}
+
+model Coupon {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  type      String
+  value     Float
+  minOrder  Float?
+  maxUses   Int?
+  usedCount Int      @default(0)
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

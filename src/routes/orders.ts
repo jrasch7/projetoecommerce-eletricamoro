@@ -4,8 +4,25 @@ import { asyncHandler } from "../lib/asyncHandler.js";
 import { CreateOrderSchema, UpdateOrderSchema } from "../schemas/order.schema.js";
 import { requireAuth, type AuthRequest } from "../middleware/requireAuth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
+import { AppError } from "../lib/errors.js";
 
 const router = Router();
+
+function calculateItemsSubtotal(items: unknown[]): number {
+  return items.reduce<number>((sum, item) => {
+    if (!item || typeof item !== "object") return sum;
+    const product = item as Record<string, unknown>;
+    const price = Number(product["price"] ?? 0);
+    const quantity = Number(product["quantity"] ?? 1);
+    if (Number.isNaN(price) || Number.isNaN(quantity) || quantity <= 0) return sum;
+    return sum + price * quantity;
+  }, 0);
+}
+
+function calculateCouponDiscount(type: string, value: number, subtotal: number): number {
+  const raw = type === "PERCENT" ? subtotal * (value / 100) : value;
+  return Math.max(0, Math.min(subtotal, raw));
+}
 
 router.get("/", requireAdmin, asyncHandler(async (req, res) => {
   const pageNum = Math.max(1, parseInt(String(req.query["page"] ?? "1")));
@@ -100,7 +117,28 @@ router.get("/my-account", requireAuth, asyncHandler(async (req: AuthRequest, res
 
 router.post("/", asyncHandler(async (req, res) => {
   const parsed = CreateOrderSchema.parse(req.body);
-  
+  const subtotal = calculateItemsSubtotal(parsed.items);
+  let discountAmount = 0;
+  let couponCode: string | null = null;
+
+  if (parsed.couponCode) {
+    const coupon = await prisma.coupon.findUnique({ where: { code: parsed.couponCode } });
+    if (!coupon) throw new AppError(400, "Cupom não encontrado");
+    if (!coupon.active) throw new AppError(400, "Cupom inativo");
+    if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) throw new AppError(400, "Cupom expirado");
+    if (coupon.minOrder !== null && subtotal < coupon.minOrder) {
+      throw new AppError(400, `Pedido mínimo para este cupom: R$ ${coupon.minOrder.toFixed(2)}`);
+    }
+    if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
+      throw new AppError(400, "Limite de uso do cupom atingido");
+    }
+
+    discountAmount = calculateCouponDiscount(coupon.type, coupon.value, subtotal);
+    couponCode = coupon.code;
+  }
+
+  const totalAfterDiscount = Math.max(0, subtotal - discountAmount);
+
   // Validate variant stock if items contain variant information
   if (parsed.items && Array.isArray(parsed.items)) {
     for (const item of parsed.items) {
@@ -134,40 +172,74 @@ router.post("/", asyncHandler(async (req, res) => {
     }
   }
   
-  const order = await prisma.order.create({
-    data: {
-      customer: parsed.customer,
-      total: parsed.total,
-      status: parsed.status,
-      payment: parsed.payment,
-      paymentMethod: parsed.paymentMethod ?? null,
-      address: parsed.address,
-      items: parsed.items,
-      customerId: parsed.customerId ?? null,
-      customerEmail: parsed.customerEmail ?? null,
-      customerCpf: parsed.customerCpf ?? null,
-    },
-  });
-  
-  // Optionally: Decrease variant stock after order creation
-  if (parsed.items && Array.isArray(parsed.items)) {
-    for (const item of parsed.items) {
-      if (item.variantIds && Array.isArray(item.variantIds) && item.variantIds.length > 0) {
-        const requestedQty = item.quantity || 1;
-        for (const variantId of item.variantIds) {
-          await prisma.productVariant.update({
-            where: { id: variantId },
-            data: {
-              stock: {
-                decrement: requestedQty
-              }
-            }
-          });
+  const order = await prisma.$transaction(async (tx) => {
+    if (couponCode) {
+      const couponSnapshot = await tx.coupon.findUnique({ where: { code: couponCode } });
+      if (!couponSnapshot || !couponSnapshot.active) {
+        throw new AppError(400, "Cupom indisponível no momento da finalização");
+      }
+      if (couponSnapshot.expiresAt && couponSnapshot.expiresAt.getTime() < Date.now()) {
+        throw new AppError(400, "Cupom expirado");
+      }
+      if (couponSnapshot.minOrder !== null && subtotal < couponSnapshot.minOrder) {
+        throw new AppError(400, `Pedido mínimo para este cupom: R$ ${couponSnapshot.minOrder.toFixed(2)}`);
+      }
+      if (couponSnapshot.maxUses !== null && couponSnapshot.usedCount >= couponSnapshot.maxUses) {
+        throw new AppError(400, "Limite de uso do cupom atingido");
+      }
+
+      const updateWhere =
+        couponSnapshot.maxUses === null
+          ? { id: couponSnapshot.id }
+          : { id: couponSnapshot.id, usedCount: { lt: couponSnapshot.maxUses } };
+      const couponUpdate = await tx.coupon.updateMany({
+        where: updateWhere,
+        data: { usedCount: { increment: 1 } },
+      });
+      if (couponUpdate.count === 0) {
+        throw new AppError(400, "Cupom indisponível no momento da finalização");
+      }
+    }
+
+    const createdOrder = await tx.order.create({
+      data: {
+        customer: parsed.customer,
+        total: totalAfterDiscount,
+        subtotal,
+        discountAmount,
+        couponCode,
+        status: parsed.status,
+        payment: parsed.payment,
+        paymentMethod: parsed.paymentMethod ?? null,
+        address: parsed.address,
+        items: parsed.items,
+        customerId: parsed.customerId ?? null,
+        customerEmail: parsed.customerEmail ?? null,
+        customerCpf: parsed.customerCpf ?? null,
+      },
+    });
+
+    if (parsed.items && Array.isArray(parsed.items)) {
+      for (const item of parsed.items) {
+        if (item.variantIds && Array.isArray(item.variantIds) && item.variantIds.length > 0) {
+          const requestedQty = item.quantity || 1;
+          for (const variantId of item.variantIds) {
+            await tx.productVariant.update({
+              where: { id: variantId },
+              data: {
+                stock: {
+                  decrement: requestedQty,
+                },
+              },
+            });
+          }
         }
       }
     }
-  }
-  
+
+    return createdOrder;
+  });
+
   res.status(201).json(order);
 }));
 

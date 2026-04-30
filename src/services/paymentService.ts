@@ -244,10 +244,14 @@ export class PaymentService {
   }
 
   async processPayment(orderData: any) {
-    const provider = await this.getActiveProvider();
-    if (!provider) {
-      throw new Error("No active payment provider configured");
-    }
+    const config = await prisma.paymentConfig.findFirst();
+    if (!config) throw new Error("No payment configuration found");
+
+    const requestedMethod = String(orderData.paymentMethodType || "CARD").toUpperCase();
+    const providersMap = (config.methodProviders ?? {}) as Record<string, string>;
+    const resolvedProviderName = providersMap[requestedMethod] || config.activeProvider;
+    const provider = this.providers.get(resolvedProviderName);
+    if (!provider) throw new Error(`No provider configured for method ${requestedMethod}`);
 
     return provider.processPayment(orderData);
   }
